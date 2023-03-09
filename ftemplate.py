@@ -36,31 +36,26 @@ class FTemp:
 
     tname: Optional[str] = None
 
-    def __init__(self, temp: str, outpath: str):
-        self.tname = temp
-        self.fstr = TEMPLATES[temp][0]
+    def __init__(self, outpath: str):
+        self.fname = outpath.split('/')[-1]
+        self.fext = '.' + self.fname.split('.')[-1]
+        self.fstr = TEMPLATES[self.fext[1:]][0]
 
-        if str(outpath)[0] == '/':
-            self.fpath = outpath
-            self.fname = str(str(outpath).split('/')[-1])
-            self.fext = '.' + self.fname.split('.')[1]
-        else:
-            self.fext = TEMPLATES[temp][1]
-            self.fname = f'{outpath}{self.fext}'
-            self.fpath = f'{abspath(os.curdir)}/{self.fname}'
+        self.tname = self.fname.split('.')[0]
+
+        self.fpath = f'{abspath(os.curdir)}/{self.fname}'
         
         with open(self.fpath, 'w') as f:
             f.write(self.fstr)
-            print(f'\nFile Template: {temp}')
+            print(f'\nFile Template: {self.tname}')
             print(f'Current Directory Is: {os.getcwd()}')
             print(f'\n{LINE}\n{self.fstr}\n{LINE}\n')
-            print(f'\n...written to {self.fpath}')
+            print(f'\n...written to {self.fpath}\n')
 
 def main():
-    ftemp = str(sys.argv[1]).lower()
-    fpath = str(sys.argv[2])
+    fpath = str(sys.argv[1])
 
-    ft = FTemp(ftemp, fpath)
+    ft = FTemp(outpath=fpath)
 
 if __name__ == '__main__':
     main()
