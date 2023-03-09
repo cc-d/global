@@ -2,8 +2,10 @@
 import sys
 import os
 
-from os.path import abspath
+from os.path import abspath, isfile
 from typing import *
+
+
 
 # FILE TEMPLATES STORED AS STRIPPED STRINGS TO PREVENT ANY ACCIDENTS
 TEMP_PY3 = '''#!/usr/bin/env python3
@@ -32,13 +34,16 @@ for s in SHORTHAND: # support short template names
 LINE = 20 * '-'
 
 class FTemp:
-    fstr: Optional[str] = None
-    fname: Optional[str] = None
-    fpath: Optional[str] = None
+    fstr: str
+    fname: str
+    fpath: str
 
-    tname: Optional[str] = None
+    tname: str
 
     def __init__(self, outpath: str):
+        if isfile(outpath):
+            raise Exception('file already exists error')
+
         self.fname = outpath.split('/')[-1]
         self.fext = '.' + self.fname.split('.')[-1]
         self.fstr = TEMPLATES[self.fext[1:]][0]
