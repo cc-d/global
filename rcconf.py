@@ -71,8 +71,7 @@ def update_evars(**kwargs) -> dict:
     # newly added evar lines to file
     for kvar in evars:
         if kvar not in updated_evars:
-            rclines.append('\n\n#ADDED VARIABLES\n\n')
-            newline = f'\n{kvar}="{evars[kvar]}"\n'
+            newline = f'\nexport {kvar}="{evars[kvar]}"\n'
             print(f'added new evar line to rc: {newline}')
             updated_evars.append(kvar)
 
@@ -88,8 +87,12 @@ def main():
     cmd = str(sys.argv[1]).lower().strip()
 
     if cmd == 'bname':
-        BNAME = sys.argv[2]
-        print('evars', update_evars(BNAME=BNAME))
+        reg = r"((^[a-zA-Z0-9]+-\d+)-?\S+$)"
+        rmatch = re.match(reg, sys.argv[2])
+
+        if rmatch and len(rmatch.groups()) == 2:
+            BNAME, TNAME = rmatch.group(1), rmatch.group(2)
+            print('evars', update_evars(BNAME=BNAME, TNAME=TNAME))
 
 
 if __name__ == '__main__':
