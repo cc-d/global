@@ -7,6 +7,8 @@ from typing import *
 
 # FILE TEMPLATES STORED AS STRIPPED STRINGS TO PREVENT ANY ACCIDENTS
 TEMP_PY3 = '''#!/usr/bin/env python3
+
+
 def main():
 
 
