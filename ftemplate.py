@@ -47,8 +47,6 @@ class FTemp:
         
         with open(self.fpath, 'w') as f:
             f.write(self.fstr)
-            print(f'\nFile Template: {self.tname}')
-            print(f'Current Directory Is: {os.getcwd()}')
             print(f'\n{LINE}\n{self.fstr}\n{LINE}\n')
             print(f'\n...written to {self.fpath}\n')
 
