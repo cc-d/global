@@ -93,6 +93,7 @@ def main():
         if rmatch and len(rmatch.groups()) == 2:
             BNAME, TNAME = rmatch.group(1), rmatch.group(2)
             print('evars', update_evars(BNAME=BNAME, TNAME=TNAME))
+    elif cmd == 'gpath':
 
 
 if __name__ == '__main__':
