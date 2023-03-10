@@ -3,23 +3,25 @@
 NAME="Cary Carter"
 EMAIL="$2"
 
+echo $1
+
 if [ -z "$EMAIL" ]
 then
     echo "Please provide an email address"
     exit 1
 fi
 
-if [ "$1" == "global" ]
+if [ "$1" = "global" ]
 then
     git config --global user.name "$NAME"
     git config --global user.email "$EMAIL"
     echo "Global git config updated with name/email: $NAME $EMAIL"
-elif [ "$1" == "local" ]
+elif [ "$1" = "local" ]
 then
     git config user.name "$NAME"
     git config user.email "$EMAIL"
     echo "Local git config updated with name/email: $NAME $EMAIL"
-elif [ "$1" == "system" ]
+elif [ "$1" = "system" ]
 then
     sudo git config --system user.name "$NAME"
     sudo git config --system user.email "$EMAIL"
