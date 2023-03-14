@@ -14,10 +14,10 @@ else
 fi
 
 # Check if the export line already exists in the rc file
-if grep -q "export $name=['\"]\{0,1\}$value['\"]\{0,1\}" "$rc_file"; then
+if grep -q "$name=['\"]\{0,1\}.*['\"]\{0,1\}" "$rc_file"; then
     # If it does, update the line
     echo "evar exists in rc updating"
-    sed -i.bak "s/export $name=['\"]\{0,1\}.*['\"]\{0,1\}/export $name=$value/" "$rc_file"
+    sed -i -e "s/^.* $name=['\"]\{0,1\}.*['\"]\{0,1\}/export $name=\"$value\"/" "$rc_file"
 else
     # If it doesn't, add the line
     echo "evar $name=$value does not exist adding now"
