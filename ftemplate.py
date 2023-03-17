@@ -8,7 +8,8 @@ from typing import *
 
 
 # FILE TEMPLATES STORED AS STRIPPED STRINGS TO PREVENT ANY ACCIDENTS
-TEMP_PY3 = '''#!/usr/bin/env python3
+TEMP_PY3 = '''
+#!/usr/bin/env python3
 
 
 def main():
@@ -16,7 +17,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-'''.strip()
+'''.strip() + '\n'
 
 TEMPLATES = {
     'python3': (TEMP_PY3, '.py'),
