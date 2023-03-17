@@ -26,6 +26,6 @@ echo "RAM performance test complete."
 
 # Network performance test
 echo "Running network performance test..."
-wget -O /dev/null https://speed.hetzner.de/100MB.bin
+#wget -O /dev/null https://speed.hetzner.de/100MB.bin
 echo "Network performance test complete."
 
