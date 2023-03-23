@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
-rm -r ~/global/syms
-mkdir ~/global/syms
+rm -r $PWD/syms
+mkdir $PWD/syms
 
-ln -s ~/global/76.sh ~/global/syms/76
-ln -s ~/global/evar.sh ~/global/syms/evar
-ln -s ~/global/ftemplate.py ~/global/syms/ftemplate
-ln -s ~/global/gcpports.sh ~/global/syms/gcpports
-ln -s ~/global/gcpssh.sh ~/global/syms/gcpssh
-ln -s ~/global/gitconf.sh ~/global/syms/gitconf
-ln -s ~/global/gpull.sh ~/global/syms/gpull
-ln -s ~/global/gpush.sh ~/global/syms/gpush
+ln -s $PWD/76.sh $PWD/syms/76
+ln -s $PWD/evar.sh $PWD/syms/evar
+ln -s $PWD/ftemplate.py $PWD/syms/ftemplate
+ln -s $PWD/gcpports.sh $PWD/syms/gcpports
+ln -s $PWD/gcpssh.sh $PWD/syms/gcpssh
+ln -s $PWD/gitconf.sh $PWD/syms/gitconf
+ln -s $PWD/gpull.sh $PWD/syms/gpull
+ln -s $PWD/gpush.sh $PWD/syms/gpush
 
-ln -s ~/global/ftemplate.py ~/global/syms/ftemplate
