@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import sys
-import os
-
-from os.path import abspath, isfile
+from os.path import abspath, isfile, expanduser
 from typing import *
 
 
@@ -24,13 +22,13 @@ TEMPLATES = {
     'python': TEMP_PY3,
 }
 
-SHORTHAND = {
+EXT = {
     'py': 'python3',
     'py3': 'python3',
 }
 
-for s in SHORTHAND: # support short template names
-    TEMPLATES[s] = TEMPLATES[SHORTHAND[s]]
+for s in EXT: # support short template names
+    TEMPLATES[s] = TEMPLATES[EXT[s]]
 
 LINE = 20 * '-'
 
@@ -45,14 +43,12 @@ class FTemp:
         if isfile(outpath):
             raise Exception('file already exists error')
 
-        self.fname = outpath.split('/')[-1]
-        self.fext = '.' + self.fname.split('.')[-1]
-        self.fstr = TEMPLATES[self.fext[1:]][0]
+        self.fpath = expanduser(str(outpath))
+        self.fext = str(self.fpath.split('.')[-1]).lower()
+        self.fstr = TEMPLATES[self.fext][0]
 
-        self.tname = self.fname.split('.')[0]
+        self.tname = '.'.join(self.fpath.split('/')[-1].split('.')[:-1])
 
-        self.fpath = f'{abspath(os.curdir)}/{self.fname}'
-        
         with open(self.fpath, 'w') as f:
             f.write(self.fstr)
             print(f'\n{LINE}\n{self.fstr}\n{LINE}\n')
