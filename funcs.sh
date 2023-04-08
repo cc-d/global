@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 
 evar() {
-    # Get the name and value of the environment variable
-    name="$1"
-    value="$2"
+    # Check if the arguments are passed in the format $NAME=$VALUE
+    if [[ "$#" -eq 1 ]] && [[ "$1" =~ ^[^=]+=.+$ ]]; then
+        # Split the input into name and value
+        name="${1%%=*}"
+        value="${1#*=}"
+    else
+        # Get the name and value of the environment variable
+        name="$1"
+        value="$2"
+    fi
 
     # Escape special characters in the value
     escaped_value=$(printf "%q" "$value")
@@ -21,7 +28,7 @@ evar() {
     if grep -q "$name=['\"]\{0,1\}.*['\"]\{0,1\}" "$rc_file"; then
         # If it does, update the line
         echo "evar exists in rc updating"
-        sed -i -e "s/^.*$name=['\"]\{0,1\}.*['\"]\{0,1\}/export $name=$escaped_value/" "$rc_file"
+        sed -i -e "s|^.*$name=['\"]\{0,1\}.*['\"]\{0,1\}|export $name=$escaped_value|" "$rc_file"
     else
         # If it doesn't, add the line
         echo "evar $name=$value does not exist adding now"
