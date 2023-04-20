@@ -54,3 +54,30 @@ update_gpath() {
 }
 
 
+split_file() {
+  input_file="$1"
+  split_size=10
+
+  if [ -z "${input_file}" ]; then
+    echo "Error: Missing input filename."
+    return 1
+  fi
+
+  if [ ! -f "${input_file}" ]; then
+    echo "Error: ${input_file} not found."
+    return 1
+  fi
+
+  output_prefix="${input_file%.*}-"
+
+  line_count=$(wc -l < "${input_file}")
+  part_count=$(( (line_count + split_size - 1) / split_size ))
+
+  current_line=1
+  for part in $(seq 1 "${part_count}"); do
+    output_file="${output_prefix}${part}.txt"
+    head -n $((part * split_size)) "${input_file}" | tail -n "${split_size}" > "${output_file}"
+    echo "Created ${output_file} with lines ${current_line} to $((current_line + split_size - 1))"
+    current_line=$((current_line + split_size))
+  done
+}
