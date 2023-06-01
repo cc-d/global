@@ -109,7 +109,7 @@ revert_to_commit() {
   git checkout master
   git pull
 
-  branch_name="Revert-master-$(date +%s)"
+  branch_name="revert-master-$(date +%s)"
   echo "Creating new branch: $branch_name"
   git checkout -b "$branch_name"
 
