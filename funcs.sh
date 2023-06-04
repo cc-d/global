@@ -80,4 +80,44 @@ git-ssh() {
 }
 
 
+# Reverts all merge commits up to a specific commit
+revert_to_commit() {
+  # Check that a commit hash was provided
+  if [ $# -eq 0 ]
+  then
+    echo "No commit hash provided. Usage: revert_to_commit <commit_hash>"
+    return 1
+  fi
 
+  target_commit="$1"
+  commit_count=0
+
+  echo "Checking out and pulling master"
+  git checkout master
+  git pull
+
+  branch_name="revert-master-$(date +%s)"
+  echo "Creating new branch: $branch_name"
+  git checkout -b "$branch_name"
+
+  echo "Reverting to commit: $target_commit"
+
+  # Iterate over all merge commits
+  for commit in $(git log --merges --pretty=format:"%H")
+  do
+    # If we've reached the target commit, stop reverting
+    if [ "$commit" = "$target_commit" ]
+    then
+      break
+    fi
+
+    # Revert the current commit
+    git revert -m 1 "$commit"
+    commit_count=$((commit_count+1))
+  done
+
+  # Echo the result of the operation
+  echo "Reverted $commit_count commits."
+  echo "Please push the branch with the following command:"
+  echo "git push origin $branch_name"
+}
