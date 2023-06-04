@@ -81,7 +81,7 @@ git-ssh() {
 
 
 # Reverts all merge commits up to a specific commit
-revert_to_commit() {
+revert-to-commit() {
   # Check that a commit hash was provided
   if [ $# -eq 0 ]
   then
