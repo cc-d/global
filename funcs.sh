@@ -2,7 +2,7 @@
 
 evar() {
     # Check if the arguments are passed in the format $NAME=$VALUE
-    if [[ "$#" -eq 1 ]] && [[ "$1" =~ ^[^=]+=.+$ ]]; then
+    if [ "$#" -eq 1 ] && echo "$1" | grep -qE '^[^=]+=.+'; then
         # Split the input into name and value
         name="${1%%=*}"
         value="${1#*=}"
@@ -41,52 +41,43 @@ evar() {
 }
 
 
-update_gpath() {
-    script_dir="$HOME/global/syms"
-    export PATH="$PATH:$script_dir"
-
-    if [ -n "$BASH" ]; then
-        shellrc="$HOME/.bashrc"
-    elif [ -n "$ZSH_NAME" ]; then
-        shellrc="$HOME/.zshrc"
-    else
-        echo "Unsupported shell. Please manually update your shell's rc file."
-        return 1
+# lists all private .ssh keyfiles in ~/.ssh if no filepath is provided
+git-ssh() {
+    # we'll use a multi-line string like a pseudo-array for this
+    sshkeys=""
+    if [ -d "$HOME/.ssh" ]; then
+        # find every openssh private key file in .ssh
+        for f in $(find ~/.ssh -type f); do
+            if [ "$(head -n 1 $f)" == '-----BEGIN OPENSSH PRIVATE KEY-----' ]; then
+                sshkeys="$sshkeys$(echo $f)\n"
+            fi
+        done
     fi
 
-    if ! grep -q "$script_dir" "$shellrc"; then
-        echo "export PATH=\"\$PATH:$script_dir\"" >> "$shellrc"
-        echo "Added $script_dir to the PATH in $shellrc"
+    # 1-index user choices
+    index=1
+    set -- $(echo -e $sshkeys)
+    echo ''
+    for kpath; do
+        echo "[$index] $kpath";
+        index=$((index + 1));
+    done
+    echo ''
+
+    # prompt user on the same line for which file to use with ssh-add
+    read -p "Select which SSH keyfile to use with ssh-add: " choice
+
+    if [ "$choice" -ge 1 ] && [ "$choice" -le "$#" ]; then
+        # start ssh-agent for this shell
+        eval "$(ssh-agent -s)"
+
+        # clever
+        cpath=$(eval "echo \$$(echo $choice)")
+        echo "$(ssh-add $cpath)"
     else
-        echo "$script_dir is already in the PATH in $shellrc"
+        echo "ERROR: $choice is not a valid choice."
     fi
 }
 
 
-split_file() {
-  input_file="$1"
-  split_size=10
 
-  if [ -z "${input_file}" ]; then
-    echo "Error: Missing input filename."
-    return 1
-  fi
-
-  if [ ! -f "${input_file}" ]; then
-    echo "Error: ${input_file} not found."
-    return 1
-  fi
-
-  output_prefix="${input_file%.*}-"
-
-  line_count=$(wc -l < "${input_file}")
-  part_count=$(( (line_count + split_size - 1) / split_size ))
-
-  current_line=1
-  for part in $(seq 1 "${part_count}"); do
-    output_file="${output_prefix}${part}.txt"
-    head -n $((part * split_size)) "${input_file}" | tail -n "${split_size}" > "${output_file}"
-    echo "Created ${output_file} with lines ${current_line} to $((current_line + split_size - 1))"
-    current_line=$((current_line + split_size))
-  done
-}
