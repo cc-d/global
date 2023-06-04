@@ -73,7 +73,7 @@ git-ssh() {
 
         # clever
         cpath=$(eval "echo \$$(echo $choice)")
-        echo "$(ssh-add $cpath)"
+        ssh-add $cpath
     else
         echo "ERROR: $choice is not a valid choice."
     fi
