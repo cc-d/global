@@ -48,7 +48,7 @@ git-ssh() {
     if [ -d "$HOME/.ssh" ]; then
         # find every openssh private key file in .ssh
         for f in $(find ~/.ssh -type f); do
-            if [ "$(head -n 1 $f)" == '-----BEGIN OPENSSH PRIVATE KEY-----' ]; then
+            if [ "$(head -n 1 $f)" = '-----BEGIN OPENSSH PRIVATE KEY-----' ]; then
                 sshkeys="$sshkeys$(echo $f)\n"
             fi
         done
@@ -65,7 +65,8 @@ git-ssh() {
     echo ''
 
     # prompt user on the same line for which file to use with ssh-add
-    read -p "Select which SSH keyfile to use with ssh-add: " choice
+    echo -n "Select which SSH keyfile to use with ssh-add: "
+    read choice
 
     if [ "$choice" -ge 1 ] && [ "$choice" -le "$#" ]; then
         # start ssh-agent for this shell
