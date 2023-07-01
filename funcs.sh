@@ -122,3 +122,12 @@ revert-to-commit() {
   echo "Please push the branch with the following command:"
   echo "git push origin $branch_name"
 }
+
+
+act-venv () {
+    if [ -d "venv/" ]; then
+        . venv/bin/activate
+    elif [ -d "env/" ]; then
+        . env/bin/activate
+    fi
+}
