@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 evar() {
     # Check if the arguments are passed in the format $NAME=$VALUE
     if [ "$#" -eq 1 ] && echo "$1" | grep -qE '^[^=]+=.+'; then
@@ -123,11 +122,35 @@ revert-to-commit() {
   echo "git push origin $branch_name"
 }
 
-
 act-venv () {
-    if [ -d "venv/" ]; then
-        . venv/bin/activate
-    elif [ -d "env/" ]; then
-        . env/bin/activate
+    # determine if currently in venv deactivate if so
+    if [ -d "$VIRTUAL_ENV" ]; then
+        echo "\nact-venv: found existing venv at $VIRTUAL_ENV deactivating\n"
+        deactivate
+    fi
+
+    actcmd=''
+    actpath=''
+
+    if [ -e "venv/bin/activate" ]; then
+        actcmd='. venv/bin/activate'
+    elif [ -e 'env/bin/activate' ]; then
+        actcmd='. env/bin/activate'
+    else
+        # Check for virtual environment directories with various Python versions
+        actpath=`find . -path '*bin/activate' -print -quit -maxdepth 3`
+        if [ "$actpath" == "" ]; then
+            if [ `command -V python3` ]; then
+                pycmd='python3'
+            else
+                pycmd='python'
+            fi
+
+            actcmd="$pycmd -m venv venv"
+        else
+            actcmd="\. $actpath"
+        fi
     fi
 }
+
+echo "funcs.sh loaded"
