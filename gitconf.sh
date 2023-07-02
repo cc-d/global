@@ -18,13 +18,13 @@ then
     echo "Global git config updated with name/email: $NAME $EMAIL"
 elif [ "$1" = "local" ]
 then
-    git config user.name "$NAME"
+    git config --local user.name "$NAME"
     git config user.email "$EMAIL"
     echo "Local git config updated with name/email: $NAME $EMAIL"
 elif [ "$1" = "system" ]
 then
-    sudo git config --system user.name "$NAME"
-    sudo git config --system user.email "$EMAIL"
+    git config --system user.name "$NAME"
+    git config --system user.email "$EMAIL"
     echo "System git config updated with name/email: $NAME $EMAIL"
 else
     echo "Invalid option: use 'global', 'local', or 'system'"
