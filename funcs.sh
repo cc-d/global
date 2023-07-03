@@ -211,23 +211,13 @@ colortext () {
     echo "${color_code}${text}${reset}"
 }
 
-dirfiles() {
-  cwddirs="$(
-    command ls -A -p --color=always . | grep '/$' | sort -f | tr '\n' ' ' && echo ''
-  )"
-  hiddirs="$(
-    command ls -A -p --color=always . | grep '[^.].*/$' | sort -f | tr '\n' ' ' && echo ''
-  )"
-  hidfiles="$(
-    command ls -A -p --color=always . | grep -v '/$' | grep '^\.' | tr '\n' ' ' && echo ''
-  )"
-  cwdfiles="$(
-    command ls -A -p --color=always . | grep -v '/$' | grep -v '^\.' | tr '\n' ' ' && echo ''
-  )"
+dirfiles () {
+    cwddirs="$(command ls -A -p --color=always . | grep '/$' | sort -f | tr '\n' ' ' && echo '')"
+    hiddirs="$(command ls -A -p --color=always . | grep '^\.' | grep '/$' |  sort -f | tr '\n' ' ' && echo '')"
+    hidfiles="$(command ls -A -p --color=always . | grep -v '/$' | grep '^\.' | tr '\n' ' ' && echo '')"
+    cwdfiles="$(command ls -A -p --color=always . | grep -v '/$' | grep -v '^\.' | tr '\n' ' ' && echo '')"
 
-  cmdstr="$cwddirs $hiddirs $hidfiles $cwdfiles"
-
-  echo -e "$(termstr "$cmdstr")"
+    echo "$cwddirs $hiddirs $hidfiles $cwdfiles"
 }
 
 termstr() {
@@ -248,9 +238,10 @@ termstr() {
 
   # Reapply color codes
   local recolored_text
+  echo "endtstr"
   recolored_text=$(echo -e "$input_string")
 
-  echo "$recolored_text"
+  echo -e "$recolored_text"
 }
 
 
