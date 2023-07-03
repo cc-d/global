@@ -1,5 +1,24 @@
 #!/usr/bin/env bash
 
+gettermsize () {
+    local rows cols
+
+    if [ -n "$COLUMNS" ] && [ -n "$LINES" ]; then
+        cols=$COLUMNS
+        rows=$LINES
+    else
+        if [ -t 0 ]; then
+            cols=$(stty size < /dev/tty | awk '{print $2}')
+            rows=$(stty size < /dev/tty | awk '{print $1}')
+        else
+            cols=$(tput cols)
+            rows=$(tput lines)
+        fi
+    fi
+
+    echo "$cols $row"
+}
+
 evar() {
     # Check if the arguments are passed in the format $NAME=$VALUE
     if [ "$#" -eq 1 ] && echo "$1" | grep -qE '^[^=]+=.+'; then
@@ -126,10 +145,10 @@ revert-to-commit() {
 # checks to see if there is a venv anywhere close in child paths
 # if so cds to that dir and activate it, decativating previous
 
-act-venv () {
+actvenv () {
     # determine if currently in venv deactivate if so
     if [ -d "$VIRTUAL_ENV" ]; then
-        echo "\nact-venv: found existing venv at $VIRTUAL_ENV deactivating\n"
+        echo "\nactvenv: found existing venv at $VIRTUAL_ENV deactivating\n"
         deactivate
     fi
 
@@ -157,11 +176,17 @@ act-venv () {
     fi
 }
 
-evalsort () {
-  local command="$@"
-  eval '"$command" | tr ' ' '\n' | sort -f  | tr '\n' ' ''
-}
 
+# removes duplicate elems from a space seperated str
+
+removedupes () {
+  local input_string="$1"
+  local unique_string
+
+  unique_string="$(echo "$input_string" | tr ' ' '\n' | sort -u | tr '\n' ' ' )"
+
+  echo "$unique_string"
+}
 
 # intentionally extremely simple func to just return
 # $test as a given $color for its foreground color
@@ -186,28 +211,47 @@ colortext () {
     echo "${color_code}${text}${reset}"
 }
 
+dirfiles() {
+  cwddirs="$(
+    command ls -A -p --color=always . | grep '/$' | sort -f | tr '\n' ' ' && echo ''
+  )"
+  hiddirs="$(
+    command ls -A -p --color=always . | grep '[^.].*/$' | sort -f | tr '\n' ' ' && echo ''
+  )"
+  hidfiles="$(
+    command ls -A -p --color=always . | grep -v '/$' | grep '^\.' | tr '\n' ' ' && echo ''
+  )"
+  cwdfiles="$(
+    command ls -A -p --color=always . | grep -v '/$' | grep -v '^\.' | tr '\n' ' ' && echo ''
+  )"
 
-alldirfiles () {
-    cwddirs="$(
-        command ls -A -p --color=always . | grep '/$' | sort -f | tr '\n' ' ' && echo ''
-    )"
-    hiddirs="$(
-        command ls -A -p --color=always . | grep '[^.].*/$' | sort -f | tr '\n' ' ' && echo ''
-    )"
-    hidfiles="$(
-        command ls -A -p --color=always . | grep -v '/$' | grep '^\.' | tr '\n' ' ' && echo ''
-    )"
-    cwdfiles="$(
-        command ls -A -p --color=always . | grep -v '/$' | grep -v '^\.' | tr '\n' ' ' && echo ''
-    )"
+  cmdstr="$cwddirs $hiddirs $hidfiles $cwdfiles"
 
-    echo "$cwddirs $hiddirs $hidfiles $cwdfiles"
+  echo -e "$(termstr "$cmdstr")"
 }
-# gets every unique file in cwd
 
-# | tr ' ' '\n' | sort -f  | tr '\n' ' '
+termstr() {
+  local tsize
+  tsize=$(gettermsize)
+  local w h
+  IFS=' ' read -r w h <<<"$tsize"
 
+  local input_string=$1
 
+  # Remove color codes
+  local text_without_colors
+  text_without_colors=$(echo "$input_string" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
+
+  # Apply formatting with fmt
+  local formatted_text
+  formatted_text=$(echo "$text_without_colors" | fmt -w "$w")
+
+  # Reapply color codes
+  local recolored_text
+  recolored_text=$(echo -e "$input_string")
+
+  echo "$recolored_text"
+}
 
 
 

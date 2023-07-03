@@ -12,14 +12,17 @@ fi
 # builtin command overrides/aliases/etc
 # if ls receives any args it behaves as normal
 
-ls() {
+ls () {
     if [ $# -eq 0 ]; then
-        alldirfiles
+        dirfiles
     else
-        command ls "$@"
+        builtin ls "$@"
     fi
-}
 
+}
+cd () {
+    builtin cd "$@" && ls
+}
 
 
 echo 'myshell.sh loaded completely'
