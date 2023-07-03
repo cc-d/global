@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 evar() {
     # Check if the arguments are passed in the format $NAME=$VALUE
     if [ "$#" -eq 1 ] && echo "$1" | grep -qE '^[^=]+=.+'; then
@@ -122,6 +123,9 @@ revert-to-commit() {
   echo "git push origin $branch_name"
 }
 
+# checks to see if there is a venv anywhere close in child paths
+# if so cds to that dir and activate it, decativating previous
+
 act-venv () {
     # determine if currently in venv deactivate if so
     if [ -d "$VIRTUAL_ENV" ]; then
@@ -152,5 +156,51 @@ act-venv () {
         fi
     fi
 }
+
+# intentionally extremely simple func to just return
+# $test as a given $color for its foreground color
+
+colortext() {
+    local text="$1"
+    local color_name="$2"
+    local reset="$(tput sgr0)"
+
+    case "$color_name" in
+        black) color_code="$(tput setaf 0)" ;;
+        red) color_code="$(tput setaf 1)" ;;
+        green) color_code="$(tput setaf 2)" ;;
+        yellow) color_code="$(tput setaf 3)" ;;
+        blue) color_code="$(tput setaf 4)" ;;
+        magenta) color_code="$(tput setaf 5)" ;;
+        cyan) color_code="$(tput setaf 6)" ;;
+        white) color_code="$(tput setaf 7)" ;;
+        *) color_code="" ;;
+    esac
+
+    echo "${color_code}${text}${reset}"
+}
+
+
+# gets every unique file in cwd
+
+# | tr ' ' '\n' | sort -f  | tr '\n' ' '
+
+alldirfiles() {
+
+    #  | tr ' ' '\n' | sort -f  | tr '\n' ' '
+
+    colortext "$(echo .*/ | tr ' ' '\n' | sort -f  | tr '\n' ' ')" blue
+    colortext "$(echo [^.]*/ | tr ' ' '\n' | sort -f  | tr '\n' ' ')" blue
+    colortext "$(echo .*[^/] | tr ' ' '\n' | sort -f  | tr '\n' ' ')" green
+    colortext "$(echo [^.]*[^/] | tr ' ' '\n' | sort -f  | tr '\n' ' ')" cyan
+
+    #dirfiles=($hiddirs $cwddirs $hidfiles $cwdfiles)
+
+    #echo "$dirfiles";
+}
+
+
+
+
 
 echo "funcs.sh loaded"

@@ -5,45 +5,21 @@ echo 'loading myshell.sh'
 if [ -f "$HOME/global/funcs.sh" ]; then
     export GLOBALDIR="$HOME/global"
     export PATH="$GLOBALDIR:$PATH"
+    . "$GLOBALPATH/funcs.sh"
 fi
 
-# List only directories
-dirsonly() {
-    curdirs=$(command ls -A -p --color=always . | grep '/$' | tr '\n' ' ')
-    echo -n "$curdirs "
-}
 
-# List only hidden directories
-hid_dirsonly() {
-    hid_dirs=$(command ls -A -p --color=always . | grep '/$' | grep '^\.\/' | tr '\n' ' ')
-    echo -n "$hid_dirs "
-}
+# builtin command overrides/aliases/etc
+# if ls receives any args it behaves as normal
 
-# List only hidden files
-hidsonly() {
-    curhids=$(command ls -A -p --color=always . | grep -v '/$' | grep '^\.' | tr '\n' ' ')
-    echo -n "$curhids "
-}
-
-# List only regular files
-filesonly() {
-    curfiles=$(command ls -A -p --color=always . | grep -v '/$' | grep -v '^\.' | tr '\n' ' ')
-    echo -n "$curfiles "
-}
-
-# Common shell utility overrides
 ls() {
-    hid_dirsonly
-    dirsonly
-    hidsonly
-    filesonly
-    echo -n '\n\n'
-}
-
-cd() {
-    builtin cd "$@" && ls
+    if [ $# -gt 0 ]; then
+        command ls "$@"
+    else
+        alldirfiles
+    fi
 }
 
 
 
-echo 'myshell.sh loaded completely'
+    echo 'myshell.sh loaded completely'
