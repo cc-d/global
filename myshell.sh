@@ -16,7 +16,7 @@ ls () {
     if [ $# -eq 0 ]; then
         dirfiles
     else
-        builtin ls "$@"
+        command ls "$@"
     fi
 
 }
