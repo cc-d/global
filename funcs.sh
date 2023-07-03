@@ -157,10 +157,16 @@ act-venv () {
     fi
 }
 
+evalsort () {
+  local command="$@"
+  eval '"$command" | tr ' ' '\n' | sort -f  | tr '\n' ' ''
+}
+
+
 # intentionally extremely simple func to just return
 # $test as a given $color for its foreground color
 
-colortext() {
+colortext () {
     local text="$1"
     local color_name="$2"
     local reset="$(tput sgr0)"
@@ -181,23 +187,16 @@ colortext() {
 }
 
 
+alldirfiles () {
+    command ls -A -p --color=always . | grep '/$' | sort -f | tr '\n' ' ' && echo ''
+    command ls -A -p --color=always . | grep '[^.].*/$' | sort -f | tr '\n' ' ' && echo ''
+
+    evalsort 'command ls -A -p --color=always .'
+}
 # gets every unique file in cwd
 
 # | tr ' ' '\n' | sort -f  | tr '\n' ' '
 
-alldirfiles() {
-
-    #  | tr ' ' '\n' | sort -f  | tr '\n' ' '
-
-    colortext "$(echo .*/ | tr ' ' '\n' | sort -f  | tr '\n' ' ')" blue
-    colortext "$(echo [^.]*/ | tr ' ' '\n' | sort -f  | tr '\n' ' ')" blue
-    colortext "$(echo .*[^/] | tr ' ' '\n' | sort -f  | tr '\n' ' ')" green
-    colortext "$(echo [^.]*[^/] | tr ' ' '\n' | sort -f  | tr '\n' ' ')" cyan
-
-    #dirfiles=($hiddirs $cwddirs $hidfiles $cwdfiles)
-
-    #echo "$dirfiles";
-}
 
 
 
