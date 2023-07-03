@@ -188,10 +188,20 @@ colortext () {
 
 
 alldirfiles () {
-    command ls -A -p --color=always . | grep '/$' | sort -f | tr '\n' ' ' && echo ''
-    command ls -A -p --color=always . | grep '[^.].*/$' | sort -f | tr '\n' ' ' && echo ''
+    cwddirs="$(
+        command ls -A -p --color=always . | grep '/$' | sort -f | tr '\n' ' ' && echo ''
+    )"
+    hiddirs="$(
+        command ls -A -p --color=always . | grep '[^.].*/$' | sort -f | tr '\n' ' ' && echo ''
+    )"
+    hidfiles="$(
+        command ls -A -p --color=always . | grep -v '/$' | grep '^\.' | tr '\n' ' ' && echo ''
+    )"
+    cwdfiles="$(
+        command ls -A -p --color=always . | grep -v '/$' | grep -v '^\.' | tr '\n' ' ' && echo ''
+    )"
 
-    evalsort 'command ls -A -p --color=always .'
+    echo "$cwddirs $hiddirs $hidfiles $cwdfiles"
 }
 # gets every unique file in cwd
 
