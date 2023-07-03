@@ -5,7 +5,7 @@ echo 'loading myshell.sh'
 if [ -f "$HOME/global/funcs.sh" ]; then
     export GLOBALDIR="$HOME/global"
     export PATH="$GLOBALDIR:$PATH"
-    . "$GLOBALPATH/funcs.sh"
+    . "$HOME/global/funcs.sh"
 fi
 
 
@@ -13,13 +13,13 @@ fi
 # if ls receives any args it behaves as normal
 
 ls() {
-    if [ $# -gt 0 ]; then
-        command ls "$@"
-    else
+    if [ $# -eq 0 ]; then
         alldirfiles
+    else
+        command ls "$@"
     fi
 }
 
 
 
-    echo 'myshell.sh loaded completely'
+echo 'myshell.sh loaded completely'
