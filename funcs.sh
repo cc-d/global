@@ -1,23 +1,22 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-gettermsize () {
-    local rows cols
-
-    if [ -n "$COLUMNS" ] && [ -n "$LINES" ]; then
-        cols=$COLUMNS
-        rows=$LINES
-    else
-        if [ -t 0 ]; then
-            cols=$(stty size < /dev/tty | awk '{print $2}')
-            rows=$(stty size < /dev/tty | awk '{print $1}')
-        else
-            cols=$(tput cols)
-            rows=$(tput lines)
-        fi
-    fi
-
-    echo "$cols $row"
+get_shell_rc_file() {
+  case "$(basename "$SHELL")" in
+    "bash")
+        [ -f "$HOME/.bash_profile" ] && echo "$HOME/.bash_profile" \
+            || [ -f "$HOME/.bash_login" ] && echo "$HOME/.bash_login" \
+            || echo "$HOME/.profile" ;;
+    "zsh")
+        [ -f "$HOME/.zshenv" ] && echo "$HOME/.zshenv" \
+        || [ -f "$HOME/.zprofile" ] && echo "$HOME/.zprofile" \
+        || [ -f "$HOME/.zshrc" ] && echo "$HOME/.zshrc" \
+        || echo "$HOME/.zlogin" ;;
+    "fish")
+        echo "$HOME/.config/fish/config.fish" ;;
+    *) echo "$HOME/.profile" ;;
+  esac
 }
+
 
 evar() {
     # Check if the arguments are passed in the format $NAME=$VALUE
@@ -35,7 +34,7 @@ evar() {
     escaped_value=$(printf "%q" "$value")
 
     # Determine the path to the rc file based on the OS
-    if [ "$(uname)" = "Darwin" ]; then
+    if [ $(basename $SHELL) == "zsh" ]; then
         # Use .zshrc on macOS
         rc_file="$HOME/.zshrc"
     else
@@ -142,51 +141,6 @@ revert-to-commit() {
   echo "git push origin $branch_name"
 }
 
-# checks to see if there is a venv anywhere close in child paths
-# if so cds to that dir and activate it, decativating previous
-
-actvenv () {
-    # determine if currently in venv deactivate if so
-    if [ -d "$VIRTUAL_ENV" ]; then
-        echo "\nactvenv: found existing venv at $VIRTUAL_ENV deactivating\n"
-        deactivate
-    fi
-
-    actcmd=''
-    actpath=''
-
-    if [ -e "venv/bin/activate" ]; then
-        actcmd='. venv/bin/activate'
-    elif [ -e 'env/bin/activate' ]; then
-        actcmd='. env/bin/activate'
-    else
-        # Check for virtual environment directories with various Python versions
-        actpath=`find . -path '*bin/activate' -print -quit -maxdepth 3`
-        if [ "$actpath" == "" ]; then
-            if [ `command -V python3` ]; then
-                pycmd='python3'
-            else
-                pycmd='python'
-            fi
-
-            actcmd="$pycmd -m venv venv"
-        else
-            actcmd="\. $actpath"
-        fi
-    fi
-}
-
-
-# removes duplicate elems from a space seperated str
-
-removedupes () {
-  local input_string="$1"
-  local unique_string
-
-  unique_string="$(echo "$input_string" | tr ' ' '\n' | sort -u | tr '\n' ' ' )"
-
-  echo "$unique_string"
-}
 
 # intentionally extremely simple func to just return
 # $test as a given $color for its foreground color
@@ -210,41 +164,3 @@ colortext () {
 
     echo "${color_code}${text}${reset}"
 }
-
-dirfiles () {
-    cwddirs="$(command ls -A -p --color=always . | grep '/$' | sort -f | tr '\n' ' ' && echo '')"
-    hiddirs="$(command ls -A -p --color=always . | grep '^\.' | grep '/$' |  sort -f | tr '\n' ' ' && echo '')"
-    hidfiles="$(command ls -A -p --color=always . | grep -v '/$' | grep '^\.' | tr '\n' ' ' && echo '')"
-    cwdfiles="$(command ls -A -p --color=always . | grep -v '/$' | grep -v '^\.' | tr '\n' ' ' && echo '')"
-
-    echo "$cwddirs $hiddirs $hidfiles $cwdfiles"
-}
-
-termstr() {
-  local tsize
-  tsize=$(gettermsize)
-  local w h
-  IFS=' ' read -r w h <<<"$tsize"
-
-  local input_string=$1
-
-  # Remove color codes
-  local text_without_colors
-  text_without_colors=$(echo "$input_string" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
-
-  # Apply formatting with fmt
-  local formatted_text
-  formatted_text=$(echo "$text_without_colors" | fmt -w "$w")
-
-  # Reapply color codes
-  local recolored_text
-  echo "endtstr"
-  recolored_text=$(echo -e "$input_string")
-
-  echo -e "$recolored_text"
-}
-
-
-
-
-echo "funcs.sh loaded"
