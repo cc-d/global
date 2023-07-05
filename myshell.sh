@@ -1,28 +1,24 @@
 #!/bin/sh
-echo 'loading myshell.sh'
+EL='[ GLOBALSHELL ]: '
 
-# Load all my posix compliant functions
-if [ -f "$HOME/global/funcs.sh" ]; then
-    export GLOBALDIR="$HOME/global"
-    export PATH="$GLOBALDIR:$PATH"
-    . "$HOME/global/funcs.sh"
-fi
+# get local cc-d/global repo path so no path weirdness happens
+export MYGLOBALDIR=$(echo $0 | sed 's/myshell.sh$//')
 
+# import aliases
+. "$MYGLOBALDIR/aliases.sh" && echo "$EL imported alises.sh from $MYGLOBALDIR"
+
+# import our functions
+. "$MYGLOBALDIR/funcs.sh" && echo "$EL imported funcs.sh from $MYGLOBALDIR"
 
 # builtin command overrides/aliases/etc
 # if ls receives any args it behaves as normal
 
-ls () {
-    if [ $# -eq 0 ]; then
-        dirfiles
-    else
-        command ls "$@"
-    fi
+alias ls='ls -AaFG'
 
-}
 cd () {
-    builtin cd "$@" && ls
+    builtin cd "$@";
+    echo $(ls -AamFp --color=always | sed 's/, / /g') && echo ''
 }
 
 
-echo 'myshell.sh loaded completely'
+echo "$EL myshell.sh loaded completely\n"
