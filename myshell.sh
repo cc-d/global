@@ -2,7 +2,7 @@
 EL='[ GLOBALSHELL ]: '
 
 # get local cc-d/global repo path so no path weirdness happens
-export MYGLOBALDIR=$(echo $0 | sed 's/myshell.sh$//')
+export MYGLOBALDIR="$HOME/global"
 
 # import aliases
 . "$MYGLOBALDIR/aliases.sh" && echo "$EL imported alises.sh from $MYGLOBALDIR"
@@ -13,7 +13,7 @@ export MYGLOBALDIR=$(echo $0 | sed 's/myshell.sh$//')
 # builtin command overrides/aliases/etc
 # if ls receives any args it behaves as normal
 
-alias ls='ls -AaFG'
+alias ls='ls -AaFp --color=always'
 
 cd () {
     builtin cd "$@";
@@ -21,4 +21,5 @@ cd () {
 }
 
 
-echo "$EL myshell.sh loaded completely\n"
+echo "$EL myshell.sh loaded completely"
+echo ''
