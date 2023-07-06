@@ -1,1 +1,42 @@
-{}
+{
+    "breadcrumbs.enabled": true,
+    // Editor
+    "editor.autoClosingBrackets": "never",
+    "editor.fontSize": 12,
+    "editor.folding": false,
+    "editor.fontLigatures": true,
+    "editor.formatOnPaste": false,
+    "editor.glyphMargin": false,
+    "editor.lineHeight": 15,
+    "editor.lineNumbers": "on",
+    "editor.matchBrackets": "always",
+    "editor.padding.bottom": 4,
+    "editor.padding.top": 4,
+    "editor.renderWhitespace": "all",
+    "editor.rulers": [
+        120
+    ],
+    // Extensions
+    "extensions.ignoreRecommendations": true,
+    // Files
+    "files.associations": {
+        "*.json": "jsonc"
+    },
+    "files.trimTrailingWhitespace": true,
+    // Terminal
+    "terminal.integrated.fontSize": 10,
+    "terminal.integrated.lineHeight": 1.0,
+    "terminal.integrated.scrollback": 1000,
+    // TypeScript
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "window.zoomLevel": 1,
+    "black-formatter.importStrategy": "fromEnvironment",
+    "black-formatter.interpreter": [
+        "python"
+    ],
+    "black-formatter.path": [
+        "black"
+    ],
+    "black-formatter.showNotifications": "always",
+}
