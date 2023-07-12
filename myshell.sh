@@ -17,7 +17,7 @@ alias ls='ls -AaFp --color=always'
 
 cd () {
     builtin cd "$@";
-    ls -AamFp --color=always | "$MYGLOBALDIR/colorprint.py";
+    ls -AamFp --color=always | "$MYGLOBALDIR/colorprint";
     echo ''
 }
 
