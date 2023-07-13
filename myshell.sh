@@ -17,7 +17,11 @@ alias ls='ls -AaFp --color=always'
 
 cd () {
     builtin cd "$@";
-    ls -AamFp --color=always | python3 "$MYGLOBALDIR/colorprint.py";
+    if [ "$(uname -m)" = "x86_64" ]; then
+        ls -AamFp --color=always | sed 's/, / /g' | sed 's/,$//' | "$MYGLOBALDIR/colorprint-x86";
+    else
+        ls -AamFp --color=always | sed 's/, / /g' | sed 's/,$//' | "$MYGLOBALDIR/colorprint";
+    fi
     echo ''
 }
 
