@@ -44,8 +44,8 @@ void print_color_string(const std::string& color_string) {
 
 int main() {
     std::string color_string;
-    std::getline(std::cin, color_string);
-    print_color_string(color_string);
+    while(std::getline(std::cin, color_string)){
+        print_color_string(color_string);
+    }
     return 0;
 }
-

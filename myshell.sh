@@ -18,9 +18,9 @@ alias ls='ls -AaFp --color=always'
 cd () {
     builtin cd "$@";
     if [ "$(uname -m)" = "x86_64" ]; then
-        ls -AamFp --color=always | sed 's/, / /g' | sed 's/,$//' | "$MYGLOBALDIR/colorprint-x86";
+        ls -Aa1Fp --color=always | tr '\n' ' ' | "$MYGLOBALDIR/colorprint-x86";
     else
-        ls -AamFp --color=always | sed 's/, / /g' | sed 's/,$//' | "$MYGLOBALDIR/colorprint";
+        ls -Aa1Fp --color=always | tr '\n' ' ' | "$MYGLOBALDIR/colorprint-arm";
     fi
     echo ''
 }
