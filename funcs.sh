@@ -82,9 +82,15 @@ git-ssh() {
     done
     echo ''
 
-    # prompt user on the same line for which file to use with ssh-add
-    echo -n "Select which SSH keyfile to use with ssh-add: "
-    read choice
+    # Check if environment variable is set and is valid
+    if [ -n "$GIT_SSH_DEFAULT_CHOICE" ] && [ "$GIT_SSH_DEFAULT_CHOICE" -ge 1 ] && [ "$GIT_SSH_DEFAULT_CHOICE" -le "$#" ]; then
+        choice=$GIT_SSH_DEFAULT_CHOICE
+        echo "Using GIT_SSH_DEFAULT_CHOICE: $choice"
+    else
+        # prompt user on the same line for which file to use with ssh-add
+        echo -n "Select which SSH keyfile to use with ssh-add: "
+        read choice
+    fi
 
     if [ "$choice" -ge 1 ] && [ "$choice" -le "$#" ]; then
         # start ssh-agent for this shell
@@ -97,6 +103,7 @@ git-ssh() {
         echo "ERROR: $choice is not a valid choice."
     fi
 }
+
 
 
 # Reverts all merge commits up to a specific commit
