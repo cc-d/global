@@ -30,7 +30,7 @@
     // TypeScript
     "typescript.tsdk": "node_modules/typescript/lib",
     "typescript.updateImportsOnFileMove.enabled": "always",
-    "window.zoomLevel": 1,
+    "window.zoomLevel": 0,
     "black-formatter.importStrategy": "fromEnvironment",
     "black-formatter.interpreter": [
         "python"
