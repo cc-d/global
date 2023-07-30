@@ -75,7 +75,7 @@ elif len(sys.argv) == 3:
             print("Invalid input. Please enter values in the correct units (mg and ml).")
 
     except ValueError:
-        print("Invalid input. Please enter numeric values.")
+        print("Invalid input. Please enter numeric values as $mg $ml (or pass 'tests' to run tests)")
 else:
     print("Usage: ./mgml.py [mg] [ml]")
     print("Usage: ./mgml.py tests")
