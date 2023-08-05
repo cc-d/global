@@ -176,7 +176,7 @@ colortext () {
 gptfiles() {
   for path in "$@"; do
     if [ -d "$path" ]; then
-      for file in $(find "$path" -type f); do
+      for file in $(find "$path" -maxdepth 1 -type f); do
         echo -e "\nFile: $file"
         if [ -s "$file" ]; then
           echo "\`\`\`"
