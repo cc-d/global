@@ -172,11 +172,29 @@ colortext () {
     echo "${color_code}${text}${reset}"
 }
 
-gptfiles () {
-    for f in $(ls "$1" --color=never); do
-        echo -e "\nFile: $f"
-        echo '```'
-        cat "$1/$f"
-        echo -e '```\n'
-    done
+
+gptfiles() {
+  for path in "$@"; do
+    if [ -d "$path" ]; then
+      for file in $(find "$path" -type f); do
+        echo -e "\nFile: $file"
+        if [ -s "$file" ]; then
+          echo "\`\`\`"
+          cat "$file"
+          echo "\`\`\`"
+          echo
+        fi
+      done
+    elif [ -f "$path" ]; then
+      echo -e "\nFile: $path"
+      if [ -s "$path" ]; then
+        echo "\`\`\`"
+        cat "$path"
+        echo "\`\`\`"
+        echo
+      fi
+    else
+      echo "$path is not a valid directory or file path."
+    fi
+  done
 }
