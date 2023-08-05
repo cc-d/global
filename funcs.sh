@@ -153,9 +153,9 @@ revert-to-commit() {
 # $test as a given $color for its foreground color
 
 colortext () {
-    local text="$1"
-    local color_name="$2"
-    local reset="$(tput sgr0)"
+    text="$1"
+    color_name="$2"
+    reset="$(tput sgr0)"
 
     case "$color_name" in
         black) color_code="$(tput setaf 0)" ;;
@@ -170,4 +170,13 @@ colortext () {
     esac
 
     echo "${color_code}${text}${reset}"
+}
+
+gptfiles () {
+    for f in $(ls "$1" --color=never); do
+        echo -e "\nFile: $f"
+        echo '```'
+        cat "$1/$f"
+        echo -e '```\n'
+    done
 }
