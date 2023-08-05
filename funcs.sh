@@ -181,8 +181,7 @@ gptfiles() {
         if [ -s "$file" ]; then
           echo "\`\`\`"
           cat "$file"
-          echo "\`\`\`"
-          echo
+          echo -e "\n\`\`\`"
         fi
       done
     elif [ -f "$path" ]; then
@@ -190,8 +189,7 @@ gptfiles() {
       if [ -s "$path" ]; then
         echo "\`\`\`"
         cat "$path"
-        echo "\`\`\`"
-        echo
+        echo -e "\n\`\`\`"
       fi
     else
       echo "$path is not a valid directory or file path."
