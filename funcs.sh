@@ -174,25 +174,30 @@ colortext () {
 
 
 gptfiles() {
+  output=""
   for path in "$@"; do
     if [ -d "$path" ]; then
       for file in $(find "$path" -maxdepth 1 -type f); do
-        echo -e "\nFile: $file"
+        output+="\nFile: $file"
         if [ -s "$file" ]; then
-          echo "\`\`\`"
-          cat "$file"
-          echo -e "\n\`\`\`"
+          output+="\n\`\`\`"
+          output+="\n$(cat "$file")"
+          output+="\n\`\`\`"
         fi
       done
     elif [ -f "$path" ]; then
-      echo -e "\nFile: $path"
+      output+="\nFile: $path"
       if [ -s "$path" ]; then
-        echo "\`\`\`"
-        cat "$path"
-        echo -e "\n\`\`\`"
+        output+="\n\`\`\`"
+        output+="\n$(cat "$path")"
+        output+="\n\`\`\`"
       fi
     else
       echo "$path is not a valid directory or file path."
+      return 1
     fi
   done
+  echo -e "$output" | xclip -selection clipboard
+  echo -e "$output"
+  echo "copied to clipboard"
 }
