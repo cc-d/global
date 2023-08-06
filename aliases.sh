@@ -8,3 +8,5 @@ alias gcpports='exec gcloud compute --project pict-app ssh --zone us-central1-a 
 alias gcpssh='gcloud compute --project pict-app ssh --zone us-central1-a webapp-development-cary'
 
 alias gitacp='git add . && git commit -m "by gitacp alias" && git push'
+
+alias gshell='. ~/global/myshell.sh'
