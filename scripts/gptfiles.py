@@ -24,7 +24,10 @@ class GPTFile:
 
         with open(fname, 'r') as f:
             self.__lines = f.read().splitlines()
-
+            self.__lines = [l for l in self.__lines if l.strip()]
+            self.__lines = [
+                l for l in self.__lines if not l.strip().startswith('#')
+            ]
         self.fname = fname
 
     def clip(self):
