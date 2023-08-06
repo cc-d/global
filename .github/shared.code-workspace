@@ -39,5 +39,7 @@
       "path": "../../liberlife"
     }
   ],
-  "settings": {}
+  "settings": {
+    "typescript.tsdk": "node_modules/typescript/lib"
+  }
 }
