@@ -10,3 +10,6 @@ alias gcpssh='gcloud compute --project pict-app ssh --zone us-central1-a webapp-
 alias gitacp='git add . && git commit -m "by gitacp alias" && git push'
 
 alias gshell='. ~/global/myshell.sh'
+
+alias libaiapi='cd ~/liberfy-ai/ && . ./shell.sh && cd api && . venv/bin/activate && ./main.py'
+alias libaifront='cd ~/liberfy-ai/ && . ./shell.sh && cd libai-frontend  && npmapi'

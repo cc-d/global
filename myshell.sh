@@ -3,12 +3,13 @@ EL='[ GLOBALSHELL ]: '
 
 # get local cc-d/global repo path so no path weirdness happens
 export MYGLOBALDIR="$HOME/global"
+export GSHELLDIR="$MYGLOBALDIR/shell"
 
 # import aliases
-. "$MYGLOBALDIR/aliases.sh" && echo "$EL imported alises.sh from $MYGLOBALDIR"
+. "$GSHELLDIR/aliases.sh" && echo "$EL imported alises.sh from $GSHELLDIR"
 
 # import our functions
-. "$MYGLOBALDIR/funcs.sh" && echo "$EL imported funcs.sh from $MYGLOBALDIR"
+. "$GSHELLDIR/funcs.sh" && echo "$EL imported funcs.sh from $GSHELLDIR"
 
 # builtin command overrides/aliases/etc
 # if ls receives any args it behaves as normal
@@ -18,9 +19,9 @@ alias ls='ls -AaFp --color=always'
 cd () {
     builtin cd "$@";
     if [ "$(uname -m)" = "x86_64" ]; then
-        ls -Aa1Fp --color=always | tr '\n' ' ' | "$MYGLOBALDIR/colorprint-x86";
+        ls -Aa1Fp --color=always | tr '\n' ' ' | "$GSHELLDIR/colorprint-x86";
     else
-        ls -Aa1Fp --color=always | tr '\n' ' ' | "$MYGLOBALDIR/colorprint-arm";
+        ls -Aa1Fp --color=always | tr '\n' ' ' | "$GSHELLDIR/colorprint-arm";
     fi
     echo ''
 }
