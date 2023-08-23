@@ -24,8 +24,8 @@ architecture = platform.machine()
 colorprint_binary = "colorprint-arm" if architecture == "arm64" else "colorprint-x86"
 
 # Define the command to run your colorprint script
-python_cmd = "echo '{}' | python3 colorprint.py"
-cpp_cmd = "echo '{}' | ./" + colorprint_binary
+python_cmd = "echo '{}' | python3 ../globalshell/colorprint.py"
+cpp_cmd = "echo '{}' | ./../globalshell/" + colorprint_binary
 
 # Define the colors to choose from
 colors = [
