@@ -19,42 +19,45 @@ get_shell_rc_file() {
 
 
 evar() {
+    # Validate input
+    if [ "$#" -eq 0 ]; then
+        echo "evar: missing arguments"
+        return 1
+    fi
+
     # Check if the arguments are passed in the format $NAME=$VALUE
     if [ "$#" -eq 1 ] && echo "$1" | grep -qE '^[^=]+=.+'; then
         # Split the input into name and value
         name="${1%%=*}"
         value="${1#*=}"
-    else
+    elif [ "$#" -eq 2 ]; then
         # Get the name and value of the environment variable
         name="$1"
         value="$2"
+    else
+        echo "evar: invalid number of arguments"
+        return 1
     fi
 
     # Escape special characters in the value
-    escaped_value=$(printf "%q" "$value")
+    escaped_value=$(printf "%s" "$value")
 
-    # Determine the path to the rc file based on the OS
-    if [ $(basename $SHELL) == "zsh" ]; then
-        # Use .zshrc on macOS
-        rc_file="$HOME/.zshrc"
-    else
-        # Use .bashrc on Linux
-        rc_file="$HOME/.bashrc"
-    fi
+    # Determine the path to the rc file based on the shell
+    rc_file="$HOME/.bashrc"
+    [ "$(basename "$SHELL")" = "zsh" ] && rc_file="$HOME/.zshrc"
 
     # Check if the export line already exists in the rc file
-    if grep -q "$name=['\"]\{0,1\}.*['\"]\{0,1\}" "$rc_file"; then
+    if grep -qE "^export $name=" "$rc_file"; then
         # If it does, update the line
-        echo "evar exists in rc updating"
-        sed -i -e "s|^.*$name=['\"]\{0,1\}.*['\"]\{0,1\}|export $name=$escaped_value|" "$rc_file"
+        sed -i.bak "s|^export $name=.*|export $name=$escaped_value|" "$rc_file"
+        echo "evar exists in rc, updating"
     else
         # If it doesn't, add the line
-        echo "evar $name=$value does not exist adding now"
         echo "export $name=$escaped_value" >> "$rc_file"
+        echo "evar $name=$value does not exist, adding now"
     fi
 
-    # Run the export line in the shell
-    echo "export $name=$escaped_value"
+    # Run the export line in the current shell
     export "$name=$escaped_value"
 }
 
