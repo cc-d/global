@@ -7,6 +7,8 @@ export GSHELLDIR="$MYGLOBALDIR/globalshell"
 INIT_COMMAND=". $MYGLOBALDIR/init-globalshell.sh"
 
 # Add globalshell init to zshrc/bashrc depending on system type
+# make sure the init command added is in the EXACT same format
+# as $INIT_COMMAND to prevent infinite loops
 add_init_to_rc_file() {
   RC_FILE="$1"
   if [ ! -f "$RC_FILE" ]; then
