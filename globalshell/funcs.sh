@@ -249,4 +249,20 @@ gitconf() {
 }
 
 
+gitnewbranch() {
+  echo "Branch to branch off from [default: master]: "; read base_branch
+  : "${base_branch:=master}"
 
+  echo "Stash local changes? [y/n]"; read stash_choice
+  [ "$stash_choice" = "y" ] && git stash || { git reset --hard HEAD; git clean -fd; }
+
+  git checkout "$base_branch" && git pull origin "$base_branch" || { echo "Error: Couldn't update base branch."; return 1; }
+  [ "$stash_choice" = "y" ] && git stash apply
+
+  echo "New branch name (or paste 'git checkout -b <name>'):"; read new_branch_input
+  new_branch=$(echo "$new_branch_input" | awk '/git checkout -b/ {print $4}'); : "${new_branch:=$new_branch_input}"
+
+  git checkout -b "$new_branch" && git push -u origin "$new_branch" || { echo "Error: Couldn't create and push new branch."; return 1; }
+
+  echo "New branch created and pushed: $new_branch"
+}
