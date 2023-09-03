@@ -123,7 +123,7 @@ revert-to-commit() {
 
   echo "Checking out and pulling master"
   git checkout master
-  git pull
+  git pullt
 
   branch_name="revert-master-$(date +%s)"
   echo "Creating new branch: $branch_name"
@@ -173,36 +173,6 @@ colortext () {
     esac
 
     echo "${color_code}${text}${reset}"
-}
-
-
-gptfiles() {
-  output=""
-  for path in "$@"; do
-    if [ -d "$path" ]; then
-      for file in $(find "$path" -maxdepth 1 -type f); do
-        output+="\nFile: $file"
-        if [ -s "$file" ]; then
-          output+="\n\`\`\`"
-          output+="\n$(cat "$file")"
-          output+="\n\`\`\`"
-        fi
-      done
-    elif [ -f "$path" ]; then
-      output+="\nFile: $path"
-      if [ -s "$path" ]; then
-        output+="\n\`\`\`"
-        output+="\n$(cat "$path")"
-        output+="\n\`\`\`"
-      fi
-    else
-      echo "$path is not a valid directory or file path."
-      return 1
-    fi
-  done
-  echo -e "$output" | xclip -selection clipboard
-  echo -e "$output"
-  echo "copied to clipboard"
 }
 
 actvenv() {
@@ -265,4 +235,183 @@ gitnewbranch() {
   git checkout -b "$new_branch" && git push -u origin "$new_branch" || { echo "Error: Couldn't create and push new branch."; return 1; }
 
   echo "New branch created and pushed: $new_branch"
+}
+
+
+ftemplate() {
+  TEMPLATEDIR="$HOME/global/globalshell/ftemplates"
+  TEMPLATEDIR=$(echo "$TEMPLATEDIR" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+  echo "Type file template name:"
+  for f in $(find "$TEMPLATEDIR" -type f); do
+    basename "$f"
+  done
+
+  read -r tname
+  template=$(echo "$tname" | tr '[:upper:]' '[:lower:]')
+
+  # Initialize variables to hold matches and counter
+  match_count=0
+  single_match=""
+
+  # Find matching files (case-insensitive)
+  for f in $(find "$TEMPLATEDIR" -type f -exec basename {} \;); do
+    f_lower=$(echo "$f" | tr '[:upper:]' '[:lower:]')
+    case "$f_lower" in
+      "$template"*)
+        match_count=$((match_count + 1))
+        single_match="$f"
+        ;;
+    esac
+  done
+
+  # Perform action based on the number of matches
+  case $match_count in
+    0)
+      echo "No matching templates."
+      ;;
+    1)
+      cp "$TEMPLATEDIR/$single_match" "$1"
+      echo "Template $single_match has been copied."
+      ;;
+    *)
+      echo "Multiple matches found. Please be more specific."
+      ;;
+  esac
+}
+
+# Detects the current Operating System and Architecture
+ostype() {
+  os_type="unknown"
+  arch_type="unknown"
+
+  case "$(uname -s)" in
+    Darwin)
+      os_type="macos"
+      ;;
+    Linux)
+      os_type="linux"
+      ;;
+    FreeBSD)
+      os_type="freebsd"
+      ;;
+    NetBSD)
+      os_type="netbsd"
+      ;;
+    OpenBSD)
+      os_type="openbsd"
+      ;;
+    SunOS)
+      os_type="solaris"
+      ;;
+    AIX)
+      os_type="aix"
+      ;;
+    *)
+      os_type="unknown"
+      ;;
+  esac
+
+  case "$(uname -m)" in
+    x86_64)
+      arch_type="x86_64"
+      ;;
+    i386|i486|i586|i686)
+      arch_type="x86"
+      ;;
+    armv6*)
+      arch_type="armv6"
+      ;;
+    armv7*)
+      arch_type="armv7"
+      ;;
+    arm64|aarch64)
+      arch_type="arm64"
+      ;;
+    s390x)
+      arch_type="ibm_s390"
+      ;;
+    ppc64le)
+      arch_type="powerpc64le"
+      ;;
+    *)
+      arch_type="unknown"
+      ;;
+  esac
+
+  echo "$os_type $arch_type"
+}
+
+
+echo_gptfile() {
+  title="### FILE: $1 ###"
+  if [ ! -f "$1" ]; then
+    return 1
+  fi
+  content=$(cat "$1")
+  output="$output\n\n$title\n\`\`\`\n$content\n\`\`\`\n"
+}
+
+
+get_sh_files() {
+  if [ -z "$shout" ]; then
+    shout="$1"
+  fi
+
+  if [ ! -f "$1" ]; then
+    return 1
+  fi
+
+  shfiles=$(cat $1| grep -E '.*(source|\.) .*\.sh' | grep -oE '[^ "]*\.sh' | sed -E 's/^\.?\///' | uniq);
+
+  if [ -z "$shfiles" ]; then
+    return 1
+  fi
+
+  for shf in $shfiles; do
+    if echo "$shout" | grep -qEv "$shf"; then
+      shout="$shout $shf"
+      if [ -f "$shf" ]; then
+        get_sh_files "$shf"
+      fi
+    fi
+  done
+
+}
+
+
+rec_sh() {
+  shout=''
+  get_sh_files "$1"
+  echo "$shout"
+}
+
+
+gptfiles() {
+  output=""
+  os_arch=$(ostype)
+  os_type=$(echo "$os_arch" | awk '{print $1}')
+
+  for f in "$@"; do
+    #shf=$(rec_sh "$f")
+    #echo "$(echo_gptfile "$f")"
+    for rf in $(rec_sh "$f"); do
+      echo_gptfile "$rf"
+    done
+  done
+
+  case "$os_type" in
+    "macos")
+      echo -e "$output" | pbcopy
+      ;;
+    "linux")
+      echo -e "$output" | xclip -selection clipboard
+      ;;
+    "unknown")
+      echo "Unsupported OS. Cannot copy to clipboard."
+      ;;
+  esac
+
+  echo -e "$output"
+  echo "Copied to clipboard"
 }
