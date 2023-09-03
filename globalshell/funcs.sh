@@ -362,7 +362,7 @@ get_sh_files() {
     return 1
   fi
 
-  shfiles=$(cat $1| grep -E '.*(source|\.) .*\.sh' | grep -oE '[^ "]*\.sh' | sed -E 's/^\.?\///' | uniq);
+  shfiles=$(cat $1| grep -E '.*(source|\.) .*\.sh' | grep -oE '[^ "]*\.sh' | sed -E 's/^\.?\/?//' | uniq);
 
   if [ -z "$shfiles" ]; then
     return 1
@@ -414,4 +414,33 @@ gptfiles() {
 
   echo -e "$output"
   echo "Copied to clipboard"
+}
+
+
+gitacpush() {
+  # Add all changes to the staging area
+  git add -A
+
+  # Generate a commit message
+  commit_message=$(git status --porcelain | awk '{print $2}' | tr '\n' ' ')
+  
+  # Truncate commit message if it's too long
+  max_len=50
+  if [ "${#commit_message}" -gt "$max_len" ]; then
+    commit_message="${commit_message:0:$max_len}..."
+  fi
+
+  # If there's nothing to commit, exit
+  if [ -z "$commit_message" ]; then
+    echo "Nothing to commit."
+    return 1
+  fi
+
+  # Commit the changes
+  git commit -m "$commit_message"
+
+  # Push to the remote repository
+  git push
+
+  echo "Successfully committed and pushed: $commit_message"
 }
