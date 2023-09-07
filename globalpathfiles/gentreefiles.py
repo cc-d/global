@@ -1,73 +1,105 @@
 import os
+from os.path import join, dirname, abspath
 import sys
-from typing import List, Optional
+import re
+from typing import Tuple, Optional, List
 
 
-def create_tree(tree_string: str, base_path: str = ".") -> None:
+def treere(line: str) -> Tuple[int, str]:
+    """
+    Generates depth and filename from a tree line.
+
+    Args:
+        line (str): A single line of the tree string.
+
+    Returns:
+        Tuple[int, str]: Depth of the tree structure and the name.
+    """
+    treg = re.match(r'(^[^\w]*)?(\w+.*)$', line)
+    if len(treg.groups()) == 1:
+        depth, name = 0, treg.group(1)
+    else:
+        depth, name = len(treg.group(1)), treg.group(2)
+    return depth, name
+
+
+def linetype(lname: str, ldepth: int, nextdepth: Optional[int] = None) -> str:
+    """
+    Determine the type (directory or file) of the current line.
+
+    Args:
+        lname (str): Name of the current line.
+        ldepth (int): Depth of the current line.
+        nextdepth (int, optional): Depth of the next line. Defaults to None.
+
+    Returns:
+        str: Returns 'dir' for directory, 'file' for file.
+    """
+    if lname.endswith('/'):
+        return 'dir'
+    else:
+        if lname.startswith('.'):
+            return 'file'
+        elif re.search('^\w+\.\w+$', lname):
+            return 'file'
+
+    if nextdepth is not None:
+        if nextdepth > ldepth:
+            return 'dir'
+
+    return 'file'
+
+
+def create_tree(tree_string: str, base_path: str = os.getcwd()) -> List[str]:
     """
     Create directory and file structure based on the given tree string.
+
+    Args:
+        tree_string (str): The tree string.
+        base_path (str): The base path to create the tree in.
+
+    Returns:
+        List[str]: List of paths that were created.
     """
     lines = tree_string.strip().splitlines()
+    lines = [l.strip() for l in lines if l.strip() != '']
 
-    # Determine the indentation length
-    indent_length = None
-    for line in lines:
-        if line.startswith(" "):
-            stripped_line = line.lstrip()
-            indent_length = len(line) - len(stripped_line)
-            print(f"Indentation length determined as: {indent_length}")
-            break
+    nextline = None
+    nextdepth = None
+    newfiles = []
+    lastrootname = None
 
-    path_stack: List[str] = []
-    for line in lines:
-        stripped_line = line.strip()
-        if len(stripped_line) > 0 and stripped_line[0] in "├└│--| |-- ":
-            stripped_line = stripped_line[1:].strip()
-
-        if indent_length is not None:
-            depth = (len(line) - len(stripped_line)) // indent_length
+    while len(lines) > 0:
+        line = lines.pop(0)
+        depth, name = treere(line)
+        if len(lines) > 0:
+            nextline = lines[0]
+            nextdepth, nextname = treere(nextline)
         else:
-            depth = len(line) - len(stripped_line)
+            nextline = None
+            nextdepth = None
 
-        # Pop to the correct parent directory or the base if necessary
-        while len(path_stack) > depth:
-            print(f"Popping from path stack: {path_stack.pop()}")
+        ltype = linetype(name, depth, nextdepth)
 
-        # Get the current path
-        cur_path = os.path.join(*path_stack, stripped_line)
+        if depth == 0:
+            lpath = abspath(join(base_path, name))
+            lastrootpath = lpath
+        else:
+            lpath = abspath(join(lastrootpath, name))
 
-        # cur_path = str(cur_path).replace(
-        #    './' + str(os.path.abspath('.').split('/')[-1]), ''
-        # )
-
-        if indent_length is None:
-            cur_path = cur_path.replace('-- ', '', -1).replace('|', '')
-        print(f"Current path: {cur_path}")
-        if stripped_line.endswith("/"):  # directory
-            os.makedirs(cur_path, exist_ok=True)
-            path_stack.append(stripped_line[:-1])
-            print(f"Directory created: {cur_path}")
-        else:  # file
-            open(cur_path, 'w').close()
-            print(f"File created: {cur_path}")
-
-
-def test():
-    tree_str = """
-django-arm-test-runner/
-|-- django_arm_test_runner/
-|   |-- __init__.py
-|   |-- runners.py
-|-- tests/
-|   |-- __init__.py
-|   |-- test_runners.py
-|-- setup.py
-|-- README.md
-|-- LICENSE
-"""
-    create_tree(tree_str)
+        print(f'Creating {ltype} at {lpath}')
+        if ltype == 'dir':
+            os.makedirs(lpath, exist_ok=True)
+        else:
+            if not os.path.exists(lpath):
+                with open(lpath, 'w') as f:
+                    f.write('')
+            else:
+                print('File already exists', lpath)
+        newfiles.append(lpath)
+    return newfiles
 
 
 # Example usage
 if __name__ == "__main__":
-    test()
+    created_paths = create_tree(sys.stdin.read())
