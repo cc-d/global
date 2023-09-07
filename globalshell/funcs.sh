@@ -423,7 +423,7 @@ gitacpush() {
 
   # Generate a commit message
   commit_message=$(git status --porcelain | awk '{print $2}' | tr '\n' ' ')
-  
+
   # Truncate commit message if it's too long
   max_len=50
   if [ "${#commit_message}" -gt "$max_len" ]; then
