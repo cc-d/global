@@ -444,3 +444,31 @@ gitacpush() {
 
   echo "Successfully committed and pushed: $commit_message"
 }
+
+gitdatecommit() {
+  # Usage:
+  # gitdatecommit -m "Your commit message" -d "10-03-2023" -t "01:01:30"
+  _commit_message="no commit message provided"
+  _date_input=$(date '+%d-%m-%Y')
+  _time_input=$(date '+%H:%M:%S')
+
+  while getopts ":m:d:t:" opt; do
+    case $opt in
+      m) _commit_message="$OPTARG" ;;
+      d) _date_input="$OPTARG" ;;
+      t) _time_input="$OPTARG" ;;
+      \?) echo "Invalid option -$OPTARG" >&2 ;;
+    esac
+  done
+
+  # Extract day, month, year from date input
+  _day=$(echo "$_date_input" | cut -d- -f1)
+  _month=$(echo "$_date_input" | cut -d- -f2)
+  _year=$(echo "$_date_input" | cut -d- -f3)
+
+  # Construct full ISO 8601 datetime format
+  _git_date="${_year}-${_month}-${_day}T${_time_input}"
+
+  GIT_AUTHOR_DATE="$_git_date" GIT_COMMITTER_DATE="$_git_date" git commit -m "$_commit_message"
+}
+
