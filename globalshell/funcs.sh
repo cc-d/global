@@ -343,14 +343,6 @@ ostype() {
 }
 
 
-echo_gptfile() {
-  title="### FILE: $1 ###"
-  if [ ! -f "$1" ]; then
-    return 1
-  fi
-  content=$(cat "$1")
-  output="$output\n\n$title\n\`\`\`\n$content\n\`\`\`\n"
-}
 
 
 get_sh_files() {
@@ -386,6 +378,21 @@ rec_sh() {
   echo "$shout"
 }
 
+
+echo_gptfile() {
+  title="<<! FILE: $1 !>>"
+  if [ ! -f "$1" ]; then
+    return 1
+  fi
+  content=$(cat "$1")
+  content=$(echo "$content" | sed '/^$/d')
+
+  if [ -z "$content" ]; then
+    output="$output\n$title\n"
+  else
+    output="$output\n$title\n\`\`\`\n$content\n\`\`\`\n"
+  fi
+}
 
 gptfiles() {
   output=""
@@ -472,3 +479,35 @@ gitdatecommit() {
   GIT_AUTHOR_DATE="$_git_date" GIT_COMMITTER_DATE="$_git_date" git commit -m "$_commit_message"
 }
 
+backproc() {
+  pid_dir="$HOME/.backproc"
+  pid_file="$pid_dir/pids"
+  mkdir -p "$pid_dir"
+  touch "$pid_file"
+
+  trap 'rm -f "$temp_file"' EXIT  # Ensure temporary file is removed
+
+  case "$1" in
+    "list")
+      cat "$pid_file"
+      ;;
+    "kill")
+      temp_file=$(mktemp)
+      grep -v "^$2=" "$pid_file" > "$temp_file"
+      grep "^$2=" "$pid_file" | cut -d= -f2 | xargs -r kill
+      mv "$temp_file" "$pid_file"
+      ;;
+    "killall")
+      cut -d= -f2 "$pid_file" | xargs -r kill
+      echo -n > "$pid_file"
+      ;;
+    *)
+      if command -v setsid >/dev/null 2>&1; then
+        setsid "$@" >/dev/null 2>&1 &
+      else
+        nohup "$@" >/dev/null 2>&1 &
+      fi
+      echo "$1=$!" >> "$pid_file"
+      ;;
+  esac
+}
