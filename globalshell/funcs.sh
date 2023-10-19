@@ -484,29 +484,20 @@ backproc() {
   pid_file="$pid_dir/pids"
   mkdir -p "$pid_dir"
   touch "$pid_file"
-
-  trap 'rm -f "$temp_file"' EXIT  # Ensure temporary file is removed
+  trap 'rm -f "$temp_file"' EXIT
 
   case "$1" in
-    "list")
-      cat "$pid_file"
-      ;;
+    "list") cat "$pid_file" ;;
     "kill")
-      temp_file=$(mktemp)
-      grep -v "^$2=" "$pid_file" > "$temp_file"
-      grep "^$2=" "$pid_file" | cut -d= -f2 | xargs -r kill
-      mv "$temp_file" "$pid_file"
+      awk -v proc="$2" -F= '$1 == proc {print $2}' "$pid_file" | xargs -r kill -9
+      awk -v proc="$2" -F= '$1 != proc' "$pid_file" > "$pid_file.tmp" && mv "$pid_file.tmp" "$pid_file"
       ;;
     "killall")
-      cut -d= -f2 "$pid_file" | xargs -r kill
-      echo -n > "$pid_file"
+      cut -d= -f2 "$pid_file" | xargs -r kill -9
+      > "$pid_file"
       ;;
     *)
-      if command -v setsid >/dev/null 2>&1; then
-        setsid "$@" >/dev/null 2>&1 &
-      else
-        nohup "$@" >/dev/null 2>&1 &
-      fi
+      if command -v setsid >/dev/null 2>&1; then setsid "$@" >/dev/null 2>&1 & else nohup "$@" >/dev/null 2>&1 & fi
       echo "$1=$!" >> "$pid_file"
       ;;
   esac
