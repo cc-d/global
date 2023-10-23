@@ -478,27 +478,115 @@ gitdatecommit() {
 
   GIT_AUTHOR_DATE="$_git_date" GIT_COMMITTER_DATE="$_git_date" git commit -m "$_commit_message"
 }
-
 backproc() {
-  pid_dir="$HOME/.backproc"
-  pid_file="$pid_dir/pids"
-  mkdir -p "$pid_dir"
-  touch "$pid_file"
+  _pid_dir="$HOME/.backproc"
+  _pid_file="$_pid_dir/pids"
+  mkdir -p "$_pid_dir"
+  touch "$_pid_file"
+
   trap 'rm -f "$temp_file"' EXIT
 
+  _cleanup_pid() {
+    pid_to_clean="$1"
+    name_to_clean="$2"
+    while kill -0 "$pid_to_clean" 2>/dev/null; do sleep 1; done
+    awk -v proc="$name_to_clean" -F= '$1 != proc' "$_pid_file" > "${_pid_file}.tmp" && mv "${_pid_file}.tmp" "$_pid_file"
+  }
+
   case "$1" in
-    "list") cat "$pid_file" ;;
+    "list")
+      cat "$_pid_file"
+      ;;
     "kill")
-      awk -v proc="$2" -F= '$1 == proc {print $2}' "$pid_file" | xargs -r kill -9
-      awk -v proc="$2" -F= '$1 != proc' "$pid_file" > "$pid_file.tmp" && mv "$pid_file.tmp" "$pid_file"
+      target_name="$2"
+      target_pid=$(awk -v proc="$target_name" -F= '$1 == proc {print $2}' "$_pid_file")
+      if [ "$target_pid" ]; then
+        kill -9 "$target_pid"
+        awk -v proc="$target_name" -F= '$1 != proc' "$_pid_file" > "${_pid_file}.tmp" && mv "${_pid_file}.tmp" "$_pid_file"
+      fi
       ;;
     "killall")
-      cut -d= -f2 "$pid_file" | xargs -r kill -9
-      > "$pid_file"
+      cut -d= -f2 "$_pid_file" | xargs -I {} kill -9 {} 2>/dev/null
+      : > "$_pid_file"
       ;;
     *)
-      if command -v setsid >/dev/null 2>&1; then setsid "$@" >/dev/null 2>&1 & else nohup "$@" >/dev/null 2>&1 & fi
-      echo "$1=$!" >> "$pid_file"
+      eval "$@ &"
+      command_pid="$!"
+      echo "$1=$command_pid" >> "$_pid_file"
+      _cleanup_pid "$command_pid" "$1" &
       ;;
   esac
+}
+
+posix_ranstr() {
+  _prs_length=${1:-8}
+  _prs_charset=${2:-'a-zA-Z0-9'}
+  LC_ALL=C tr -dc "$_prs_charset" < /dev/urandom | head -c "$_prs_length"
+  echo
+}
+
+
+
+screenproc() {
+  SCREENPROC_FILE="$HOME/.screenproc"
+  _generate_session_name() {
+    echo "sproc$(date '+%H%S')`posix_ranstr 3 'a-z'`";
+  }
+
+  _list_sessions() {
+    grep -F -f "$SCREENPROC_FILE" <(screen -ls) || echo "No active screenproc sessions.";
+  }
+
+  _kill_session() {
+    if grep -q "$1" "$SCREENPROC_FILE"; then
+      screen -S "$1" -X quit
+      grep -v "$1" "$SCREENPROC_FILE" > "$SCREENPROC_FILE.tmp" && \
+        mv "$SCREENPROC_FILE.tmp" "$SCREENPROC_FILE"
+    else echo "Session $1 not found.";
+    fi
+  }
+
+  _kill_all_sessions() {
+    while read -r session; do
+      screen -S "$session" -X quit;
+    done < "$SCREENPROC_FILE";
+    rm -f "$SCREENPROC_FILE";
+  }
+
+  [ ! -f "$SCREENPROC_FILE" ] && touch "$SCREENPROC_FILE"
+
+  case $1 in
+    -list) _list_sessions;;
+    -kill) _kill_session "$2";;
+    -killall) _kill_all_sessions;;
+    -h | -help | "")
+      echo "Usage: screenproc [OPTION]... [COMMAND]..."
+      echo "  -list       List all screenproc sessions."
+      echo "  -kill NAME  Kill a specific screenproc session."
+      echo "  -killall    Kill all screenproc sessions."
+      echo "  COMMAND     Execute COMMAND in a new screen session."
+      ;;
+    *)
+      session_name=$(_generate_session_name)
+      echo "$session_name" >> "$SCREENPROC_FILE"
+      echo "$session_name"
+      screen -dmS "$session_name" sh -c "$*"
+      ;;
+  esac
+}
+
+
+
+pasterun() {
+  # Check if the type of the program is provided
+  if [ -z "$1" ]; then
+    echo "Usage: pasterun command (then paste src code)"
+    return 1
+  fi
+
+  # Notify the user to paste the program
+  echo "Paste your program and press Ctrl-D when done:"
+  tmpfile=$(mktemp /tmp/pasted_program.XXXXXX)
+  cat > "$tmpfile"
+  eval "$1 $tmpfile"
 }
