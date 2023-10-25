@@ -453,31 +453,40 @@ gitacpush() {
 }
 
 gitdatecommit() {
-  # Usage:
   # gitdatecommit -m "Your commit message" -d "10-03-2023" -t "01:01:30"
- _sp_commit_message="no commit message provided"
- _sp_date_input=$(date '+%d-%m-%Y')
- _sp_time_input=$(date '+%H:%M:%S')
-
-  while getopts ":m:d:t:" opt; do
-    case $opt in
-      m)_sp_commit_message="$OPTARG" ;;
-      d)_sp_date_input="$OPTARG" ;;
-      t)_sp_time_input="$OPTARG" ;;
-      \?) echo "Invalid option -$OPTARG" >&2 ;;
+  _gd_commit_message="no commit message provided"
+  _gd_date_input=$(date '+%d-%m-%Y')
+  _gd_time_input=$(date '+%H:%M:%S')
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -m)
+        shift
+        _gd_commit_message="$1"
+        ;;
+      -d)
+        shift
+        _gd_date_input="$1"
+        ;;
+      -t)
+        shift
+        _gd_time_input="$1"
+        ;;
+      *)
+        echo "Invalid option: $1" >&2
+        return 1
+        ;;
     esac
+    shift
   done
+  _gd_day=$(echo "$_gd_date_input" | cut -d- -f1)
+  _gd_month=$(echo "$_gd_date_input" | cut -d- -f2)
+  _gd_year=$(echo "$_gd_date_input" | cut -d- -f3)
 
-  # Extract day, month, year from date input
- _sp_day=$(echo "$_date_input" | cut -d- -f1)
- _sp_month=$(echo "$_date_input" | cut -d- -f2)
- _sp_year=$(echo "$_date_input" | cut -d- -f3)
+  _gd_git_date="${_gd_year}-${_gd_month}-${_gd_day}T${_gd_time_input}"
 
-  # Construct full ISO 8601 datetime format
- _sp_git_date="${_year}-${_month}-${_day}T${_time_input}"
-
-  GIT_AUTHOR_DATE="$_git_date" GIT_COMMITTER_DATE="$_git_date" git commit -m "$_commit_message"
+  GIT_AUTHOR_DATE="$_gd_git_date" GIT_COMMITTER_DATE="$_gd_git_date" git commit -m "$_gd_commit_message"
 }
+
 
 posix_ranstr() {
     _prs_length=${1:-8}
