@@ -1,5 +1,5 @@
 #!/bin/sh
-EL='[ GLOBALSHELL ]: '
+EL='[GLOBALSHELL]>'
 
 # get local cc-d/global repo path so no path weirdness happens
 export MYGLOBALDIR="$HOME/global"
