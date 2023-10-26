@@ -62,48 +62,54 @@ evar() {
 }
 
 
-# lists all private .ssh keyfiles in ~/.ssh if no filepath is provided
 git-ssh() {
-    # we'll use a multi-line string like a pseudo-array for this
-    sshkeys=""
+    _LEFT_TITLE="[GIT-SSH]>"
+    GIT_SSH_PID_DIR="$HOME/.git_ssh_pids"
+    _git_ssh_cleanup() {
+        _git_ssh_pid_file="${GIT_SSH_PID_DIR}/ssh_agent_pid_${$}"
+        if [ -f "${_git_ssh_pid_file}" ]; then
+            _git_ssh_pid=$(cat "${_git_ssh_pid_file}")
+            kill -9 "${_git_ssh_pid}"
+            rm -f "${_git_ssh_pid_file}"
+        fi
+    }
+
+    mkdir -p "${GIT_SSH_PID_DIR}"
+    trap _git_ssh_cleanup EXIT
+
+    echo -e "$_LEFT_TITLE Starting ssh-agent\n"
+    _git_ssh_sshkeys=""
     if [ -d "$HOME/.ssh" ]; then
-        # find every openssh private key file in .ssh
-        for f in $(find ~/.ssh -type f); do
-            if [ "$(head -n 1 $f)" = '-----BEGIN OPENSSH PRIVATE KEY-----' ]; then
-                sshkeys="$sshkeys$(echo $f)\n"
+        for _git_ssh_f in $(find "$HOME/.ssh" -type f); do
+            if [ "$(head -n 1 "${_git_ssh_f}")" = "-----BEGIN OPENSSH PRIVATE KEY-----" ]; then
+                _git_ssh_sshkeys="${_git_ssh_sshkeys}${_git_ssh_f}\n"
             fi
         done
     fi
 
-    # 1-index user choices
-    index=1
-    set -- $(echo -e $sshkeys)
-    echo ''
-    for kpath; do
-        echo "[$index] $kpath";
-        index=$((index + 1));
+    _git_ssh_index=1
+    set -- $(echo -e "$_git_ssh_sshkeys")
+    for _git_ssh_kpath; do
+        echo "[$_git_ssh_index] $_git_ssh_kpath"
+        _git_ssh_index=$((_git_ssh_index + 1))
     done
     echo ''
 
-    # Check if environment variable is set and is valid
     if [ -n "$GIT_SSH_DEFAULT_CHOICE" ] && [ "$GIT_SSH_DEFAULT_CHOICE" -ge 1 ] && [ "$GIT_SSH_DEFAULT_CHOICE" -le "$#" ]; then
-        choice=$GIT_SSH_DEFAULT_CHOICE
-        echo "Using GIT_SSH_DEFAULT_CHOICE: $choice"
+        _git_ssh_choice="$GIT_SSH_DEFAULT_CHOICE"
+        echo "$_LEFT_TITLE Using GIT_SSH_DEFAULT_CHOICE: $_git_ssh_choice"
     else
-        # prompt user on the same line for which file to use with ssh-add
-        echo -n "Select which SSH keyfile to use with ssh-add: "
-        read choice
+        echo -n "$_LEFT_TITLE Select which SSH keyfile to use with ssh-add: "
+        read _git_ssh_choice
     fi
 
-    if [ "$choice" -ge 1 ] && [ "$choice" -le "$#" ]; then
-        # start ssh-agent for this shell
+    if [ "$_git_ssh_choice" -ge 1 ] && [ "$_git_ssh_choice" -le "$#" ]; then
         eval "$(ssh-agent -s)"
-
-        # clever
-        cpath=$(eval "echo \$$(echo $choice)")
-        ssh-add $cpath
+        echo "${SSH_AGENT_PID}" > "${GIT_SSH_PID_DIR}/ssh_agent_pid_${$}"
+        _git_ssh_cpath=$(eval "echo \$$(echo "$_git_ssh_choice")")
+        ssh-add "$_git_ssh_cpath"
     else
-        echo "ERROR: $choice is not a valid choice."
+        echo "ERROR: $_git_ssh_choice is not a valid choice."
     fi
 }
 
