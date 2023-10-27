@@ -75,7 +75,6 @@ git-ssh() {
         done
     fi
 
-    # 1-index user choices
     index=1
     set -- $(echo -e $sshkeys)
     echo ''
@@ -97,6 +96,7 @@ git-ssh() {
 
     if [ "$choice" -ge 1 ] && [ "$choice" -le "$#" ]; then
         # start ssh-agent for this shell
+        # note: it isnt killed afterwards
         eval "$(ssh-agent -s)"
 
         # clever
