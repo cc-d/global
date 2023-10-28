@@ -490,22 +490,32 @@ dirfiles() {
 
 
     # Print the directory name
-    echo "$2$(basename $_df_dir)/"
+    if [ ! -z "$2" ]; then
+        echo "|${2:1}$(basename $_df_dir)/"
+    else
+        echo ''
+        echo "$(basename $_df_dir)/"
+    fi
 
     # List files in the current directory
     curfiles=""
     for df_f in $(find "$_df_dir" -maxdepth 1 -mindepth 1 -type f \
-    -not -name '*.pyc' ); do
+    -not -name '*.pyc' | sort -b); do
         curfiles="$curfiles `basename $df_f`"
     done
+
     if [ ! -z "$curfiles" ]; then
-        echo "$2 $curfiles"
+        if [ ! -z "$2" ]; then
+            echo "|${2:0}$curfiles"
+        else
+            echo "|$curfiles"
+        fi
     fi
 
     # Recursively list files in subdirectories
     for df_d in $(find "$_df_dir" -maxdepth 1 -mindepth 1 -type d \
     -not -name '__pycache__' -not -name 'venv' -not -name '.git' \
-    -not -path '*node_modules*' -not -name '.pytest_cache'); do
+    -not -path '*node_modules*' -not -name '.pytest_cache' | sort -b); do
         dirfiles $df_d "$2  "
     done
 }
