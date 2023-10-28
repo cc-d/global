@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Click to Copy</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 1%;
+        background-color: #f5f5f5;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+      .copySection {
+        border: 1px solid #ddd;
+        padding: 1rem;
+        background-color: white;
+        border-radius: 4px;
+        display: flex;
+        width: 98%;
+        cursor: pointer;
+        min-height: 100px;
+        transition: 0.3s;
+        overflow: hidden;
+      }
+        .copySection:hover {
+            background-color: rgba(140, 243, 155, 0.395)
+        }
+      .copySection.active {
+        background-color: lightgreen;
+        font-weight: bold;
+      }
+
+      #container {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"
+
+    ></div>
+    <script>
+      [
+        "https://www.linkedin.com/in/cary-carter-31832a162/",
+        "https://github.com/cc-d",
+        "Cary Carter\n(931) 787-4248",
+      ].forEach((i) => {
+        let s = document.createElement("div");
+        s.className = "copySection";
+        s.innerHTML = i.replace("\n", "<br>");
+        s.onclick = (e) => {
+          document
+            .querySelectorAll(".active")
+            .forEach((a) => a.classList.remove("active"));
+          e.currentTarget.classList.add("active");
+          navigator.clipboard.writeText(i);
+        };
+        document.body.appendChild(s);
+      });
+    </script>
+  </body>
+</html>

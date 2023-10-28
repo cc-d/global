@@ -321,9 +321,9 @@ echo_gptfile() {
   content=$(echo "$content" | sed '/^$/d')
 
   if [ -z "$content" ]; then
-    output="$output$title"
+    echo "$output\n$title"
   else
-    output="$output$title\`\`\`$content\`\`\`"
+    echo "$output\n$title\n\`\`\`\n$content\n\`\`\`\n"
   fi
 }
 
@@ -333,8 +333,7 @@ gptfiles() {
   os_type=$(echo "$os_arch" | awk '{print $1}')
 
   for f in "$@"; do
-
-    echo_gptfile "$rf"
+    output="$output$(echo_gptfile $f)"
   done
 
   case "$os_type" in
