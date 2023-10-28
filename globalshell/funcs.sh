@@ -64,14 +64,7 @@ evar() {
 
 # lists all private .ssh keyfiles in ~/.ssh if no filepath is provided
 git-ssh() {
-    if [ -z "$SSH_AUTH_SOCK" ]; then
-        eval "$(ssh-agent -s)"
-        # Ensure the ssh-agent is killed when the shell is closed
-        trap 'test -n "$SSH_AGENT_PID" && eval `ssh-agent -k`' EXIT
-    else
-        echo "ssh-agent is already running."
-    fi
-
+    _LSTR='[GIT-SSH]>'
     # we'll use a multi-line string like a pseudo-array for this
     sshkeys=""
     if [ -d "$HOME/.ssh" ]; then
@@ -95,23 +88,29 @@ git-ssh() {
     # Check if environment variable is set and is valid
     if [ -n "$GIT_SSH_DEFAULT_CHOICE" ] && [ "$GIT_SSH_DEFAULT_CHOICE" -ge 1 ] && [ "$GIT_SSH_DEFAULT_CHOICE" -le "$#" ]; then
         choice=$GIT_SSH_DEFAULT_CHOICE
-        echo "Using GIT_SSH_DEFAULT_CHOICE: $choice"
+        echo "$_LSTR Using GIT_SSH_DEFAULT_CHOICE: $choice"
     else
         # prompt user on the same line for which file to use with ssh-add
-        echo -n "Select which SSH keyfile to use with ssh-add: "
+        echo -n "$_LSTR Select which SSH keyfile to use with ssh-add: "
         read choice
     fi
 
     if [ "$choice" -ge 1 ] && [ "$choice" -le "$#" ]; then
         # start ssh-agent for this shell
         # note: it isnt killed afterwards
-        eval "$(ssh-agent -s)"
+        if [ -z "$SSH_AUTH_SOCK" ]; then
+            eval "$(ssh-agent -s)"
+            # Ensure the ssh-agent is killed when the shell is closed
+            trap 'test -n "$SSH_AGENT_PID" && eval `ssh-agent -k`' EXIT
+        else
+            echo "$_LSTR ssh-agent is already running."
+        fi
 
         # clever
         cpath=$(eval "echo \$$(echo $choice)")
         ssh-add $cpath
     else
-        echo "ERROR: $choice is not a valid choice."
+        echo "$_LSTRERROR: $choice is not a valid choice."
     fi
 }
 
@@ -463,8 +462,6 @@ screenproc() {
     esac
 }
 
-
-
 pasterun() {
   # Check if the type of the program is provided
   if [ -z "$1" ]; then
@@ -477,4 +474,37 @@ pasterun() {
   tmpfile=$(mktemp /tmp/pasted_program.XXXXXX)
   cat > "$tmpfile"
   eval "$1 $tmpfile"
+}
+
+
+pyenvinit(){
+  export PYENV_ROOT="$HOME/.pyenv"
+  command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init -)"
+}
+
+
+
+dirfiles() {
+    _df_dir="$1"
+
+
+    # Print the directory name
+    echo "$2$(basename $_df_dir)/"
+
+    # List files in the current directory
+    curfiles=""
+    for df_f in $(find "$_df_dir" -maxdepth 1 -mindepth 1 -type f \
+    -not -name '*.pyc' ); do
+        curfiles="$curfiles `basename $df_f`"
+    done
+    if [ ! -z "$curfiles" ]; then
+        echo "$2 $curfiles"
+    fi
+
+    # Recursively list files in subdirectories
+    for df_d in $(find "$_df_dir" -maxdepth 1 -mindepth 1 -type d \
+    -not -name '__pycache__' -not -name 'venv'); do
+        dirfiles $df_d "$2  "
+    done
 }
