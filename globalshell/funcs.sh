@@ -504,7 +504,8 @@ dirfiles() {
 
     # Recursively list files in subdirectories
     for df_d in $(find "$_df_dir" -maxdepth 1 -mindepth 1 -type d \
-    -not -name '__pycache__' -not -name 'venv'); do
+    -not -name '__pycache__' -not -name 'venv' -not -name '.git' \
+    -not -path '*node_modules*' -not -name '.pytest_cache'); do
         dirfiles $df_d "$2  "
     done
 }
