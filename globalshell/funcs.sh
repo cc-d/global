@@ -333,9 +333,8 @@ gptfiles() {
   os_type=$(echo "$os_arch" | awk '{print $1}')
 
   for f in "$@"; do
-    for rf in $(rec_sh "$f"); do
-      echo_gptfile "$rf"
-    done
+
+    echo_gptfile "$rf"
   done
 
   case "$os_type" in
@@ -494,7 +493,13 @@ dirfiles() {
         echo "|${2:1}$(basename $_df_dir)/"
     else
         echo ''
-        echo "$(basename $_df_dir)/"
+        if [ "$1" = "." ]; then
+            echo "$(basename `pwd`)/"
+        elif [ "$1" = ".." ]; then
+            echo "$(dirname `pwd`)/"
+        else
+            echo "$(basename $_df_dir)/"
+        fi
     fi
 
     # List files in the current directory
