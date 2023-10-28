@@ -5,7 +5,8 @@ from multiprocessing import Pool
 
 def cpu_warmup(_):
     while True:
-        print(ri(0, 100000000000))
+        r1, r2 = ri(1, 100000000), ri(1, 100000000)
+        print(''.join((i for i in str(r1 * r2))))
 
 
 
