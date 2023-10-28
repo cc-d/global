@@ -64,6 +64,14 @@ evar() {
 
 # lists all private .ssh keyfiles in ~/.ssh if no filepath is provided
 git-ssh() {
+    if [ -z "$SSH_AUTH_SOCK" ]; then
+        eval "$(ssh-agent -s)"
+        # Ensure the ssh-agent is killed when the shell is closed
+        trap 'test -n "$SSH_AGENT_PID" && eval `ssh-agent -k`' EXIT
+    else
+        echo "ssh-agent is already running."
+    fi
+
     # we'll use a multi-line string like a pseudo-array for this
     sshkeys=""
     if [ -d "$HOME/.ssh" ]; then
@@ -123,7 +131,7 @@ revert-to-commit() {
 
   echo "Checking out and pulling master"
   git checkout master
-  git pullt
+  git pull
 
   branch_name="revert-master-$(date +%s)"
   echo "Creating new branch: $branch_name"
@@ -150,10 +158,6 @@ revert-to-commit() {
   echo "Please push the branch with the following command:"
   echo "git push origin $branch_name"
 }
-
-
-# intentionally extremely simple func to just return
-# $test as a given $color for its foreground color
 
 colortext () {
     text="$1"
@@ -187,32 +191,33 @@ actvenv() {
 
 
 gitconf() {
-    NAME="Cary Carter"
-    EMAIL="$2"
-
-    echo $1
-
-    if [ -z "$EMAIL" ]
-    then
-        echo "Please provide an email address"
-        exit 1
+    _CONFNAME="Cary Carter"
+    if [ ! -z "$(echo "$1" | grep '@')" ]; then
+        _CONFEMAIL="$1"
+        _CONFSCOPE=$(echo "$2" | sed 's/-//g')
+    else
+        _CONFEMAIL="$2"
+        _CONFSCOPE=$(echo "$1" | sed 's/-//g')
     fi
-
-    if [ "$1" = "global" ]
-    then
-        git config --global user.name "$NAME"
-        git config --global user.email "$EMAIL"
-        echo "Global git config updated with name/email: $NAME $EMAIL"
-    elif [ "$1" = "local" ]
-    then
-        git config --local user.name "$NAME"
-        git config user.email "$EMAIL"
-        echo "Local git config updated with name/email: $NAME $EMAIL"
-    elif [ "$1" = "system" ]
-    then
-        git config --system user.name "$NAME"
-        git config --system user.email "$EMAIL"
-        echo "System git config updated with name/email: $NAME $EMAIL"
+    if [ -z "$_CONFEMAIL" ]; then
+        echo "Please provide an email address"
+        return
+    elif [ -z "$_CONFSCOPE" ]; then
+        echo "Please provide a scope: 'global', 'local', or 'system'"
+        return
+    fi
+    if [ "$_CONFSCOPE" = "global" ]; then
+        git config --global user.name "$_CONFNAME"
+        git config --global user.email "$_CONFEMAIL"
+        echo "Global git config updated with name/email: $_CONFNAME $_CONFEMAIL"
+    elif [ "$_CONFSCOPE" = "local" ]; then
+        git config --local user.name "$_CONFNAME"
+        git config user.email "$_CONFEMAIL"
+        echo "Local git config updated with name/email: $_CONFNAME $_CONFEMAIL"
+    elif [ "$_CONFSCOPE" = "system" ]; then
+        git config --system user.name "$_CONFNAME"
+        git config --system user.email "$_CONFEMAIL"
+        echo "System git config updated with name/email: $_CONFNAME $_CONFEMAIL"
     else
         echo "Invalid option: use 'global', 'local', or 'system'"
     fi
@@ -353,32 +358,19 @@ gptfiles() {
 
 
 gitacpush() {
-  # Add all changes to the staging area
   git add -A
-
-  # Generate a commit message
   commit_message=$(git status --porcelain | awk '{print $2}' | tr '\n' ' ')
-
-  # Truncate commit message if it's too long
   max_len=50
-  if [ "${#commit_message}" -gt "$max_len" ]; then
-    commit_message="${commit_message:0:$max_len}..."
-  fi
-
-  # If there's nothing to commit, exit
+  commit_message="${commit_message:0:$max_len}..."
   if [ -z "$commit_message" ]; then
     echo "Nothing to commit."
     return 1
   fi
-
-  # Commit the changes
   git commit -m "$commit_message"
-
-  # Push to the remote repository
   git push
-
   echo "Successfully committed and pushed: $commit_message"
 }
+
 
 gitdatecommit() {
   # gitdatecommit -m "Your commit message" -d "10-03-2023" -t "01:01:30"

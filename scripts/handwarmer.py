@@ -8,8 +8,6 @@ def cpu_warmup(_):
         r1, r2 = ri(1, 100000000), ri(1, 100000000)
         print(''.join((i for i in str(r1 * r2))))
 
-
-
 if __name__ == "__main__":
     num_cores = os.cpu_count()
     num_processes = num_cores - 1 if num_cores > 1 else 1
