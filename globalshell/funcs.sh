@@ -224,61 +224,27 @@ gitnewbranch() {
   : "${base_branch:=master}"
 
   echo "Stash local changes? [y/n]"; read stash_choice
-  [ "$stash_choice" = "y" ] && git stash || { git reset --hard HEAD; git clean -fd; }
+  [ "$stash_choice" = "y" ] && git stash || {
+    git reset --hard HEAD; git clean -fd;
+  }
 
-  git checkout "$base_branch" && git pull origin "$base_branch" || { echo "Error: Couldn't update base branch."; return 1; }
+  git checkout "$base_branch" && git pull origin "$base_branch" || {
+    echo "Error: Couldn't update base branch."; return 1;
+  }
   [ "$stash_choice" = "y" ] && git stash apply
 
   echo "New branch name (or paste 'git checkout -b <name>'):"; read new_branch_input
-  new_branch=$(echo "$new_branch_input" | awk '/git checkout -b/ {print $4}'); : "${new_branch:=$new_branch_input}"
+  new_branch=$(echo "$new_branch_input" | awk '/git checkout -b/ {print $4}')
+   : "${new_branch:=$new_branch_input}"
 
-  git checkout -b "$new_branch" && git push -u origin "$new_branch" || { echo "Error: Couldn't create and push new branch."; return 1; }
+  git checkout -b "$new_branch" && git push -u origin "$new_branch" || {
+    echo "Error: Couldn't create and push new branch.";
+    return 1;
+  }
 
   echo "New branch created and pushed: $new_branch"
 }
 
-
-ftemplate() {
-  TEMPLATEDIR="$HOME/global/globalshell/ftemplates"
-  TEMPLATEDIR=$(echo "$TEMPLATEDIR" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-
-  echo "Type file template name:"
-  for f in $(find "$TEMPLATEDIR" -type f); do
-    basename "$f"
-  done
-
-  read -r tname
-  template=$(echo "$tname" | tr '[:upper:]' '[:lower:]')
-
-  # Initialize variables to hold matches and counter
-  match_count=0
-  single_match=""
-
-  # Find matching files (case-insensitive)
-  for f in $(find "$TEMPLATEDIR" -type f -exec basename {} \;); do
-    f_lower=$(echo "$f" | tr '[:upper:]' '[:lower:]')
-    case "$f_lower" in
-      "$template"*)
-        match_count=$((match_count + 1))
-        single_match="$f"
-        ;;
-    esac
-  done
-
-  # Perform action based on the number of matches
-  case $match_count in
-    0)
-      echo "No matching templates."
-      ;;
-    1)
-      cp "$TEMPLATEDIR/$single_match" "$1"
-      echo "Template $single_match has been copied."
-      ;;
-    *)
-      echo "Multiple matches found. Please be more specific."
-      ;;
-  esac
-}
 
 # Detects the current Operating System and Architecture
 ostype() {
@@ -342,43 +308,6 @@ ostype() {
   echo "$os_type $arch_type"
 }
 
-
-
-
-get_sh_files() {
-  if [ -z "$shout" ]; then
-    shout="$1"
-  fi
-
-  if [ ! -f "$1" ]; then
-    return 1
-  fi
-
-  shfiles=$(cat $1| grep -E '.*(source|\.) .*\.sh' | grep -oE '[^ "]*\.sh' | sed -E 's/^\.?\/?//' | uniq);
-
-  if [ -z "$shfiles" ]; then
-    return 1
-  fi
-
-  for shf in $shfiles; do
-    if echo "$shout" | grep -qEv "$shf"; then
-      shout="$shout $shf"
-      if [ -f "$shf" ]; then
-        get_sh_files "$shf"
-      fi
-    fi
-  done
-
-}
-
-
-rec_sh() {
-  shout=''
-  get_sh_files "$1"
-  echo "$shout"
-}
-
-
 echo_gptfile() {
   title="<<! FILE: $1 !>>"
   if [ ! -f "$1" ]; then
@@ -388,9 +317,9 @@ echo_gptfile() {
   content=$(echo "$content" | sed '/^$/d')
 
   if [ -z "$content" ]; then
-    output="$output\n$title\n"
+    output="$output$title"
   else
-    output="$output\n$title\n\`\`\`\n$content\n\`\`\`\n"
+    output="$output$title\`\`\`$content\`\`\`"
   fi
 }
 
@@ -400,8 +329,6 @@ gptfiles() {
   os_type=$(echo "$os_arch" | awk '{print $1}')
 
   for f in "$@"; do
-    #shf=$(rec_sh "$f")
-    #echo "$(echo_gptfile "$f")"
     for rf in $(rec_sh "$f"); do
       echo_gptfile "$rf"
     done
@@ -421,6 +348,7 @@ gptfiles() {
 
   echo -e "$output"
   echo "Copied to clipboard"
+  echo ''
 }
 
 
