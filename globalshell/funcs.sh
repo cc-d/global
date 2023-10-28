@@ -500,7 +500,7 @@ dirfiles() {
     # List files in the current directory
     curfiles=""
     for df_f in $(find "$_df_dir" -maxdepth 1 -mindepth 1 -type f \
-    -not -name '*.pyc' | sort -b); do
+    -not -name '*.pyc' | sort -bh); do
         curfiles="$curfiles `basename $df_f`"
     done
 
@@ -515,7 +515,7 @@ dirfiles() {
     # Recursively list files in subdirectories
     for df_d in $(find "$_df_dir" -maxdepth 1 -mindepth 1 -type d \
     -not -name '__pycache__' -not -name 'venv' -not -name '.git' \
-    -not -path '*node_modules*' -not -name '.pytest_cache' | sort -b); do
+    -not -path '*node_modules*' -not -name '.pytest_cache' | sort -bh); do
         dirfiles $df_d "$2  "
     done
 }
