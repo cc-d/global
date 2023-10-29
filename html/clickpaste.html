@@ -7,7 +7,6 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        margin: 0;
         padding: 1%;
         background-color: #f5f5f5;
         display: flex;
@@ -24,11 +23,11 @@
         cursor: pointer;
         min-height: 100px;
         transition: 0.3s;
-        overflow: hidden;
+        font-size: 1.4rem;
       }
-        .copySection:hover {
-            background-color: rgba(140, 243, 155, 0.395)
-        }
+      .copySection:hover {
+        background-color: rgba(140, 243, 155, 0.395);
+      }
       .copySection.active {
         background-color: lightgreen;
         font-weight: bold;
@@ -43,15 +42,14 @@
     </style>
   </head>
   <body>
-    <div id="container"
-
-    ></div>
+    <div id="container"></div>
     <script>
       [
-        "https://www.linkedin.com/in/cary-carter-31832a162/",
-        "https://github.com/cc-d",
-        "Cary Carter\n(931) 787-4248",
+        "aHR0cHM6Ly93d3cubGlua2VkaW4uY29tL2luL2NhcnktY2FydGVyLTMxODMyYTE2Mi8=",
+        "aHR0cHM6Ly9naXRodWIuY29tL2NjLWQ=",
+        "Q2FyeSBDYXJ0ZXIKKDkzMSkgNzg3LTQyNDg=",
       ].forEach((i) => {
+        var i = atob(i);
         let s = document.createElement("div");
         s.className = "copySection";
         s.innerHTML = i.replace("\n", "<br>");
