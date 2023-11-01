@@ -15,6 +15,7 @@ alias libaiapi='cd ~/liberfy-ai/ && . ./shell.sh && cd api && . venv/bin/activat
 alias libaifront='cd ~/liberfy-ai/ && . ./shell.sh && cd libai-frontend  && npmapi'
 
 
-alias pyenvinit='export PYENV_ROOT="$HOME/.pyenv" && command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"  \
+alias pyenvinit='export PYENV_ROOT="$HOME/.pyenv && \
+	command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH" \
 	&& eval "$(pyenv init -)"'
 
