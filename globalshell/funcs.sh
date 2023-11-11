@@ -517,26 +517,27 @@ dirfiles() {
         dirfiles $df_d "$2  "
     done
 }
-
 columnate() {
-  _colnate_ncols=${1:-4}
-  _colnate_colw=${2:-$(( $(tput cols) / _colnate_ncols ))}
-  [ $_colnate_colw -lt 10 ] && _colnate_colw=10
-  _colnate_count=0
-  while read -r _colnate_line; do
-    _colnate_line=${_colnate_line#./}
-    if [ ${#_colnate_line} -gt $((_colnate_colw - 2)) ]; then
-      printf "%s" "${_colnate_line:0:$((_colnate_colw - 2))}.."
+  ncols=${1:-4}
+  colw=${2:-$(($(tput cols) / ncols - 1))}
+  colw=$((colw > 4 ? colw : 4))
+  i=0
+  declare -A printed
+  while read -r line; do
+    if [ ${#line} -gt $((colw - 3)) ]; then
+      shortline="${line:0:$((colw - 3))}..."
     else
-      printf "%-${_colnate_colw}s" "$_colnate_line"
+      shortline="$line"
     fi
-    _colnate_count=$(( _colnate_count + 1 ))
-    if [ $((_colnate_count % _colnate_ncols)) -eq 0 ]; then
-      printf "\n"
+    if [ "${printed[$shortline]}" != "1" ]; then
+      printf "%-${colw}s " "$shortline"
+      printed[$shortline]="1"
+      i=$((i + 1))
+      [ $((i % ncols)) -eq 0 ] && { printf "\n"; i=0; }
     fi
   done
-  if [ $((_colnate_count % _colnate_ncols)) -ne 0 ]; then
-    printf "\n"
-  fi
+  [ $((i % ncols)) -ne 0 ] && printf "\n"
 }
+
+
 
