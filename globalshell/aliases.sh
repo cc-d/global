@@ -18,3 +18,4 @@ alias pyenvinit='export PYENV_ROOT="$HOME/.pyenv" && \
 	command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH" \
 	&& eval "$(pyenv init -)"'
 
+alias timestamp="python3 -c 'from time import time; print(time() * 1000)'"
