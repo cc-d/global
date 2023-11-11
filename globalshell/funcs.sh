@@ -517,21 +517,39 @@ dirfiles() {
         dirfiles $df_d "$2  "
     done
 }
+
+
+tstime() {
+  _tstime1=`timestamp`
+  eval "$@"
+  _tstime2=`timestamp`
+  _tstime_diff=$(echo "$_tstime2 $_tstime1" | awk '{print $1 - $2}')
+  echo "time: $_tstime_diff ms"
+}
+
+
 columnate() {
   ncols=${1:-4}
   colw=${2:-$(($(tput cols) / ncols - 1))}
   colw=$((colw > 4 ? colw : 4))
   i=0
-  declare -A printed
+  printed=()
   while read -r line; do
-    if [ ${#line} -gt $((colw - 3)) ]; then
-      shortline="${line:0:$((colw - 3))}..."
+    if [ ${#line} -gt $((colw - 2)) ]; then
+      shortline="${line:0:$((colw - 2))}.."
     else
       shortline="$line"
     fi
-    if [ "${printed[$shortline]}" != "1" ]; then
+    found=0
+    for p in "${printed[@]}"; do
+      if [ "$p" = "$shortline" ]; then
+        found=1
+        break
+      fi
+    done
+    if [ $found -eq 0 ]; then
       printf "%-${colw}s " "$shortline"
-      printed[$shortline]="1"
+      printed+=("$shortline")
       i=$((i + 1))
       [ $((i % ncols)) -eq 0 ] && { printf "\n"; i=0; }
     fi
