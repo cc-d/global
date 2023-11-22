@@ -1,5 +1,5 @@
 #!/bin/sh
-EL='[GLOBALSHELL]>'
+EL='[GSHELL]>'
 
 # get local cc-d/global repo path so no path weirdness happens
 export MYGLOBALDIR="$HOME/global"
@@ -30,10 +30,10 @@ elif [ "$(basename "$SHELL")" = "bash" ]; then
 fi
 
 # import aliases
-. "$GSHELLDIR/aliases.sh" && echo "$EL imported alises.sh from $GSHELLDIR"
+. "$GSHELLDIR/aliases.sh" && echo "$EL imported alises.sh"
 
 # import our functions
-. "$GSHELLDIR/funcs.sh" && echo "$EL imported funcs.sh from $GSHELLDIR"
+. "$GSHELLDIR/funcs.sh" && echo "$EL imported funcs.sh"
 
 # builtin command overrides/aliases/etc
 # if ls receives any args it behaves as normal

@@ -10,12 +10,11 @@ alias gcpssh='gcloud compute --project pict-app ssh --zone us-central1-a webapp-
 
 alias gitacp='git add . && git commit -m "by gitacp alias" && git push'
 
-alias libaiapi='cd ~/liberfy-ai/ && . ./shell.sh && cd api && . venv/bin/activate && ./main.py'
-alias libaifront='cd ~/liberfy-ai/ && . ./shell.sh && cd libai-frontend  && npmapi'
-
-
 alias pyenvinit='export PYENV_ROOT="$HOME/.pyenv" && \
 	command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH" \
 	&& eval "$(pyenv init -)"'
 
 alias timestamp="python3 -c 'from time import time; print(time() * 1000)'"
+
+alias py3='python3'
+alias py='python'
