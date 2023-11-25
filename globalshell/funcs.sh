@@ -317,13 +317,17 @@ echo_gptfile() {
   if [ ! -f "$1" ]; then
     return 1
   fi
-  content=$(cat "$1")
-  content=$(echo "$content" | sed '/^$/d')
+  content=$(cat "$1" | awk '!/^[[:space:]]*$/' | sed -E 's/^.*#.*//g' )
 
   if [ -z "$content" ]; then
-    echo "$output\n$title"
+    echo "(empty) $title"
   else
-    echo "$output\n$title\n\`\`\`\n$content\n\`\`\`\n"
+    echo "$output"
+    echo "$title"
+    echo '''```'''
+    echo "$content"
+    echo '''```'''
+
   fi
 }
 
