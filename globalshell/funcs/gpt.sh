@@ -10,7 +10,6 @@ echo_gptfile() {
   if [ -z "$content" ]; then
     echo "(empty) $title"
   else
-    echo "$content"
     echo "$title"
     echo '''```'''
     echo "$content"
