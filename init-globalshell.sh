@@ -30,7 +30,7 @@ elif [ "$(basename "$SHELL")" = "bash" ]; then
 fi
 
 # import aliases
-. "$GSHELLDIR/aliases.sh" && echo "$EL imported alises.sh"
+. "$GSHELLDIR/aliases.sh" && echo "$EL imported aliases.sh"
 
 # import our functions
 #!/bin/sh

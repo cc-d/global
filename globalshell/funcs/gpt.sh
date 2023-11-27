@@ -10,7 +10,7 @@ echo_gptfile() {
   if [ -z "$content" ]; then
     echo "(empty) $title"
   else
-    echo "$output"
+    echo "$content"
     echo "$title"
     echo '''```'''
     echo "$content"
@@ -28,17 +28,11 @@ gptfiles() {
     output="$output$(echo_gptfile $f)"
   done
 
-  case "$os_type" in
-    "macos")
-      echo -e "$output" | pbcopy
-      ;;
-    "linux")
-      echo -e "$output" | xclip -selection clipboard
-      ;;
-    "unknown")
-      echo "Unsupported OS. Cannot copy to clipboard."
-      ;;
-  esac
+  if `uname -s | grep -qi "darwin"`; then
+    echo -e "$output" | pbcopy
+  else
+    echo -e "$output" | xclip -selection clipboard
+  fi
 
   echo -e "$output"
   echo "Copied to clipboard"
