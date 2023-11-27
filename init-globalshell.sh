@@ -33,7 +33,14 @@ fi
 . "$GSHELLDIR/aliases.sh" && echo "$EL imported alises.sh"
 
 # import our functions
-. "$GSHELLDIR/funcs.sh" && echo "$EL imported funcs.sh"
+#!/bin/sh
+for f in `find "$GSHELLDIR/funcs" -type f -name '*.sh'`; do
+  if command -v source &>/dev/null; then
+    source "$f"
+  else
+    . "$f"
+  fi
+done
 
 # builtin command overrides/aliases/etc
 # if ls receives any args it behaves as normal
