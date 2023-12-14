@@ -5,7 +5,7 @@ import tempfile
 from os.path import join, dirname, abspath
 
 sys.path.insert(0, abspath(join(dirname(__file__), "..", "..")))
-from globalpathfiles.gentreefiles import create_tree, treere, linetype
+from scripts.gentreefiles import create_tree, treere, linetype
 
 TESTSTRS = (
     '''
@@ -96,7 +96,9 @@ class TestTreeCreation(unittest.TestCase):
                 if path.endswith("/"):
                     self.assertTrue(os.path.isdir(path))
                 nextpath = (
-                    created_paths[i + 1] if i + 1 < len(created_paths) else None
+                    created_paths[i + 1]
+                    if i + 1 < len(created_paths)
+                    else None
                 )
                 if nextpath is not None:
                     nextdepth = treere(nextpath)[0]
