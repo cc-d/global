@@ -108,7 +108,7 @@ gitnewbranch() {
 gitacpush() {
   git add -A
   commit_message=$(git status --porcelain | awk '{print $2}' | tr '\n' ' ')
-  max_len=50
+  max_len=200
   commit_message="${commit_message:0:$max_len}..."
   if [ -z "$commit_message" ]; then
     echo "Nothing to commit."
