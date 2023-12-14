@@ -33,7 +33,13 @@ fi
 . "$GSHELLDIR/aliases.sh" && echo "$EL imported aliases.sh"
 
 # import our functions
-#!/bin/sh
+# always source utils first
+if command -v source &>/dev/null; then
+  source "$GSHELLDIR/funcs/utils.sh"
+else
+  . "$GSHELLDIR/funcs/utils.sh"
+fi
+
 for f in `find "$GSHELLDIR/funcs" -type f -name '*.sh'`; do
   if command -v source &>/dev/null; then
     source "$f"
