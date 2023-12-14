@@ -114,6 +114,12 @@ gitacpush() {
     echo "Nothing to commit."
     return 1
   fi
+
+  _gap_curbranch=$(echo `git branch | awk '{print $2}'`)
+  if substr_in "S0S" "$_gap_curbranch"; then
+    commit_message="$_gap_curbranch: $commit_message"
+  fi
+
   git commit -m "$commit_message"
   git push
   echo "Successfully committed and pushed: $commit_message"

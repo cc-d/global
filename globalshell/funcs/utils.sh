@@ -44,6 +44,21 @@ evar() {
     export "$name=$escaped_value"
 }
 
+safesource () {
+  if command -v source &>/dev/null; then
+    source "$f"
+  else
+    . "$f"
+  fi
+}
+
+substr_in () {
+  case "$2" in
+    *$1*) return 0;;
+    *) return 1;;
+  esac
+}
+
 # Detects the current Operating System and Architecture
 ostype() {
   os_type="unknown"
