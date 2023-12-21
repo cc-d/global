@@ -64,5 +64,10 @@ cd () {
 }
 
 
+if [ -f "`pwd`/shell.sh" ]; then
+    echo "$EL shell.sh found, loading..."
+    . "`pwd`/shell.sh"
+fi
+
 echo "$EL myshell.sh loaded completely"
 echo ''
