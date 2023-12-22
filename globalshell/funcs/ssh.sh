@@ -3,6 +3,7 @@
 
 # lists all private .ssh keyfiles in ~/.ssh if no filepath is provided
 git_ssh() {
+    # this appears on the left of all globalshell messages
     _LSTR='[GITSSH]>'
     # we'll use a multi-line string like a pseudo-array for this
     sshkeys=""
