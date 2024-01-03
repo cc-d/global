@@ -69,5 +69,4 @@ if [ -f "`pwd`/shell.sh" ]; then
     . "`pwd`/shell.sh"
 fi
 
-echo "$EL myshell.sh loaded completely"
-echo ''
+echo -e "$EL myshell.sh loaded completely\n"
