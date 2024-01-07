@@ -5,8 +5,7 @@ echo_gptfile() {
   if [ ! -f "$1" ]; then
     return 1
   fi
-  content=$(cat "$1" | awk '!/^[[:space:]]*$/' | sed -E 's/^.*#.*//g' )
-
+  content=`cat "$1" | awk '!/^[[:space:]]*$/' | sed -E 's/^.*#.*//g' | grep -vE '^$'`
   if [ -z "$content" ]; then
     echo "(empty) $title"
   else
@@ -24,7 +23,7 @@ gptfiles() {
   os_arch=$(ostype)
   os_type=$(echo "$os_arch" | awk '{print $1}')
 
-  for f in "$@"; do
+  for f in $@; do
     output="$output$(echo_gptfile $f)"
   done
 

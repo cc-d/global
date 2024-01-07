@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 # lists all private .ssh keyfiles in ~/.ssh if no filepath is provided
 git_ssh() {
     # this appears on the left of all globalshell messages
