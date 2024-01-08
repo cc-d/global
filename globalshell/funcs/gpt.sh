@@ -7,7 +7,9 @@ echo_gptfile() {
   fi
   content=`cat "$1" | awk '!/^[[:space:]]*$/' | sed -E 's/^.*#.*//g' | grep -vE '^$'`
   if [ -z "$content" ]; then
+    echo ''
     echo "(empty) $title"
+    echo ''
   else
     echo ''
     echo "$title"
