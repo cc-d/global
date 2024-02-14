@@ -108,7 +108,7 @@ gitnewbranch() {
 gitacpush() {
   git add -A
   _GAC_FILES=$(git status --porcelain | awk '{print $2}')
-
+  _GAC_LEFT_TEXT="[GITACPUSH]>"
   if [ -z "$_GAC_FILES" ]; then
     echo "Nothing to commit."
     return 1
@@ -116,7 +116,7 @@ gitacpush() {
 
   _GAC_COUNT=$(echo "$_GAC_FILES" | wc -l | awk '{print $1}')
   _GAC_FILES=$(echo "$_GAC_FILES" | tr '\n' ' ')
-  _GAC_COUNT="[$_GAC_COUNT file(s)]"
+  _GAC_COUNT="[$_GAC_COUNT FILE(s)]"
 
   if [ -z "$GITAC_MAX_MSG_LEN" ]; then
     # nice
@@ -130,14 +130,14 @@ gitacpush() {
   if [ -n "$_GAC_SOS_SUBSTR" ]; then
     _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG $_GAC_SOS_SUBSTR"
   fi
-  _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG | $_GAC_FILES"
-  echo "original commit message: $_GAC_COMMIT_MSG"
+
+  _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG $_GAC_FILES"
+  echo "$_GAC_LEFT_TEXT ORIGINAL: $_GAC_COMMIT_MSG"
   _GAC_COMMIT_MSG="${_GAC_COMMIT_MSG:0:$GITAC_MAX_MSG_LEN}"
-  echo "trimmed commit message: $_GAC_COMMIT_MSG"
+  echo "$_GAC_LEFT_TEXT TRUNCATED: $_GAC_COMMIT_MSG"
 
   git commit -m "$_GAC_COMMIT_MSG"
   git push
-  echo "[GITACPUSH]: $_GAC_COMMIT_MSG"
 }
 
 
