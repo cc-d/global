@@ -107,22 +107,36 @@ gitnewbranch() {
 
 gitacpush() {
   git add -A
-  commit_message=$(git status --porcelain | awk '{print $2}' | tr '\n' ' ')
-  max_len=200
-  commit_message="${commit_message:0:$max_len}..."
-  if [ -z "$commit_message" ]; then
+  _GAC_FILES=$(git status --porcelain | awk '{print $2}')
+
+  if [ -z "$_GAC_FILES" ]; then
     echo "Nothing to commit."
     return 1
   fi
 
-  _gap_curbranch=$(echo `git branch | awk '{print $2}'`)
-  if substr_in "S0S" "$_gap_curbranch"; then
-    commit_message="$_gap_curbranch: $commit_message"
+  _GAC_COUNT=$(echo "$_GAC_FILES" | wc -l | awk '{print $1}')
+  _GAC_FILES=$(echo "$_GAC_FILES" | tr '\n' ' ')
+  _GAC_COUNT="[$_GAC_COUNT file(s)]"
+
+  if [ -z "$GITAC_MAX_MSG_LEN" ]; then
+    # nice
+    GITAC_MAX_MSG_LEN=69
   fi
 
-  git commit -m "$commit_message"
+  _GAC_COMMIT_MSG="$_GAC_COUNT"
+
+  # automatically include jira ticket number in commit message
+  _GAC_SOS_SUBSTR="$(echo `git branch | awk '{print $2}'`)";
+  if substr_in "S0S" "$_GAC_SOS_SUBSTR"; then
+    _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG $_GAC_SOS_SUBSTR"
+  fi
+
+  _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG: $_GAC_FILES"
+  _GAC_COMMIT_MSG="${_GAC_COMMIT_MSG:0:$GITAC_MAX_MSG_LEN}"
+
+  git commit -m "$_GAC_COMMIT_MSG"
   git push
-  echo "Successfully committed and pushed: $commit_message"
+  echo "Committed and pushed: $_GAC_COMMIT_MSG"
 }
 
 
