@@ -108,7 +108,7 @@ gitnewbranch() {
 gitacpush() {
   git add -A
   _GAC_FILES=$(git status --porcelain | awk '{print $2}')
-  _GAC_LEFT_TEXT="[GITACPUSH]>"
+  _GAC_LEFT_TEXT="[GITACPUSH]"
   if [ -z "$_GAC_FILES" ]; then
     echo "Nothing to commit."
     return 1
@@ -132,9 +132,9 @@ gitacpush() {
   fi
 
   _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG $_GAC_FILES"
-  echo "$_GAC_LEFT_TEXT ORIGINAL: $_GAC_COMMIT_MSG"
+  echo "$_GAC_LEFT_TEXT ORIGINAL: \"\"\"$_GAC_COMMIT_MSG\"\"\""
   _GAC_COMMIT_MSG="${_GAC_COMMIT_MSG:0:$GITAC_MAX_MSG_LEN}"
-  echo "$_GAC_LEFT_TEXT TRUNCATED: $_GAC_COMMIT_MSG"
+  echo "$_GAC_LEFT_TEXT TRUNCATED: \"\"\"$_GAC_COMMIT_MSG\"\"\""
 
   git commit -m "$_GAC_COMMIT_MSG"
   git push
