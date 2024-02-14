@@ -126,17 +126,18 @@ gitacpush() {
   _GAC_COMMIT_MSG="$_GAC_COUNT"
 
   # automatically include jira ticket number in commit message
-  _GAC_SOS_SUBSTR="$(echo `git branch | awk '{print $2}'`)";
-  if substr_in "S0S" "$_GAC_SOS_SUBSTR"; then
+  _GAC_SOS_SUBSTR="$(echo `git branch | grep -oE 'SOS-[0-9]+'`)"
+  if [ -n "$_GAC_SOS_SUBSTR" ]; then
     _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG $_GAC_SOS_SUBSTR"
   fi
-
-  _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG: $_GAC_FILES"
+  _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG | $_GAC_FILES"
+  echo "original commit message: $_GAC_COMMIT_MSG"
   _GAC_COMMIT_MSG="${_GAC_COMMIT_MSG:0:$GITAC_MAX_MSG_LEN}"
+  echo "trimmed commit message: $_GAC_COMMIT_MSG"
 
   git commit -m "$_GAC_COMMIT_MSG"
   git push
-  echo "Committed and pushed: $_GAC_COMMIT_MSG"
+  echo "[GITACPUSH]: $_GAC_COMMIT_MSG"
 }
 
 
