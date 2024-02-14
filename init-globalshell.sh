@@ -5,6 +5,7 @@ EL='[GSHELL]>'
 export MYGLOBALDIR="$HOME/global"
 export GSHELLDIR="$MYGLOBALDIR/globalshell"
 INIT_COMMAND=". $MYGLOBALDIR/init-globalshell.sh"
+export GLOBAL_SHELL_HISTORY=1
 
 # Add globalshell init to zshrc/bashrc depending on system type
 # make sure the init command added is in the EXACT same format
@@ -17,8 +18,6 @@ add_init_to_rc_file() {
   elif ! grep -qxF "$INIT_COMMAND" "$RC_FILE"; then
     echo "$INIT_COMMAND" >> "$RC_FILE"
     echo "$EL Added init to $RC_FILE"
-  else
-    echo "$EL Init already present in $RC_FILE"
   fi
 }
 
