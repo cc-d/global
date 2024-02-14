@@ -119,6 +119,7 @@ gitacpush() {
   _GAC_COUNT="[$_GAC_COUNT FILE(s)]"
 
   if [ -z "$GITAC_MAX_MSG_LEN" ]; then
+    # -3 for the ellipsis 72 is github's max commit msg display length
     # nice
     GITAC_MAX_MSG_LEN=69
   fi
@@ -133,7 +134,12 @@ gitacpush() {
 
   _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG $_GAC_FILES"
   echo "$_GAC_LEFT_TEXT ORIGINAL: \"\"\"$_GAC_COMMIT_MSG\"\"\""
-  _GAC_COMMIT_MSG="${_GAC_COMMIT_MSG:0:$GITAC_MAX_MSG_LEN}"
+
+  # truncate commit message if it's too long and add ellipsis
+  if [ "${#_GAC_COMMIT_MSG}" -gt "$GITAC_MAX_MSG_LEN" ]; then
+    _GAC_COMMIT_MSG="${_GAC_COMMIT_MSG:0:$GITAC_MAX_MSG_LEN}..."
+  fi
+
   echo "$_GAC_LEFT_TEXT TRUNCATED: \"\"\"$_GAC_COMMIT_MSG\"\"\""
 
   git commit -m "$_GAC_COMMIT_MSG"
