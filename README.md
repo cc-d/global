@@ -18,7 +18,7 @@ Originally I had a sh function that did this, then a python script, then finally
 
 #### Colorprint
 
-This was created to work around issues with in-terminal color lines being broken at incorrect widths. It had to be maximally or otherwise it would be annoying to use.
+This was created to work around issues with in-terminal color lines being broken at incorrect widths. It had to be maximally performant or otherwise it would be annoying to use.
 
 There are two versions of colorprint, one in python and one in c++. There are 2 compiled binaries of the c++ version, one for ARM64 and one for x86-64. The correct version should be automatically used based on system/os type.
 
