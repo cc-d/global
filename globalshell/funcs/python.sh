@@ -2,14 +2,25 @@
 
 
 actvenv() {
-  venvfile=$(find . -name 'activate' | head -n 1 | sed -E 's/^\.\//. /')
-  if [ -z "$venvfile" ]; then
-    echo "No virtualenv found."
-    return 1
+  _ACTVENV_COUNT=0
+  _ACTVENV_DIRSCANNED=0
+  if [ -d "venv" ]; then
+    . venv/bin/activate
   else
-    eval "$venvfile"
+    for d in $(find . -type d -name "venv" -maxdepth 3); do
+      if [ -f "$d/bin/activate" ]; then
+        _ACTVENV_FILE="$d/bin/activate"
+      else
+        _ACTVENV_COUNT=$(($_ACTVENV_COUNT + 1))
+      fi
+      _ACTVENV_DIRSCANNED=$(($_ACTVENV_DIRSCANNED + 1))
+    done
+    if [ -n "$_ACTVENV_FILE" ]; then
+      echo "Activating virtualenv cmd: . $_ACTVENV_FILE"
+      . "$_ACTVENV_FILE"
+    else
+      echo "No virtualenv found"
+    fi
   fi
+  echo "[ACTVENV]> Scanned $_ACTVENV_DIRSCANNED | Venvs found: $_ACTVENV_COUNT"
 }
-
-
-
