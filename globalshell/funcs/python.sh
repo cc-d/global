@@ -22,5 +22,5 @@ actvenv() {
       echo "No virtualenv found"
     fi
   fi
-  echo "[ACTVENV]> Scanned $_ACTVENV_DIRSCANNED | Venvs found: $_ACTVENV_COUNT"
+  echo "[ACTVENV]> Scanned $_ACTVENV_DIRSCANNED | Other Venvs found: $_ACTVENV_COUNT"
 }
