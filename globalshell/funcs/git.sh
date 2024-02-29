@@ -129,7 +129,7 @@ gitacpush() {
   # automatically include jira ticket number in commit message
   _GAC_SOS_SUBSTR="$(git branch --show-current)"
   if [ -n "$_GAC_SOS_SUBSTR" ]; then
-    _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG $_GAC_SOS_SUBSTR"
+    _GAC_COMMIT_MSG="$_GAC_SOS_SUBSTR: $_GAC_COMMIT_MSG"
   fi
 
   _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG $_GAC_FILES"
