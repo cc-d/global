@@ -120,8 +120,7 @@ gitacpush() {
 
   if [ -z "$GITAC_MAX_MSG_LEN" ]; then
     # -3 for the ellipsis 72 is github's max commit msg display length
-    # nice
-    GITAC_MAX_MSG_LEN=69
+    GITAC_MAX_MSG_LEN=69 # nice
   fi
 
   _GAC_COMMIT_MSG="$_GAC_COUNT"
