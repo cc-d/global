@@ -108,7 +108,7 @@ gitnewbranch() {
 gitacpush() {
   git add -A
   _GAC_FILES=$(git status --porcelain | awk '{print $2}')
-  _GAC_LEFT_TEXT="[GITACPUSH]"
+  _GAC_LEFT_TEXT="[GITACPUSH]>"
   if [ -z "$_GAC_FILES" ]; then
     echo "Nothing to commit."
     return 1
@@ -128,10 +128,9 @@ gitacpush() {
 
   # automatically include jira ticket number in commit message
   _GAC_SOS_SUBSTR="$(git branch --show-current)"
-  if [ -n "$_GAC_SOS_SUBSTR" ]; then
-    _GAC_COMMIT_MSG="$_GAC_SOS_SUBSTR: $_GAC_COMMIT_MSG"
+  if echo "$_GAC_SOS_SUBSTR" | grep -q -E '^SOS-'; then
+    _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG [$_GAC_SOS_SUBSTR]"
   fi
-
   _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG $_GAC_FILES"
   echo "$_GAC_LEFT_TEXT ORIGINAL: \"\"\"$_GAC_COMMIT_MSG\"\"\""
 
