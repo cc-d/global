@@ -139,9 +139,8 @@ gitacpush() {
     _GAC_COMMIT_MSG="${_GAC_COMMIT_MSG:0:$GITAC_MAX_MSG_LEN}..."
   fi
 
-  echo "$_GAC_LEFT_TEXT TRUNCATED: \"\"\"$_GAC_COMMIT_MSG\"\"\""
 
-  #git commit -m "$_GAC_COMMIT_MSG"
+  git commit -m "$_GAC_COMMIT_MSG"
   #git push origin "$(git rev-parse --abbrev-ref HEAD)"
 }
 
