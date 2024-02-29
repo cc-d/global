@@ -142,8 +142,8 @@ gitacpush() {
 
   echo "$_GAC_LEFT_TEXT TRUNCATED: \"\"\"$_GAC_COMMIT_MSG\"\"\""
 
-  git commit -m "$_GAC_COMMIT_MSG"
-  git push origin "$(git rev-parse --abbrev-ref HEAD)"
+  #git commit -m "$_GAC_COMMIT_MSG"
+  #git push origin "$(git rev-parse --abbrev-ref HEAD)"
 }
 
 
