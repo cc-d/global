@@ -96,7 +96,7 @@ There are two versions of colorprint, one in python and one in c++. There are 2 
 ### git_ssh
 
 - Purpose: Adds a specified SSH key to the SSH agent to facilitate Git operations over SSH. It allows for easy usage of `ssh-add` and can be configured to automatically add a key on startup if the `GIT_SSH_DEFAULT_CHOICE` environment variable is set.
-- Usage: `git_ssh`
+- Usage: `git_ssh` (or `git-ssh` if aliased)
 
 ### actvenv
 
