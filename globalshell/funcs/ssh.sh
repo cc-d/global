@@ -47,7 +47,11 @@ git_ssh() {
 
         # clever
         cpath=$(eval "echo \$$(echo $choice)")
-        ssh-add $cpath
+        if ! ssh-add $cpath; then
+            echo "$_LSTRERROR: Failed to add SSH key. Retrying..."
+            eval "$(ssh-agent -s)"
+            ssh-add $cpath || echo "$_LSTRERROR: Failed to add SSH key."
+        fi
     else
         echo "$_LSTRERROR: $choice is not a valid choice."
     fi
