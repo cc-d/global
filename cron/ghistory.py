@@ -6,7 +6,10 @@ from time import sleep
 from typing import List, Tuple, Optional as Opt
 
 GSHISTORY = op.expanduser('~/.global/shell_history')
-_PAD = max(os.get_terminal_size().columns // 3, 10)
+try:
+    _PAD = max(os.get_terminal_size().columns // 3, 10)
+except OSError:
+    _PAD = 10
 GHHEADER = '=' * _PAD + ' GLOBAL HISTORY ' + '=' * _PAD
 
 
