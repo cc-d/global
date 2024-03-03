@@ -16,7 +16,6 @@ def truncate_color_string(s: str, max_length: int) -> str:
     result = ''
     real_len = 0
 
-    nocolor = re.sub(r'\x1b\[[;0-9]*[mK]', '', s)
     for char in s:
         if char == '\x1b':
             esc_seq += char
@@ -27,10 +26,9 @@ def truncate_color_string(s: str, max_length: int) -> str:
                 result += esc_seq
                 esc_seq = ''
             continue
-
         result += char
         real_len += 1
-        if real_len > max_length - 2:
+        if real_len > max_length - 2 and char != s[-1]:
             return result + '..'
 
     return result
@@ -50,10 +48,10 @@ def columnate(inputs: List[str], max_length: int, num_columns: int) -> None:
             max_length
             + len(re.sub(r'\x1b\[[;0-9]*[mK]', '', truncated))
             - len(truncated)
-        )
+        ) + 2
         print(
             truncated.ljust(pad_length),
-            end='  ' if (i + 1) % num_columns else '\n',
+            end=' ' if (i + 1) % num_columns else '\n',
         )
 
     print()
