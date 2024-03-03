@@ -38,6 +38,8 @@ I've overriden the `cd` command with custom functionality which displays a color
 
 Originally I had a sh function that did this, then a python script, then finally I wrote the utility using cpp for optimization reasons. Going from python -> c++ was about a 90% performance improvement.
 
+![!cd](img/cd.png)
+
 ### history
 
 I've overriden the `history` command with custom functionality which works as follows:
