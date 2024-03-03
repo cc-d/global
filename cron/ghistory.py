@@ -17,27 +17,32 @@ class NoHistoryFileError(FileNotFoundError):
     pass
 
 
-def history_file() -> str:
+def history_files() -> List[str]:
     """return the path of the history file for the current shell"""
     shell = os.environ.get('SHELL')
-    if shell is None:
-        print('SHELL environment variable not set')
-        print('Attempting to guess history file')
-        if op.exists(op.expanduser('~/.bash_history')):
-            return op.expanduser('~/.bash_history')
-        elif op.exists(op.expanduser('~/.zsh_history')):
-            return op.expanduser('~/.zsh_history')
-        elif op.exists(op.expanduser('~/.local/share/fish/fish_history')):
-            return op.expanduser('~/.local/share/fish/fish_history')
-        print('Could not guess history file')
-        raise NoHistoryFileError('Could not guess history file')
-    if shell.endswith('bash'):
-        return op.expanduser('~/.bash_history')
-    elif shell.endswith('zsh'):
-        return op.expanduser('~/.zsh_history')
-    elif shell.endswith('fish'):
-        return op.expanduser('~/.local/share/fish/fish_history')
-    raise NoHistoryFileError('Unknown shell could not guess history file')
+    history_files = []
+    _hfiles = {
+        'bash': op.expanduser('~/.bash_history'),
+        'zsh': op.expanduser('~/.zsh_history'),
+        'fish': op.expanduser('~/.local/share/fish/fish_history'),
+    }
+    for k, v in _hfiles.items():
+        if shell.endswith(k):
+            history_files.append(v)
+
+    if len(history_files) > 0:
+        return history_files
+
+    print('SHELL environment variable not set or known')
+    print('Attempting to guess history file')
+    for k, v in _hfiles.items():
+        if op.exists(v):
+            history_files.append(v)
+
+    if len(history_files) > 0:
+        return history_files
+    print('Could not guess history file')
+    raise NoHistoryFileError('Could not guess history file')
 
 
 def ghfile_unique(gsfile: str = GSHISTORY) -> List[str]:
@@ -67,23 +72,26 @@ def ghfile_unique(gsfile: str = GSHISTORY) -> List[str]:
 
 
 def update_ghistory() -> List[str]:
-    hfile = history_file()
-    if not op.exists(hfile):
-        raise NoHistoryFileError(f'History file {hfile} does not exist')
+    hf_names = history_files()
+    hfiles = [hf for hf in hf_names if op.exists(hf)]
 
-    with open(hfile, 'r') as f:
-        history = []
-        for line in f.read().splitlines():
-            if line.strip() != '' and not line.startswith('#'):
-                if line not in history:
-                    history.append(line)
+    if len(hfiles) == 0:
+        raise NoHistoryFileError('No history file found')
+
+    combined_history = []
+    for hfile in hfiles:
+        with open(hfile, 'r') as f:
+            for line in f.read().splitlines():
+                if line.strip() != '' and not line.startswith('#'):
+                    if line not in combined_history:
+                        combined_history.append(line)
 
     print(GHHEADER)
-    print(f'History File: {hfile} | {len(history)} lines')
+    print(f'History File: {hfile} | {len(combined_history)} lines')
 
     ghlines, newlines = ghfile_unique(), []
 
-    for line in history:
+    for line in combined_history:
         if line not in ghlines:
             newlines.append(line)
 

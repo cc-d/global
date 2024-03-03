@@ -109,11 +109,13 @@ gitacpush() {
   git add -A
   _GAC_FILES=$(git status --porcelain | awk '{print $2}')
   _GAC_LEFT_TEXT="[GITACPUSH]>"
+  _GAC_BRANCH=$(git branch --show-current)
   if [ -z "$_GAC_FILES" ]; then
     echo "Nothing to commit."
     if git status | grep -q 'use "git push" to publish your local commits'; then
       echo "Commits not pushed. Pushing now."
-      git push origin "$(git rev-parse --abbrev-ref HEAD)"
+
+      git push origin "$_GAC_BRANCH"
     fi
   fi
 
