@@ -19,7 +19,6 @@ class NoHistoryFileError(FileNotFoundError):
 
 def history_files() -> List[str]:
     """return the path of the history file for the current shell"""
-    shell = os.environ.get('SHELL')
     history_files = []
     _hfiles = {
         'bash': op.expanduser('~/.bash_history'),
@@ -27,32 +26,30 @@ def history_files() -> List[str]:
         'fish': op.expanduser('~/.local/share/fish/fish_history'),
     }
     for k, v in _hfiles.items():
-        if shell.endswith(k):
-            history_files.append(v)
-
-    if len(history_files) > 0:
-        return history_files
-
-    print('SHELL environment variable not set or known')
-    print('Attempting to guess history file')
-    for k, v in _hfiles.items():
         if op.exists(v):
             history_files.append(v)
 
     if len(history_files) > 0:
         return history_files
-    print('Could not guess history file')
+
     raise NoHistoryFileError('Could not guess history file')
 
 
-def ghfile_unique(gsfile: str = GSHISTORY) -> List[str]:
-    """Ensure that the global history file contains only unique lines"""
-    uniq_lines, all_lines = [], []
+def _ensure_gh_file(gsfile: str = GSHISTORY) -> bool:
+    """ensures that the global history file exists"""
     if not op.exists(gsfile):
         print(f'Creating global history file: {gsfile}')
         with open(gsfile, 'w') as f:
             f.write('')
+            return False
+    return True
 
+
+def ghfile_unique(gsfile: str = GSHISTORY) -> List[str]:
+    """Ensure that the global history file contains only unique lines"""
+    _ensure_gh_file(gsfile)
+
+    uniq_lines, all_lines = [], []
     with open(gsfile, 'r') as f:
         for line in f.read().splitlines():
             all_lines.append(line)
@@ -60,9 +57,7 @@ def ghfile_unique(gsfile: str = GSHISTORY) -> List[str]:
                 uniq_lines.append(line)
 
     if len(uniq_lines) != len(all_lines):
-        print(
-            f'Found {len(all_lines) - len(uniq_lines)} duplicate lines in {gsfile}'
-        )
+        print(f'{len(all_lines) - len(uniq_lines)} dupicate lines in {gsfile}')
         print(f'Removing duplicates from {gsfile}')
         with open(gsfile, 'w') as f:
             print(f'writing {len(uniq_lines)} unique lines to {gsfile}')
@@ -72,11 +67,7 @@ def ghfile_unique(gsfile: str = GSHISTORY) -> List[str]:
 
 
 def update_ghistory() -> List[str]:
-    hf_names = history_files()
-    hfiles = [hf for hf in hf_names if op.exists(hf)]
-
-    if len(hfiles) == 0:
-        raise NoHistoryFileError('No history file found')
+    hfiles = history_files()
 
     combined_history = []
     for hfile in hfiles:
@@ -87,7 +78,7 @@ def update_ghistory() -> List[str]:
                         combined_history.append(line)
 
     print(GHHEADER)
-    print(f'History File: {hfile} | {len(combined_history)} lines')
+    print(f'History Files: {hfiles} | {len(combined_history)} lines')
 
     ghlines, newlines = ghfile_unique(), []
 
