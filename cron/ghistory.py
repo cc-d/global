@@ -39,6 +39,7 @@ def _ensure_gh_file(gsfile: str = GSHISTORY) -> bool:
     """ensures that the global history file exists"""
     if not op.exists(gsfile):
         print(f'Creating global history file: {gsfile}')
+        os.makedirs(op.dirname(gsfile), exist_ok=True)
         with open(gsfile, 'w') as f:
             f.write('')
             return False
@@ -91,7 +92,7 @@ def update_ghistory() -> List[str]:
         print(GHHEADER)
         print('\n'.join(newlines))
         with open(GSHISTORY, 'w') as f:
-            f.write('\n'.join(ghlines + newlines))
+            f.write('\n'.join(ghlines + newlines) + '\n')
             print(GHHEADER)
             print(f'Added {len(newlines)} lines to {GSHISTORY}')
 
