@@ -111,7 +111,7 @@ gitacpush() {
   _GAC_LEFT_TEXT="[GITACPUSH]>"
   if [ -z "$_GAC_FILES" ]; then
     echo "Nothing to commit."
-    if git status | grep -q 'use "git push" to publish'; then
+    if echo `git status` | grep -q 'use "git push" to publish'; then
       echo "Commits not pushed. Pushing now."
       git push origin "$(git rev-parse --abbrev-ref HEAD)"
     fi
