@@ -1,2 +1,1 @@
 * * * * * /usr/bin/python3 $HOME/global/cron/ghistory.py >> /tmp/ghistory.log 2>&1
-* * * * * echo "test" >> /tmp/test.log
