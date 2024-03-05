@@ -7,6 +7,10 @@ history() {
     else
         python3 "$HOME/global/cron/gc_history.py"
         _GC_HISTORY_FILE="$HOME/.global/shell_history"
-        awk '{$1=$1}; !x[$0]++' "$_GC_HISTORY_FILE" | nl -w 1 -s " " -ba
+        for _GC_HIST_LINE in \
+            `awk '{$1=$1}; !x[$0]++' "$_GC_HISTORY_FILE" | nl -w 1 -s " " -ba`;
+        do
+            echo "$_GC_HIST_LINE"
+        done
     fi
 }
