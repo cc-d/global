@@ -247,32 +247,16 @@ tstime() {
 
 
 columnate() {
-  ncols=${1:-4}
-  colw=${2:-$(($(tput cols) / ncols - 1))}
-  colw=$((colw > 4 ? colw : 4))
-  i=0
-  printed=()
-  while read -r line; do
-    if [ ${#line} -gt $((colw - 2)) ]; then
-      shortline="${line:0:$((colw - 2))}.."
-    else
-      shortline="$line"
-    fi
-    found=0
-    for p in "${printed[@]}"; do
-      if [ "$p" = "$shortline" ]; then
-        found=1
-        break
-      fi
-    done
-    if [ $found -eq 0 ]; then
-      printf "%-${colw}s " "$shortline"
-      printed+=("$shortline")
-      i=$((i + 1))
-      [ $((i % ncols)) -eq 0 ] && { printf "\n"; i=0; }
-    fi
-  done
-  [ $((i % ncols)) -ne 0 ] && printf "\n"
+  # get sys in
+
+  if which python3 &>/dev/null; then
+    _PYCMD="python3"
+  else
+    _PYCMD="python"
+  fi
+
+  cat - | $_PYCMD $HOME/global/globalshell/columnate.py
+
 }
 
 

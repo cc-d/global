@@ -48,7 +48,7 @@ def columnate(inputs: List[str], max_length: int, num_columns: int) -> None:
             max_length
             + len(re.sub(r'\x1b\[[;0-9]*[mK]', '', truncated))
             - len(truncated)
-        ) + 2
+        ) + 1
         print(
             truncated.ljust(pad_length),
             end=' ' if (i + 1) % num_columns else '\n',
