@@ -62,10 +62,10 @@ cd () {
     echo ''
 }
 
-
-if [ -f "`pwd`/shell.sh" ]; then
-    echo "$EL shell.sh found, loading..."
-    . "`pwd`/shell.sh"
+# automatically run git_ssh if the environment variable is set
+if [ -n "$GIT_SSH_DEFAULT_CHOICE" ]; then
+  echo "$EL GIT_SSH_DEFAULT_CHOICE is set, running git_ssh"
+  git_ssh
 fi
 
 echo "$EL myshell.sh loaded completely\n"

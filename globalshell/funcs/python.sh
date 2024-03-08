@@ -5,6 +5,7 @@ actvenv() {
   _ACTVENV_COUNT=0
   _ACTVENV_DIRSCANNED=0
   if [ -d "venv" ]; then
+    echo "Activating venv in current directory"
     . venv/bin/activate
   else
     for d in $(find . -type d -name "venv" -maxdepth 3); do

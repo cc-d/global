@@ -1,6 +1,10 @@
 #!/bin/sh
 
 # lists all private .ssh keyfiles in ~/.ssh if no filepath is provided
+# if GIT_SSH_DEFAULT_CHOICE is set, it will use that keyfile automatically
+# it is suggested to use this function in your shell startup script if
+# it is not password protected
+
 git_ssh() {
     # this appears on the left of all globalshell messages
     _LSTR='[GITSSH]>'
@@ -42,18 +46,18 @@ git_ssh() {
             # Ensure the ssh-agent is killed when the shell is closed
             trap 'test -n "$SSH_AGENT_PID" && eval `ssh-agent -k`' EXIT
         else
-            echo "$_LSTR ssh-agent is already running."
+            # echo "$_LSTR ssh-agent is already running."
         fi
 
         # clever
         cpath=$(eval "echo \$$(echo $choice)")
-        if ! ssh-add $cpath; then
-            echo "$_LSTRERROR: Failed to add SSH key. Retrying..."
+        if ! ssh-add $cpath 2>/dev/null; then
+            echo "$_LSTR: Failed to add SSH key. Retrying..."
             eval "$(ssh-agent -s)"
             ssh-add $cpath || echo "$_LSTRERROR: Failed to add SSH key."
         fi
     else
-        echo "$_LSTRERROR: $choice is not a valid choice."
+        echo "$_LSTR: $choice is not a valid choice."
     fi
 }
 
