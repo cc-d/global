@@ -108,8 +108,18 @@ def main(poll_every: Opt[int] = None):
         update_ghistory()
 
 
+def print_history():
+    with open(GSHISTORY, 'r') as f:
+        lines = set(f.read().splitlines())
+        for i, line in enumerate(lines):
+            print(f'{i} {line}')
+
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        main(int(sys.argv[1]))
+        if str(sys.argv[1]).lower() == 'print':
+            print_history()
+        else:
+            main(int(sys.argv[1]))
     else:
         main()
