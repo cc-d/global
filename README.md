@@ -161,22 +161,10 @@ There are two versions of colorprint, one in python and one in c++. There are 2 
 
 ### columnate
 
-- Purpose: Organizes input into specified columns, improving readability for long lists of items. It's customizable in terms of the number of columns and column width.
-- Usage: `columnate <number_of_columns> <column_width>`
+- Purpose: Organizes input into avg/median width truncated columns for easy, compact viewing. Automatically detects terminal width and adjusts the number of columns accordingly, as well as properly handling color codes and special characters.
+- Usage: `ls -AaFp --color=always | columnate`
 
-```
-mym2@Carys-MacBook-Pro /etc % ls -A --color=never . | columnate 10 14
-./             ../            afpovertcp.c.. aliases        aliases.db     apache2/       asl/           asl.conf       auto_home      auto_master
-autofs.conf    bashrc         bashrc_Apple.. bootpd.plist   com.apple.sc.. csh.cshrc      csh.login      csh.logout     cups/          defaults/
-find.codes     ftpusers       gettytab       group          hosts          hosts.equiv    irbrc          kern_loader... krb5.keytab    localtime
-locate.rc      mail.rc        man.conf       manpaths       manpaths.d/    master.passw.. mullvad-vpn/   networks       newsyslog.co.. newsyslog.d/
-nfs.conf       notify.conf    ntp.conf       ntp_opendire.. openldap/      pam.d/         passwd         paths          paths.d/       periodic/
-pf.anchors/    pf.conf        pf.os          postfix/       ppp/           profile        protocols      racoon/        rc.common      rc.netboot
-resolv.conf    rmtab          rpc            rtadvd.conf    security/      services       shells         snmp/          ssh/           ssl/
-sudo_lecture   sudoers        sudoers.d/     syslog.conf    ttys           uucp/          wfs/           xtab           zprofile       zshrc
-zshrc_Apple_..
-mym2@Carys-MacBook-Pro /etc %
-```
+![!columnate](img/columnate.png)
 
 ### get_shell_rc_file
 
