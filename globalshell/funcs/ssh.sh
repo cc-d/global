@@ -45,8 +45,6 @@ git_ssh() {
             eval "$(ssh-agent -s)"
             # Ensure the ssh-agent is killed when the shell is closed
             trap 'test -n "$SSH_AGENT_PID" && eval `ssh-agent -k`' EXIT
-        else
-            # echo "$_LSTR ssh-agent is already running."
         fi
 
         # clever
