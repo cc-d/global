@@ -68,4 +68,4 @@ if [ -n "$GIT_SSH_DEFAULT_CHOICE" ]; then
   git_ssh
 fi
 
-echo "$EL myshell.sh loaded completely\n"
+echo "$EL myshell.sh loaded completely"
