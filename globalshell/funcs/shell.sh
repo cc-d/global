@@ -5,6 +5,6 @@ history() {
         echo "GLOBAL_SHELL_HISTORY is not set, using default"
         command history "$@"
     else
-        python3 "$HOME/global/cron/ghistory.py" print
+        python3 "$HOME/global/cron/ghistory.py" "$@"
     fi
 }
