@@ -29,22 +29,14 @@ elif [ "$(basename "$SHELL")" = "bash" ]; then
 fi
 
 # import aliases
-. "$GSHELLDIR/aliases.sh" && echo "$EL imported aliases.sh"
+. "$GSHELLDIR/aliases.sh"
 
 # import our functions
 # always source utils first
-if command -v source &>/dev/null; then
-  source "$GSHELLDIR/funcs/utils.sh"
-else
-  . "$GSHELLDIR/funcs/utils.sh"
-fi
+. "$GSHELLDIR/funcs/utils.sh"
 
 for f in `find "$GSHELLDIR/funcs" -type f -name '*.sh'`; do
-  if command -v source &>/dev/null; then
-    source "$f"
-  else
-    . "$f"
-  fi
+  . "$f"
 done
 
 # builtin command overrides/aliases/etc
@@ -54,10 +46,11 @@ alias ls='ls -AaFp --color=always'
 
 cd () {
     builtin cd "$@";
+
     if [ "$(uname -m)" = "x86_64" ]; then
-        ls -Aa1Fp --color=always | tr '\n' ' ' | "$GSHELLDIR/colorprint-x86";
+        ls -Aa1Fp --color=always | tr '\n' ' ' | "$GSHELLDIR/colorprint-x86"
     else
-        ls -Aa1Fp --color=always | tr '\n' ' ' | "$GSHELLDIR/colorprint-arm";
+        ls -Aa1Fp --color=always | tr '\n' ' ' | "$GSHELLDIR/colorprint-arm"
     fi
     echo ''
 }
