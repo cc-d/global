@@ -38,7 +38,7 @@ def history_files() -> List[str]:
 def _ensure_gh_file(gsfile: str = GSHISTORY) -> bool:
     """ensures that the global history file exists"""
     if not op.exists(gsfile):
-        print(f'Creating global history file: {gsfile}')
+        print('Creating global history file: {gsfile}'.format(gsfile=gsfile))
         os.makedirs(op.dirname(gsfile), exist_ok=True)
         with open(gsfile, 'w') as f:
             f.write('')
@@ -58,10 +58,16 @@ def ghfile_unique(gsfile: str = GSHISTORY) -> List[str]:
                 uniq_lines.append(line)
 
     if len(uniq_lines) != len(all_lines):
-        print(f'{len(all_lines) - len(uniq_lines)} dupicate lines in {gsfile}')
-        print(f'Removing duplicates from {gsfile}')
+        print(
+            '{} duplicate lines in {}'.format(
+                len(all_lines) - len(uniq_lines), gsfile
+            )
+        )
+        print('Removing duplicates from {}'.format(gsfile))
         with open(gsfile, 'w') as f:
-            print(f'writing {len(uniq_lines)} unique lines to {gsfile}')
+            print(
+                'writing {} unique lines to {}'.format(len(uniq_lines), gsfile)
+            )
             f.write('\n'.join(uniq_lines))
 
     return uniq_lines
@@ -79,7 +85,7 @@ def update_ghistory() -> List[str]:
                         combined_history.append(line)
 
     print(GHHEADER)
-    print(f'History Files: {hfiles} | {len(combined_history)} lines')
+    print('History Files: {} | {} lines'.format(hfiles, len(combined_history)))
 
     ghlines, newlines = ghfile_unique(), []
 
@@ -88,13 +94,13 @@ def update_ghistory() -> List[str]:
             newlines.append(line)
 
     if len(newlines) > 0:
-        print(f'Adding {len(newlines)} lines to {GSHISTORY}')
+        print('Adding {} lines to {}'.format(len(newlines), GSHISTORY))
         print(GHHEADER)
         print('\n'.join(newlines))
         with open(GSHISTORY, 'w') as f:
             f.write('\n'.join(ghlines + newlines) + '\n')
             print(GHHEADER)
-            print(f'Added {len(newlines)} lines to {GSHISTORY}')
+            print('Added {} lines to {}'.format(len(newlines), GSHISTORY))
 
     return newlines
 
@@ -110,9 +116,12 @@ def main(poll_every: Opt[int] = None):
 
 def print_history():
     with open(GSHISTORY, 'r') as f:
-        lines = set(f.read().splitlines())
-        for i, line in enumerate(lines):
-            print(f'{i} {line}')
+        lines, newlines = f.read().splitlines(), []
+        newlines = [line for line in lines if line not in newlines]
+
+        # dont use set here because we want to preserve order
+        for i, line in enumerate(newlines):
+            print(i, line)
 
 
 if __name__ == '__main__':
