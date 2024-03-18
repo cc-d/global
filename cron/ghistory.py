@@ -2,133 +2,67 @@
 import os
 import sys
 import os.path as op
+import sys
 from time import sleep
 from typing import List, Tuple, Optional as Opt
 
-GSHISTORY = op.expanduser('~/.global/shell_history')
-try:
-    _PAD = max(os.get_terminal_size().columns // 3, 10)
-except OSError:
-    _PAD = 10
-GHHEADER = '=' * _PAD + ' GLOBAL HISTORY ' + '=' * _PAD
+GHHEADER = '=' * 10 + ' GLOBAL HISTORY ' + '=' * 10
+GHFILE = op.expanduser('~/.global/shell_history')
+HISTORY_FILES = [
+    op.expanduser('~/.bash_history'),
+    op.expanduser('~/.zsh_history'),
+]
 
 
-class NoHistoryFileError(FileNotFoundError):
-    pass
+def read_histfile(hfile: str) -> List[str]:
+    """reads history file and returns a list of lines"""
+    lines, ulines = [], []
+    if not op.exists(hfile):
+        return ulines
+
+    with open(hfile, 'r') as f:
+        lines = f.read().splitlines()
+    while lines:
+        line = lines.pop(0)
+        if line not in ulines and line.strip() and not line.startswith('#'):
+            ulines.append(line)
+
+    return ulines
 
 
-def history_files() -> List[str]:
-    """return the path of the history file for the current shell"""
-    history_files = []
-    _hfiles = {
-        'bash': op.expanduser('~/.bash_history'),
-        'zsh': op.expanduser('~/.zsh_history'),
-        'fish': op.expanduser('~/.local/share/fish/fish_history'),
-    }
-    for k, v in _hfiles.items():
-        if op.exists(v):
-            history_files.append(v)
-
-    if len(history_files) > 0:
-        return history_files
-
-    raise NoHistoryFileError('Could not guess history file')
+def _merge_lines(*args: List[str]) -> List[str]:
+    """merges lines from multiple history files"""
+    merged = []
+    while any(args):
+        for lines in args:
+            if lines:
+                line = lines.pop(0)
+                if line not in merged:
+                    merged.append(line)
+    return merged
 
 
-def _ensure_gh_file(gsfile: str = GSHISTORY) -> bool:
-    """ensures that the global history file exists"""
-    if not op.exists(gsfile):
-        print('Creating global history file: {gsfile}'.format(gsfile=gsfile))
-        os.makedirs(op.dirname(gsfile), exist_ok=True)
-        with open(gsfile, 'w') as f:
-            f.write('')
-            return False
-    return True
-
-
-def ghfile_unique(gsfile: str = GSHISTORY) -> List[str]:
-    """Ensure that the global history file contains only unique lines"""
-    _ensure_gh_file(gsfile)
-
-    uniq_lines, all_lines = [], []
-    with open(gsfile, 'r') as f:
-        for line in f.read().splitlines():
-            all_lines.append(line)
-            if line not in uniq_lines:
-                uniq_lines.append(line)
-
-    if len(uniq_lines) != len(all_lines):
-        print(
-            '{} duplicate lines in {}'.format(
-                len(all_lines) - len(uniq_lines), gsfile
-            )
-        )
-        print('Removing duplicates from {}'.format(gsfile))
-        with open(gsfile, 'w') as f:
-            print(
-                'writing {} unique lines to {}'.format(len(uniq_lines), gsfile)
-            )
-            f.write('\n'.join(uniq_lines))
-
-    return uniq_lines
-
-
-def update_ghistory() -> List[str]:
-    hfiles = history_files()
-
-    combined_history = []
-    for hfile in hfiles:
-        with open(hfile, 'r') as f:
-            for line in f.read().splitlines():
-                if line.strip() != '' and not line.startswith('#'):
-                    if line not in combined_history:
-                        combined_history.append(line)
+def main(*args: str) -> None:
+    history = _merge_lines(*[read_histfile(f) for f in HISTORY_FILES])
+    ghistory = read_histfile(GHFILE)
+    new_history = [line for line in history if line not in ghistory]
 
     print(GHHEADER)
-    print('History Files: {} | {} lines'.format(hfiles, len(combined_history)))
+    if new_history:
+        print(f'Found new lines, adding to {GHFILE}')
+        ghistory.extend(new_history)
+        with open(GHFILE, 'w') as f:
+            f.write('\n'.join(ghistory))
 
-    ghlines, newlines = ghfile_unique(), []
+    limit = int(args[0]) if args else None
+    linemap = list((i, line) for i, line in enumerate(ghistory))
+    if limit:
+        while len(linemap) > limit:
+            linemap.pop(0)
 
-    for line in combined_history:
-        if line not in ghlines:
-            newlines.append(line)
-
-    if len(newlines) > 0:
-        print('Adding {} lines to {}'.format(len(newlines), GSHISTORY))
-        print(GHHEADER)
-        print('\n'.join(newlines))
-        with open(GSHISTORY, 'w') as f:
-            f.write('\n'.join(ghlines + newlines) + '\n')
-            print(GHHEADER)
-            print('Added {} lines to {}'.format(len(newlines), GSHISTORY))
-
-    return newlines
-
-
-def main(poll_every: Opt[int] = None):
-    if poll_every is not None:
-        while True:
-            update_ghistory()
-            sleep(poll_every)
-    else:
-        update_ghistory()
-
-
-def print_history():
-    with open(GSHISTORY, 'r') as f:
-        lines, newlines = f.read().splitlines(), []
-        newlines = [line for line in lines if line not in newlines]
-
-        # dont use set here because we want to preserve order
-        for i, line in enumerate(newlines):
-            print(i, line)
+    for ln in linemap:
+        print(*ln)
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        if str(sys.argv[1]).lower() == 'print':
-            print_history()
-        else:
-            main(int(sys.argv[1]))
-    else:
-        main()
+    main(*sys.argv[1:])
