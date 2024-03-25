@@ -25,3 +25,47 @@ actvenv() {
   fi
   echo "[ACTVENV]> Scanned $_ACTVENV_DIRSCANNED | Other Venvs found: $_ACTVENV_COUNT"
 }
+
+publish_to_pypi() {
+    # Check if setup.py exists
+    if [ -f "setup.py" ]; then
+        python setup.py sdist
+    else
+        # Check if pyproject.toml exists
+        if [ -f "pyproject.toml" ]; then
+            python -m build
+        else
+            echo "Neither setup.py nor pyproject.toml found."
+            return 1
+        fi
+    fi
+
+    # Check if build directory exists
+    if [ -d "dist" ]; then
+        # Find the most recent build file in the dist directory
+        most_recent_build=$(ls -t dist/* 2>/dev/null | head -n 1)
+
+        if [ -n "$most_recent_build" ]; then
+            # Read PyPI token from file
+            if ! [ -n "$PYPI_TOKEN_FILE" ]; then
+                echo "PYPI_TOKEN_FILE not set."
+                return 1
+            fi
+
+            pypi_token=$(cat "$PYPI_TOKEN_FILE")
+
+            # Upload the most recent build using environment variables for authentication
+            echo "Uploading build to PyPI..."
+            echo "Using PyPI token from ~/.keys/pypitokenall"
+            TWINE_USERNAME="__token__" TWINE_PASSWORD="$pypi_token" twine upload "$most_recent_build"
+        else
+            echo "No build files found in 'dist' directory."
+            return 1
+        fi
+    else
+        echo "Build directory 'dist' not found."
+        return 1
+    fi
+}
+
+
