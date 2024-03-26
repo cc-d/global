@@ -56,7 +56,7 @@ publish_to_pypi() {
 
             # Upload the most recent build using environment variables for authentication
             echo "Uploading build to PyPI..."
-            echo "Using PyPI token from ~/.keys/pypitokenall"
+            echo "Using PyPI token from file: $PYPI_TOKEN_FILE"
             TWINE_USERNAME="__token__" TWINE_PASSWORD="$pypi_token" twine upload "$most_recent_build"
         else
             echo "No build files found in 'dist' directory."
