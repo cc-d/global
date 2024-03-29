@@ -44,11 +44,16 @@ done
 
 alias ls='ls -AaFp --color=always'
 
+
 cd () {
-    builtin cd "$@";
+    if which builtin &> /dev/null; then
+        builtin cd "$@"
+    else
+        command cd "$@"
+    fi
 
     if [ "$(uname -m)" = "x86_64" ]; then
-        ls -Aa1Fp --color=always | tr '\n' ' ' | "$GSHELLDIR/colorprint-x86"
+        ls -Aa1Fp --color=always | tr '\n' ' ' | "$GSHELLDIR/colorprint-amd64"
     else
         ls -Aa1Fp --color=always | tr '\n' ' ' | "$GSHELLDIR/colorprint-arm"
     fi
