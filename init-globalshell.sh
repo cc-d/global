@@ -46,7 +46,7 @@ alias ls='ls -AaFp --color=always'
 
 
 cd () {
-    if which builtin &> /dev/null; then
+    if which builtin; then
         builtin cd "$@"
     else
         command cd "$@"
