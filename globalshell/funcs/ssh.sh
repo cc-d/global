@@ -20,7 +20,7 @@ git_ssh() {
     fi
 
     index=1
-    set -- $(echo -e $sshkeys)
+    set -- $(printf "%b" "$sshkeys")
     echo ''
     for kpath; do
         echo "[$index] $kpath";

@@ -60,10 +60,21 @@ cd () {
     echo ''
 }
 
+globalshell () {
+  echo "$EL GLOBAL SHELL COMMANDS"
+  echo ""
+  echo "actvenv columnate dirfiles dirfiles evar"
+  echo "fixperms gitacpush gitconf gitdatecommit gitnewbranch"
+  echo "git_ssh gptfiles history ostype pasterun"
+  echo "publish_to_pypi revert_to_commit safesorce screenproc"
+  echo "sourceshell tstime"
+  echo ""
+}
+
 # automatically run git_ssh if the environment variable is set
 if [ -n "$GIT_SSH_DEFAULT_CHOICE" ]; then
   echo "$EL GIT_SSH_DEFAULT_CHOICE is set, running git_ssh"
   git_ssh
 fi
 
-echo "$EL myshell.sh loaded completely"
+echo "$EL GLOBAL SHELL INITIALIZED"

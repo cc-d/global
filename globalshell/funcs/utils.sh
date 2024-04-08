@@ -238,17 +238,12 @@ dirfiles() {
 
 
 tstime() {
-  _tstime1=`timestamp`
-  eval "$@"
-  _tstime2=`timestamp`
-  _tstime_diff=$(echo "$_tstime2 $_tstime1" | awk '{print $1 - $2}')
-  echo "time: $_tstime_diff ms"
+  _tstime1=$(timestamp) && eval $@; _tstime2=$(timestamp)
+  echo "time:" $(echo $_tstime2 $_tstime1 | awk '{print $1 - $2}') ms
 }
 
 
 columnate() {
-  # get sys in
-
   if which python3 &>/dev/null; then
     _PYCMD="python3"
   else
