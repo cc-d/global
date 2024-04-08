@@ -154,9 +154,10 @@ There are two versions of colorprint, one in python and one in c++. There are 2 
 - Purpose: Lists files and directories within a specified path, applying filters to exclude certain directories by default. It helps in navigating project structures more efficiently.
 - Usage: `dirfiles <directory>`
 
-### tstime
+### pytime
 
-- Purpose: Measures the execution time of a specified command in milliseconds, aiding in performance testing and optimization efforts.
+- Purpose: Measures the execution time of a specified command in convenient human-readable format, providing insights into the performance of scripts or processes. Uses python, hence the name.
+
 - Usage: `tstime <command>`
 
 ### columnate

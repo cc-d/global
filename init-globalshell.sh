@@ -67,7 +67,7 @@ globalshell () {
   echo "fixperms gitacpush gitconf gitdatecommit gitnewbranch"
   echo "git_ssh gptfiles history ostype pasterun"
   echo "publish_to_pypi revert_to_commit safesorce screenproc"
-  echo "sourceshell tstime"
+  echo "sourceshell pytime"
   echo ""
 }
 

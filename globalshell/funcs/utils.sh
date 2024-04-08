@@ -237,9 +237,8 @@ dirfiles() {
 }
 
 
-tstime() {
-  _tstime1=$(timestamp) && eval $@; _tstime2=$(timestamp)
-  echo "time:" $(echo $_tstime2 $_tstime1 | awk '{print $1 - $2}') ms
+pytime() {
+  $MYGLOBALDIR/scripts/pytime.py $@
 }
 
 
