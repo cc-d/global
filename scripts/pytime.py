@@ -3,6 +3,7 @@ from sys import argv
 from subprocess import run
 from time import perf_counter
 from decimal import Decimal, getcontext
+from pyshared import ran, D
 
 getcontext().prec = 12  # Set higher precision for Decimal calculations
 
@@ -22,20 +23,39 @@ def fmt_time(e):
     ~e (Decimal): Elapsed time in seconds.
     -> str: Formatted time string.
     """
+    d = {'s': D(str(e))}
+    d['ms'] = d['s'] * D('1000')
+    if d['s'] > D('1'):
+        d['m'] = d['s'] / D('60')
+        if d['m'] > D('1'):
+            d['h'] = d['m'] / D('60')
+            if d['h'] > D('1'):
+                d['d'] = d['h'] / D('24')
 
-    td = {
-        'ms': round(e * 1000, 2),
-        's': round(e, 2),
-        'm': round(e / 60, 2),
-        'h': round(e / 3600, 2),
-        'd': round(e / 86400, 2),
-    }
-    ts = 'time: '
-    for k, v in td.items():
-        if set(str(v)) != {'0', '.'} and v > 0.1:
-            ts += '%s%s ' % (v, k)
+    for k, v in d.items():
+        if str(float(v)).endswith('.0'):
+            d[k] = int(v)
 
-    return ts.strip()
+    t = 'times: '
+
+    for k in ['ms', 's', 'm', 'h', 'd']:
+        if k not in d:
+            break
+        r = 3 if k == 's' else 2
+
+        if k in d:
+            t += f'{0 if round(d[k], r) == 0 else round(d[k],r)}{k}\t'
+
+    return t
+
+
+def test():
+    times = [
+        ran.randint(0, 100) * ran.choice([0.0001, 1, 0.0099])
+        for _ in range(50)
+    ]
+    for i in times:
+        print(fmt_time(i))
 
 
 if __name__ == "__main__":
