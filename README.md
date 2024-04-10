@@ -158,7 +158,7 @@ There are two versions of colorprint, one in python and one in c++. There are 2 
 
 - Purpose: Measures the execution time of a specified command in convenient human-readable format, providing insights into the performance of scripts or processes. Uses python, hence the name.
 
-- Usage: `tstime <command>`
+- Usage: `pytime <command>`
 
 ### columnate
 
