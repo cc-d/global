@@ -36,7 +36,7 @@ def fmt_time(e):
         if str(float(v)).endswith('.0'):
             d[k] = int(v)
 
-    t = 'times: '
+    t = 'time: '
 
     for k in ['ms', 's', 'm', 'h', 'd']:
         if k not in d:
