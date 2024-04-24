@@ -1,5 +1,5 @@
 #!/bin/sh
-EL='[GSHELL]>'
+export _LGS='[GSHELL]>'
 
 # get local cc-d/global repo path so no path weirdness happens
 export MYGLOBALDIR="$HOME/global"
@@ -14,10 +14,10 @@ add_init_to_rc_file() {
   RC_FILE="$1"
   if [ ! -f "$RC_FILE" ]; then
     echo "$INIT_COMMAND" > "$RC_FILE"
-    echo "$EL Created $RC_FILE with init command"
+    echo "$_LGS Created $RC_FILE with init command"
   elif ! grep -qxF "$INIT_COMMAND" "$RC_FILE"; then
     echo "$INIT_COMMAND" >> "$RC_FILE"
-    echo "$EL Added init to $RC_FILE"
+    echo "$_LGS Added init to $RC_FILE"
   fi
 }
 
@@ -35,8 +35,8 @@ fi
 # always source utils first
 . "$GSHELLDIR/funcs/utils.sh"
 
-for f in `find "$GSHELLDIR/funcs" -type f -name '*.sh'`; do
-  . "$f"
+for f in $(find "$GSHELLDIR/funcs" -type f -name '*.sh'); do
+  . $f
 done
 
 # builtin command overrides/aliases/etc
@@ -47,9 +47,9 @@ alias ls='ls -AaFp --color=always'
 
 cd () {
     if which builtin &>/dev/null; then
-        builtin cd "$@"
+        builtin cd $@
     else
-        command cd "$@"
+        command cd $@
     fi
 
     if [ "$(uname -m)" = "x86_64" ]; then
@@ -61,7 +61,7 @@ cd () {
 }
 
 globalshell () {
-  echo "$EL GLOBAL SHELL COMMANDS"
+  echo "$_LGS GLOBAL SHELL COMMANDS"
   echo ""
   echo "actvenv columnate dirfiles dirfiles evar"
   echo "fixperms gitacpush gitconf gitdatecommit gitnewbranch"
@@ -73,8 +73,8 @@ globalshell () {
 
 # automatically run git_ssh if the environment variable is set
 if [ -n "$GIT_SSH_DEFAULT_CHOICE" ]; then
-  echo "$EL GIT_SSH_DEFAULT_CHOICE is set, running git_ssh"
+  echo "$_LGS GIT_SSH_DEFAULT_CHOICE is set, running git_ssh"
   git_ssh
 fi
 
-echo "$EL GLOBAL SHELL INITIALIZED"
+echo "$_LGS GLOBAL SHELL INITIALIZED"

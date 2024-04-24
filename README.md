@@ -167,10 +167,10 @@ There are two versions of colorprint, one in python and one in c++. There are 2 
 
 ![!columnate](img/columnate.png)
 
-### get_shell_rc_file
+### get_shell_rc_files
 
 - Purpose: Identifies the shell's rc file, such as `.bashrc`, `.zshrc`, etc. This utility supports customizing and configuring the shell environment by determining the correct file to modify.
-- Usage: `get_shell_rc_file`
+- Usage: `get_shell_rc_files | head -n 1`
 
 ### sourceshell
 

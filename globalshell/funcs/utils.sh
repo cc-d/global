@@ -1,48 +1,36 @@
 #!/bin/sh
 
-
 evar() {
-    # Validate input
-    if [ "$#" -eq 0 ]; then
-        echo "evar: missing arguments"
-        return 1
+  if [ "$#" -eq 1 ]; then
+    if ! echo "$1" | grep -qE '^\w+=.*$'; then
+      echo "evar: invalid argument format"
+      return 1
     fi
+    _EVNAME="${1%%=*}"
+    _EVVAL=$(echo "$1" | sed -E "s/^$name=//")
+  elif [ "$#" -eq 2 ]; then
+    _EVNAME="$1"
+    _EVVAL="$2"
+  else
+    echo "evar: invalid number of arguments"
+    return 1
+  fi
 
-    # Check if the arguments are passed in the format $NAME=$VALUE
-    if [ "$#" -eq 1 ] && echo "$1" | grep -qE '^[^=]+=.+'; then
-        # Split the input into name and value
-        name="${1%%=*}"
-        value="${1#*=}"
-    elif [ "$#" -eq 2 ]; then
-        # Get the name and value of the environment variable
-        name="$1"
-        value="$2"
-    else
-        echo "evar: invalid number of arguments"
-        return 1
-    fi
+  _EV_RCFILE=`get_shell_rc_files | head -n 1`
 
-    # Escape special characters in the value
-    escaped_value=$(printf "%s" "$value")
+  if grep -qE "^export $_EVNAME=" "$_EV_RCFILE"; then
+    echo "evar exists in rc, updating"
+    sed -i'' -E "s/^export $_EVNAME=.*/export $_EVNAME=$_EVVAL/g" "$_EV_RCFILE"
+  else
+    echo "evar $_EVNAME=$_EVVAL does not exist, adding now"
+    echo "export $_EVNAME=$_EVVAL" >> "$_EV_RCFILE"
+  fi
 
-    # Determine the path to the rc file based on the shell
-    rc_file="$HOME/.bashrc"
-    [ "$(basename "$SHELL")" = "zsh" ] && rc_file="$HOME/.zshrc"
-
-    # Check if the export line already exists in the rc file
-    if grep -qE "^export $name=" "$rc_file"; then
-        # If it does, update the line
-        sed -i.bak "s|^export $name=.*|export $name=$escaped_value|" "$rc_file"
-        echo "evar exists in rc, updating"
-    else
-        # If it doesn't, add the line
-        echo "export $name=$escaped_value" >> "$rc_file"
-        echo "evar $name=$value does not exist, adding now"
-    fi
-
-    # Run the export line in the current shell
-    export "$name=$escaped_value"
+  echo "export $_EVNAME=$_EVVAL"
+  export "$_EVNAME=$_EVVAL"
 }
+
+
 
 safesource () {
   if command -v source &>/dev/null; then
@@ -254,7 +242,7 @@ columnate() {
 }
 
 
-get_shell_rc_file() {
+get_shell_rc_files() {
   case "$(basename "$SHELL")" in
     "bash")
         [ -f "$HOME/.bash_profile" ] && echo "$HOME/.bash_profile" \
@@ -274,7 +262,7 @@ get_shell_rc_file() {
 
 sourceshell() {
   _SSPADSTR="!!!!!!!!!!!!!"
-  _SSRCFILE=$(get_shell_rc_file | head -n 1)
+  _SSRCFILE=$(get_shell_rc_files | head -n 1)
   if [ -z "$_SSRCFILE" ]; then
     echo "$_SSPADSTR Could not find shell rc file $_SSPADSTR"
     return 1
