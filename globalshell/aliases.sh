@@ -27,3 +27,5 @@ alias git-ssh="git_ssh"
 alias dc='docker compose'
 alias dcpruneall='docker image prune -a; docker container prune; docker volume prune; docker network prune'
 alias tstime='pytime'
+
+alias gtree='tree -aCF  --charset ascii --filelimit=200 | sed "s/  / /g;s/--/-/g"'
