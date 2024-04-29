@@ -1,5 +1,16 @@
 #!/bin/sh
 
+# Define functions for pre-pull and post-pull actions
+pre_pull_action() {
+    echo "Pre-pull action executed."
+}
+
+post_pull_action() {
+    echo "Post-pull action executed."
+}
+
+
+
 # Print usage information
 usage() {
     echo ""
@@ -77,23 +88,16 @@ kill_existing_sessions() {
     done
 }
 
-# Define functions for pre-pull and post-pull actions
-pre_pull_action() {
-    echo "Pre-pull action executed."
-}
-
-post_pull_action() {
-    echo "Post-pull action executed."
-}
 
 pre_post_pull() {
     echo "Running pre-pull action..."
     pre_pull_action
-    if [ "$GITWATCH_NO_PULL" -eq 0 ]; then
+    if [ "$GITWATCH_NO_PULL"="1" ]; then
         echo "Changes detected. Pulling changes..."
         git pull
         echo "Changes pulled successfully."
     else
+        echo "GITWATCH_NO_PULL=" "$GITWATCH_NO_PULL"
         echo "Pulling changes skipped."
     fi
     post_pull_action
@@ -103,31 +107,39 @@ pre_post_pull() {
 # Function to execute Git operations
 git_operations() {
     cd "$GITWATCH_REPO_PATH" || exit 1
-    BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 
-    LOCAL_COMMIT=$(git rev-parse --short HEAD)
-    REMOTE_COMMIT=$(git ls-remote origin $BRANCH_NAME | cut -f1)
+    while true; do
+        git fetch
+        BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 
-    # ensure same length as --short
-    REMOTE_COMMIT=${REMOTE_COMMIT:0:7}
-    echo "Local commit: $LOCAL_COMMIT | Remote commit: $REMOTE_COMMIT | Branch: $BRANCH_NAME"
+        LOCAL_COMMIT=$(git rev-parse --short HEAD)
+        REMOTE_COMMIT=$(git rev-parse --short origin/$BRANCH_NAME)
 
-    if [ "$LOCAL_COMMIT" != "$REMOTE_COMMIT" ]; then
-        echo "Changes detected. Running pre-pull and post-pull actions..."
-        pre_post_pull
-    elif [ "$GITWATCH_FORCE_ACTIONS" -eq 1 ]; then
-        echo "No changes detected but force actions flag is set."
-        echo "Force Running pre-pull and post-pull actions..."
-        pre_post_pull
-        exit 0
-    else
-        echo "No changes detected. $LOCAL_COMMIT is up to date with $REMOTE_COMMIT."
-    fi
+        # ensure same length as --short
+        REMOTE_COMMIT=${REMOTE_COMMIT:0:7}
+        echo "Local commit: $LOCAL_COMMIT | Remote commit: $REMOTE_COMMIT | Branch: $BRANCH_NAME"
 
-    if [ -n "$GITWATCH_REPEAT" ]; then
-        sleep "$GITWATCH_INTERVAL"
-        git_operations
-    fi
+        if [ "$LOCAL_COMMIT" != "$REMOTE_COMMIT" ]; then
+            echo "Changes detected. Running pre-pull and post-pull actions..."
+            pre_post_pull
+        elif [ "$GITWATCH_FORCE_ACTIONS" -eq 1 ]; then
+            echo "No changes detected but force actions flag is set."
+            echo "Force Running pre-pull and post-pull actions..."
+            pre_post_pull
+            exit 0
+        else
+            echo "No changes detected. $LOCAL_COMMIT is up to date with $REMOTE_COMMIT."
+        fi
+
+        if [ -n "$GITWATCH_REPEAT" ]; then
+            echo "sleeping for $GITWATCH_INTERVAL seconds..."
+            sleep "$GITWATCH_INTERVAL"
+        else
+            echo "Exiting..."
+            exit 0
+        fi
+    done
+
 }
 
 # Manage screen session
@@ -150,4 +162,5 @@ if [ -n "$GITWATCH_INTERVAL" ] && [ -z "$GITWATCH_REPEAT" ]; then
     exit 0
 else
     git_operations
+    exit 0
 fi
