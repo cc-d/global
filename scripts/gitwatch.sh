@@ -87,6 +87,7 @@ post_pull_action() {
 }
 
 pre_post_pull() {
+    echo "Running pre-pull action..."
     pre_pull_action
     if [ "$GITWATCH_NO_PULL" -eq 0 ]; then
         echo "Changes detected. Pulling changes..."
@@ -102,19 +103,19 @@ pre_post_pull() {
 git_operations() {
     cd "$GITWATCH_REPO_PATH" || exit 1
     git fetch
-    LOCAL_COMMIT=$(git rev-parse HEAD)
-    REMOTE_COMMIT=$(git rev-parse "@{u}")
+    LOCAL_COMMIT=$(git rev-parse --short HEAD)
+    REMOTE_COMMIT=$(git ls-remote origin HEAD | cut -f1)
 
     if [ "$LOCAL_COMMIT" != "$REMOTE_COMMIT" ]; then
         echo "Changes detected. Running pre-pull and post-pull actions..."
         pre_post_pull
     elif [ "$GITWATCH_FORCE_ACTIONS" -eq 1 ]; then
-        echo "No changes detected."
+        echo "No changes detected but force actions flag is set."
         echo "Force Running pre-pull and post-pull actions..."
         pre_post_pull
         exit 0
     else
-        echo "No changes detected."
+        echo "No changes detected. $LOCAL_COMMIT is up to date with $REMOTE_COMMIT."
     fi
 
     if [ -n "$GITWATCH_REPEAT" ]; then
