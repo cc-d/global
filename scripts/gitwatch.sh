@@ -99,12 +99,19 @@ pre_post_pull() {
     post_pull_action
 }
 
+
 # Function to execute Git operations
 git_operations() {
     cd "$GITWATCH_REPO_PATH" || exit 1
     git fetch
+    BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+
     LOCAL_COMMIT=$(git rev-parse --short HEAD)
-    REMOTE_COMMIT=$(git ls-remote origin HEAD | cut -f1)
+    REMOTE_COMMIT=$(git ls-remote origin $BRANCH_NAME | cut -f1)
+
+    # ensure same length as --short
+    REMOTE_COMMIT=${REMOTE_COMMIT:0:7}
+    echo "Local commit: $LOCAL_COMMIT | Remote commit: $REMOTE_COMMIT | Branch: $BRANCH_NAME"
 
     if [ "$LOCAL_COMMIT" != "$REMOTE_COMMIT" ]; then
         echo "Changes detected. Running pre-pull and post-pull actions..."
