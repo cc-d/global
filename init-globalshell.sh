@@ -77,4 +77,4 @@ if [ -n "$GIT_SSH_DEFAULT_CHOICE" ]; then
   git_ssh
 fi
 
-echo "$_LGS GLOBAL SHELL INITIALIZED"
+echo "$_LGS GLOBAL SHELL INITIALIZED\n"
