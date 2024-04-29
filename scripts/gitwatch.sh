@@ -103,7 +103,6 @@ pre_post_pull() {
 # Function to execute Git operations
 git_operations() {
     cd "$GITWATCH_REPO_PATH" || exit 1
-    git fetch
     BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 
     LOCAL_COMMIT=$(git rev-parse --short HEAD)
