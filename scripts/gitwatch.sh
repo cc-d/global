@@ -7,6 +7,7 @@ usage() {
     echo "Options:"
     echo "  -h, --help           Show this help message"
     echo "  -n, --no-pull        Run pre-pull and post-pull actions without pulling"
+    echo "  -f, --force-actions Run pre-pull and post-pull actions even if no changes detected"
     echo ""
 }
 
@@ -14,6 +15,7 @@ usage() {
 GITWATCH_NO_PULL=0
 GITWATCH_REPO_PATH=""
 GITWATCH_INTERVAL=""
+GITWATCH_FORCE_ACTIONS=0
 
 # Parse command line arguments
 while [ "$#" -gt 0 ]; do
@@ -24,6 +26,10 @@ while [ "$#" -gt 0 ]; do
             ;;
         -n|--no-pull)
             GITWATCH_NO_PULL=1
+            shift
+            ;;
+        -f|--force-actions)
+            GITWATCH_FORCE_ACTIONS=1
             shift
             ;;
         *)
@@ -80,6 +86,18 @@ post_pull_action() {
     echo "Post-pull action executed."
 }
 
+pre_post_pull() {
+    pre_pull_action
+    if [ "$GITWATCH_NO_PULL" -eq 0 ]; then
+        echo "Changes detected. Pulling changes..."
+        git pull
+        echo "Changes pulled successfully."
+    else
+        echo "Pulling changes skipped."
+    fi
+    post_pull_action
+}
+
 # Function to execute Git operations
 git_operations() {
     cd "$GITWATCH_REPO_PATH" || exit 1
@@ -88,14 +106,13 @@ git_operations() {
     REMOTE_COMMIT=$(git rev-parse "@{u}")
 
     if [ "$LOCAL_COMMIT" != "$REMOTE_COMMIT" ]; then
-        pre_pull_action
-        if [ "$GITWATCH_NO_PULL" -eq 0 ]; then
-            echo "Changes detected. Pulling changes..."
-            git pull
-        else
-            echo "Pulling changes skipped."
-        fi
-        post_pull_action
+        echo "Changes detected. Running pre-pull and post-pull actions..."
+        pre_post_pull
+    elif [ "$GITWATCH_FORCE_ACTIONS" -eq 1 ]; then
+        echo "No changes detected."
+        echo "Force Running pre-pull and post-pull actions..."
+        pre_post_pull
+        exit 0
     else
         echo "No changes detected."
     fi
@@ -107,12 +124,23 @@ git_operations() {
 }
 
 # Manage screen session
-if [ -n "$GITWATCH_INTERVAL" ]; then
+if [ -n "$GITWATCH_INTERVAL" ] && [ -z "$GITWATCH_REPEAT" ]; then
     kill_existing_sessions
-    GITWATCH_REPEAT=1
-    screen -dmS "$PROCESS_NAME" sh -c "env GITWATCH_REPO_PATH=\"$GITWATCH_REPO_PATH\" GITWATCH_INTERVAL=\"$GITWATCH_INTERVAL\" GITWATCH_NO_PULL=\"$GITWATCH_NO_PULL\" GITWATCH_REPEAT=\"$GITWATCH_REPEAT\" $0"
+
+    if [ -n "$GITWATCH_NO_PULL" ]; then
+        ARG_NO_PULL="--no-pull"
+    else
+        ARG_NO_PULL=""
+    fi
+
+    echo "Running Command: "
+    echo "screen -dmS $PROCESS_NAME sh -c 'GITWATCH_REPEAT=1 $0 $GITWATCH_REPO_PATH $GITWATCH_INTERVAL $ARG_NO_PULL'"
+
+    screen -dmS "$PROCESS_NAME" \
+        sh -c "GITWATCH_REPEAT=1 $0 $GITWATCH_REPO_PATH $GITWATCH_INTERVAL $ARG_NO_PULL"
+
     echo "Spawned a new background screen session named $PROCESS_NAME"
     exit 0
+else
+    git_operations
 fi
-
-git_operations
