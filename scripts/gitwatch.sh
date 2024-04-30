@@ -93,7 +93,11 @@ pre_post_pull() {
     echo "Running pre-pull action..."
     pre_pull_action
     if [ "$GITWATCH_NO_PULL"="1" ]; then
-        echo "Changes detected. Pulling changes..."
+        if [ "$GITWATCH_FORCE_ACTIONS"="1" ]; then
+            echo "Force Actions enabled. Pulling changes..."
+        else
+            echo "Changes detected. Pulling changes..."
+        fi
         git pull
         echo "Changes pulled successfully."
     else
