@@ -20,7 +20,7 @@ def read_histfile(hfile: str) -> List[str]:
     if not op.exists(hfile):
         return ulines
 
-    with open(hfile, 'r') as f:
+    with open(hfile, 'r', errors='ignore') as f:
         lines = f.read().splitlines()
     while lines:
         line = lines.pop(0)
