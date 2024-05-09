@@ -149,9 +149,14 @@ gitacpush() {
 
 
 gitdatecommit() {
-  # gitdatecommit -m "Your commit message" -d "10-03-2023" -t "01:01:30"
+  if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ -z "$1" ]; then
+    echo 'Usage: gitdatecommit [-m <commit_message>] [-d $Y-$m-$d] [-t $H:$M:$S]'
+    echo "Example: ... -m 'hi' -d 2021-12-31 -t 23:59:59"
+    echo ''
+    return 1
+  fi
   _gd_commit_message="no commit message provided"
-  _gd_date_input=$(date '+%d-%m-%Y')
+  _gd_date_input=$(date '+%Y-%m-%d')
   _gd_time_input=$(date '+%H:%M:%S')
   while [ $# -gt 0 ]; do
     case "$1" in
