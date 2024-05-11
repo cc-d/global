@@ -36,7 +36,7 @@ def fmt_time(e):
         if str(float(v)).endswith('.0'):
             d[k] = int(v)
 
-    t = 'time: '
+    t = 'pytime: '
 
     for k in ['ms', 's', 'm', 'h', 'd']:
         if k not in d:
@@ -44,7 +44,12 @@ def fmt_time(e):
         r = 3 if k == 's' else 2
 
         if k in d:
-            t += f'{0 if round(d[k], r) == 0 else round(d[k],r)}{k}\t'
+            num = f'{0 if round(d[k], r) == 0 else  round(d[k],r)}'
+            s = f'{num}{k}'
+            if len(str(num).split('.')[0]) >= 5:
+                continue
+
+            t += s + ' '
 
     return t
 
@@ -54,13 +59,18 @@ def test():
         ran.randint(0, 100) * ran.choice([0.0001, 1, 0.0099])
         for _ in range(50)
     ]
+    ts = ''
     for i in times:
-        print(fmt_time(i))
+        ts += fmt_time(i).replace('pytime: ', '')
+        if len(ts) > 100:
+            print(ts)
+            ts = ''
 
 
 if __name__ == "__main__":
     if len(argv) < 2:
         print("Usage: pytime <command>")
     else:
-
+        print()
         print(time_cmd(" ".join(argv[1:])))
+        print()

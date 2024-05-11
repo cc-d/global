@@ -185,6 +185,7 @@ gitdatecommit() {
 
   _gd_git_date="${_gd_year}-${_gd_month}-${_gd_day}T${_gd_time_input}"
 
+
   GIT_AUTHOR_DATE="$_gd_git_date" GIT_COMMITTER_DATE="$_gd_git_date" git commit -m "$_gd_commit_message"
 }
 
