@@ -52,10 +52,18 @@ cd () {
         command cd $@
     fi
 
+    # prob faster to just do this but less risky to not
+    # if [ "$(uname -m)" = "x86_64" ]; then
+    #     ls -Aa1Fp --color=always | tr '\n' ' ' | tail -n +3 | "$GSHELLDIR/colorprint-amd64"
+    # else
+    #     ls -Aa1Fp --color=always | tr '\n' ' ' | tail -n +3 | "$GSHELLDIR/colorprint-arm"
+    # fi
+
     if [ "$(uname -m)" = "x86_64" ]; then
-        ls -Aa1Fp --color=always | tr '\n' ' ' | "$GSHELLDIR/colorprint-amd64"
+
+        ls -Aa1Fp --color=always | tr '\n' ' ' | sed -E 's/^.*\.\.[^ ]* //' |  "$GSHELLDIR/colorprint-amd64"
     else
-        ls -Aa1Fp --color=always | tr '\n' ' ' | "$GSHELLDIR/colorprint-arm"
+        ls -Aa1Fp --color=always | tr '\n' ' ' | sed -E 's/^.*\.\.[^ ]* //' | "$GSHELLDIR/colorprint-arm"
     fi
     echo ''
 }
@@ -77,4 +85,4 @@ if [ -n "$GIT_SSH_DEFAULT_CHOICE" ]; then
   git_ssh
 fi
 
-echo "$_LGS GLOBAL SHELL INITIALIZED\n"
+echo "$_LGS GLOBAL SHELL INITIALIZED" && echo ""
