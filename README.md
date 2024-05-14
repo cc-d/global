@@ -176,3 +176,4 @@ There are two versions of colorprint, one in python and one in c++. There are 2 
 
 - Purpose: Sources the identified shell rc file, effectively refreshing the shell's environment and settings. It ensures that any changes to the shell configuration are immediately applied.
 - Usage: `sourceshell`
+
