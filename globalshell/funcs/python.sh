@@ -28,8 +28,8 @@ actvenv() {
 
 publish_to_pypi() {
     # Check if setup.py exists
-    if [ -f "setup.py" ]; then
-        python setup.py sdist
+    if [ -f "setup.py" ] && ! [ -f "pyproject.toml" ]; then
+        python setup.py sdist bdist_wheel
     else
         # Check if pyproject.toml exists
         if [ -f "pyproject.toml" ]; then
@@ -43,7 +43,8 @@ publish_to_pypi() {
     # Check if build directory exists
     if [ -d "dist" ]; then
         # Find the most recent build file in the dist directory
-        most_recent_build=$(ls -t dist/* 2>/dev/null | head -n 1)
+        most_recent_build=$(ls -tv dist/* 2>/dev/null | head -n 2 | tr '\n' ' ')
+        most_recent_version=$(echo $most_recent_build | grep -oE '[^ ]+\d+\.\d+?\.\d+?' | head -n 1)
 
         if [ -n "$most_recent_build" ]; then
             # Read PyPI token from file
@@ -57,7 +58,10 @@ publish_to_pypi() {
             # Upload the most recent build using environment variables for authentication
             echo "Uploading build to PyPI..."
             echo "Using PyPI token from file: $PYPI_TOKEN_FILE"
-            TWINE_USERNAME="__token__" TWINE_PASSWORD="$pypi_token" twine upload "$most_recent_build"
+            echo "Uploading build: $most_recent_build"
+            echo "Most recent version: $most_recent_version"
+            TWINE_USERNAME="__token__" TWINE_PASSWORD="$pypi_token" twine upload $most_recent_version*
+
         else
             echo "No build files found in 'dist' directory."
             return 1
