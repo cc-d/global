@@ -71,6 +71,5 @@ if __name__ == "__main__":
     if len(argv) < 2:
         print("Usage: pytime <command>")
     else:
-        print()
-        print(time_cmd(" ".join(argv[1:])))
-        print()
+
+        print('\n', time_cmd(" ".join(argv[1:])), '\n', sep='\n')
