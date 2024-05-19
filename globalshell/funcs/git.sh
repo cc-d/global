@@ -136,7 +136,10 @@ gitacpush() {
     _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG [$_GAC_SOS_SUBSTR]"
   fi
   _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG $_GAC_FILES"
-  echo "$_GAC_LEFT_TEXT ORIGINAL: \"\"\"$_GAC_COMMIT_MSG\"\"\""
+  echo "$_GAC_LEFT_TEXT ORIGINAL"
+  echo ""
+  echo $_GAC_COMMIT_MSG
+  echo ""
 
   # truncate commit message if it's too long and add ellipsis
   if [ "${#_GAC_COMMIT_MSG}" -gt "$GITAC_MAX_MSG_LEN" ]; then
