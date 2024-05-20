@@ -4,21 +4,17 @@ import os
 import multiprocessing as M
 import threading
 import re
+from time import sleep
 from glob import glob
 from typing import List
-
-
-os.environ['LOGF_USE_PRINT'] = 'True'
-
-
-from logfunc import logf
 
 
 def find_in_file_segment(
     filename, start, end, search_str, regex, partial, results
 ):
     """Find the search string in a file segment from start to end."""
-    startr = len(results)
+
+    _results = []
     with open(filename, 'r') as file:
         file.seek(start)
         if start != 0:
@@ -30,22 +26,26 @@ def find_in_file_segment(
             if regex:
                 match = re.search(search_str, line)
                 if match:
-                    result = match.group(0) if partial else line
-                    results.append(result)
+                    _results.append(match.group(0) if partial else line)
+                    print(_results[-1])
             else:
                 if search_str in line:
-                    result = search_str if partial else line
-                    results.append(result)
+                    _results.append(search_str if partial else line)
+                    print(_results[-1])
+
+    results[filename] = _results
 
 
-def thread_file_processing(filename, search_str, regex, partial, num_threads):
+def thread_file_processing(
+    filename, search_str, regex, partial, num_threads, results
+):
     """Process a file using multiple threads."""
-    results = []
+
     filesize = os.path.getsize(filename)
     segment_size = filesize // num_threads
     threads = []
 
-    for i in range(2):
+    for i in range(num_threads):
         start = i * segment_size
         end = start + segment_size if i < num_threads - 1 else filesize
 
@@ -59,22 +59,30 @@ def thread_file_processing(filename, search_str, regex, partial, num_threads):
     for thread in threads:
         thread.join()
 
-    for result in results:
-        print(result)
-
 
 def process_files(files, search_str, regex, partial, single, num_workers):
     """Setup file processing with appropriate concurrency."""
+
     if single:
         for filename in files:
-            thread_file_processing(filename, search_str, regex, partial, 1)
+            thread_file_processing(filename, search_str, regex, partial, 2)
     else:
-        with M.Pool(num_workers) as pool:
+        with M.Pool(num_workers) as pool, M.Manager() as manager:
+            results = manager.dict()
             for filename in files:
                 pool.apply_async(
                     thread_file_processing,
-                    (filename, search_str, regex, partial, num_workers),
+                    (
+                        filename,
+                        search_str,
+                        regex,
+                        partial,
+                        num_workers,
+                        results,
+                    ),
                 )
+            while len(results) < len(files):
+                sleep(0.1)
 
 
 def main(args):
@@ -85,15 +93,6 @@ def main(args):
         process_files(
             log_files, s, args.regex, args.partial, args.single, args.cpu
         )
-
-
-for func in [
-    main,
-    process_files,
-    thread_file_processing,
-    find_in_file_segment,
-]:
-    globals()[func.__name__] = logf()(func)
 
 
 if __name__ == '__main__':
