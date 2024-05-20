@@ -108,7 +108,7 @@ if __name__ == '__main__':
         '--cpu',
         type=int,
         default=os.cpu_count(),
-        help='Number of CPUs to use for processing',
+        help='Number of CPU cores to use',
     )
     parser.add_argument(
         '-r', '--regex', action='store_true', help='Use regex for searching'
