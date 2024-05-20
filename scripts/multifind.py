@@ -61,37 +61,23 @@ def thread_file_processing(
         thread.join()
 
 
-def process_files(files, search_strs, regex, partial, single, num_workers):
+def process_files(files, search_strs, regex, partial, num_workers):
     """Setup file processing with appropriate concurrency."""
-
-    if single:
+    with M.Pool(num_workers) as pool, M.Manager() as manager:
+        results = manager.dict()
         for filename in files:
-            thread_file_processing(filename, search_strs, regex, partial, 2)
-    else:
-        with M.Pool(num_workers) as pool, M.Manager() as manager:
-            results = manager.dict()
-            for filename in files:
-                pool.apply_async(
-                    thread_file_processing,
-                    (
-                        filename,
-                        search_strs,
-                        regex,
-                        partial,
-                        num_workers,
-                        results,
-                    ),
-                )
-            while len(results) < len(files):
-                sleep(0.1)
+            pool.apply_async(
+                thread_file_processing,
+                (filename, search_strs, regex, partial, num_workers, results),
+            )
+        while len(results) < len(files):
+            sleep(0.1)
 
 
 def main(args):
     log_files = glob(args.file_pattern)
 
-    process_files(
-        log_files, args.search, args.regex, args.partial, args.single, args.cpu
-    )
+    process_files(log_files, args.search, args.regex, args.partial, args.cpu)
 
 
 if __name__ == '__main__':
@@ -108,7 +94,14 @@ if __name__ == '__main__':
         '--cpu',
         type=int,
         default=os.cpu_count(),
-        help='Number of CPU cores to use',
+        help='Number of CPU cores to use, one file per core',
+    )
+    parser.add_argument(
+        '-t',
+        '--threads',
+        type=int,
+        default=os.cpu_count() * 4,
+        help='Number of threads per file, default is 4x per core',
     )
     parser.add_argument(
         '-r', '--regex', action='store_true', help='Use regex for searching'
@@ -118,12 +111,6 @@ if __name__ == '__main__':
         '--partial',
         action='store_true',
         help='Display only matches, not full lines',
-    )
-    parser.add_argument(
-        '-s',
-        '--single',
-        action='store_true',
-        help='Process files one at a time',
     )
     parser.add_argument(
         'search', nargs='+', help='Search strings to look for in the files'
