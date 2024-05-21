@@ -4,6 +4,8 @@ from subprocess import run
 from time import perf_counter
 from decimal import Decimal, getcontext
 from pyshared import ran, D
+from shlex import quote, split
+from os import system
 
 getcontext().prec = 12  # Set higher precision for Decimal calculations
 
@@ -14,7 +16,7 @@ def time_cmd(cmd):
     -> Decimal: Time in seconds.
     """
     start = Decimal(perf_counter())
-    run(cmd, shell=True, check=False)
+    system(cmd)
     return fmt_time(Decimal(perf_counter()) - start)
 
 
@@ -68,7 +70,7 @@ def test():
 
 
 if __name__ == "__main__":
-    if len(argv) < 2:
+    if len(argv) < 2 or argv[1] in ['-h', '--help']:
         print("Usage: pytime <command>")
     else:
-        print('\n', time_cmd(" ".join(argv[1:])), '\n', sep='\n')
+        print('\n', time_cmd(' '.join(argv[1:])), '\n')
