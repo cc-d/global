@@ -225,10 +225,6 @@ dirfiles() {
 }
 
 
-pytime() {
-  $MYGLOBALDIR/scripts/pytime.py $@
-}
-
 
 columnate() {
   if which python3 &>/dev/null; then
