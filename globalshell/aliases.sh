@@ -29,3 +29,5 @@ alias dcpruneall='docker image prune -a; docker container prune; docker volume p
 alias tstime='pytime'
 
 alias gtree='tree -aCF  --charset ascii --filelimit=200 | sed "s/  / /g;s/--/-/g"'
+
+alias ls='ls -AaFp --color=always'
