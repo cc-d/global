@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 import sys
 import os.path as op
 import sys
