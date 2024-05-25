@@ -2,8 +2,8 @@
 import sys
 import os.path as op
 import sys
-from time import sleep
 from typing import List, Tuple, Optional as Opt
+from itertools import zip_longest
 
 GHHEADER = '=' * 10 + ' GLOBAL HISTORY ' + '=' * 10
 GHFILE = op.expanduser('~/.global/shell_history')
@@ -29,20 +29,19 @@ def read_histfile(hfile: str) -> List[str]:
     return ulines
 
 
-def _merge_lines(*args: List[str]) -> List[str]:
+def _merge_lines(*args: List[str]) -> set:
     """merges lines from multiple history files"""
-    merged = []
-    while any(args):
-        for lines in args:
-            if lines:
-                line = lines.pop(0)
-                if line not in merged:
-                    merged.append(line)
+    merged = set()
+    for lines in zip_longest(*args):
+        for line in lines:
+            if line:
+                merged.add(line)
+
     return merged
 
 
 def main(*args: str) -> None:
-    history = _merge_lines(*[read_histfile(f) for f in HISTORY_FILES])
+    history = _merge_lines(*[read_histfile(hfile) for hfile in HISTORY_FILES])
     ghistory = read_histfile(GHFILE)
     new_history = [line for line in history if line not in ghistory]
 
