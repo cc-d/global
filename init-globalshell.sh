@@ -91,3 +91,5 @@ if [ -n "$GIT_SSH_DEFAULT_CHOICE" ]; then
 fi
 
 echo "$_LGS GLOBAL SHELL INITIALIZED" && echo ""
+
+export HISTFILE="$HOME/.global/shell_history"
