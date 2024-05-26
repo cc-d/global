@@ -60,49 +60,79 @@ def find_in_file_segment(
     results[filename] = _results
 
 
-def thread_file_processing(
-    filename: str, args: argparse.Namespace, results: dict
+def spawn_threads(
+    filename: str,
+    args: argparse.Namespace,
+    results: dict,
+    procs: dict,
+    start: int,
+    end: int,
 ):
-    """Process a file using multiple threads."""
+    """Spawn a thread to process a segment of a file."""
+    segsize = end - start
 
-    filesize = os.path.getsize(filename)
-    segment_size = filesize // args.num_threads
-    threads = []
-
-    for i in range(args.num_threads):
-        start = i * segment_size
-        end = start + segment_size if i < args.num_threads - 1 else filesize
-
-        thread = threading.Thread(
+    tresults = {}
+    segs = [(s, min(s + segsize, end)) for s in range(start, end, segsize)]
+    for seg in segs:
+        t = threading.Thread(
             target=find_in_file_segment,
-            args=(filename, start, end, args, results),
+            args=(filename, seg[0], seg[1], args, tresults),
         )
-        threads.append(thread)
-        thread.start()
+        t.start()
+        procs['threads'].append(t)
+        t.join()
 
-    for thread in threads:
-        thread.join()
+    results.append((filename, tresults))
 
 
-def process_files(files, args):  # search, regex, partial, num_workers):
-    """Setup file processing with appropriate concurrency."""
-    num_workers = args.cpu
-    with M.Pool(num_workers) as pool, M.Manager() as manager:
-        results = manager.dict()
-        procs = []
-        for filename in files:
-            procs.append(
-                pool.apply_async(
-                    thread_file_processing, (filename, args, results)
-                )
+def spawn_procs(
+    filename: str,
+    args: argparse.Namespace,
+    pool: M.Pool,
+    procs: dict,
+    manager: M.Manager,
+    results: list,
+):
+    """Process a file using multiple processes."""
+
+    # get line count
+
+    segment_size = os.path.getsize(filename) // args.cpu
+    _procs = []
+
+    for i in range(0, args.cpu):
+        start = i * segment_size
+        end = (i + 1) * segment_size
+
+        _procs.append(
+            pool.apply_async(
+                spawn_threads,
+                args=(filename, args, results, procs, start, end),
             )
-        while not all(proc.ready() for proc in procs):
-            sleep(0.1)
+        )
+
+    while not all(p.ready() for p in _procs):
+        sleep(0.1)
+
+    return results
+
+
+def proc_single_file(fname, args):
+    """Process a single file."""
+
+    with M.Pool(args.cpu) as pool, M.Manager() as manager:
+        procs = manager.dict({'threads': [], 'procs': []})
+        results = manager.list()
+        spawn_procs(fname, args, pool, procs, manager, results)
 
 
 def main(args):
     log_files = glob(args.files)
-    process_files(log_files, args)
+    if len(log_files) == 0:
+        print('No files found')
+        return
+    elif len(log_files) == 1:
+        proc_single_file(log_files[0], args)
 
 
 if __name__ == '__main__':
@@ -111,21 +141,22 @@ if __name__ == '__main__':
         '-f',
         '--files',
         type=str,
-        default='*.log',
-        help='Pattern to match log files (glob)',
+        required=True,
+        help='File or files to search',
     )
+
     parser.add_argument(
         '-c',
         '--cpu',
         type=int,
-        default=os.cpu_count(),
-        help='Number of CPU cores to use, one file per core',
+        default=os.cpu_count() // 2,
+        help='Number of CPU cores to use',
     )
     parser.add_argument(
         '-t',
         '--threads',
         type=int,
-        default=4,
+        default=2,
         help='Number of threads per file, default is 4',
         dest='num_threads',
     )
@@ -164,6 +195,6 @@ if __name__ == '__main__':
 
     ex = shlex.split(''.join(sys.argv[1:]))
     args = parser.parse_args()
-    print(args)
+
     args.search_mode = args.search_mode.lower()
     main(args)
