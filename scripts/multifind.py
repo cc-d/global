@@ -10,29 +10,50 @@ from typing import List, Optional as Opt, Union as U
 from logfunc import logf
 
 
-def _search_line(line: str, args: argparse.Namespace) -> U[str, None]:
-    """Handles single line in file returning the line if conditions are met."""
-    matches = {}
+def _verbose(msg: str, args: argparse.Namespace):
+    if args.verbose:
+        print(msg)
+
+
+def _sl_regex(
+    line: str, args: argparse.Namespace, matches: dict = {}
+) -> U[str, None]:
+    """Search line using regex."""
 
     for search_str in args.search:
-        if args.regex:
-            match = re.search(
-                search_str, line, re.IGNORECASE if args.ignore_case else 0
-            )
-            if match:
-                if args.search_mode == 'or':
-                    return match.group(0) if args.partial else line
+        match = re.search(
+            search_str, line, re.IGNORECASE if args.ignore_case else 0
+        )
+        if match:
+            if args.search_mode == 'or':
+                return match.group(0) if args.partial else line
+            else:
                 matches[search_str] = match.group(0) if args.partial else line
-        else:
-            search_line = line.lower() if args.ignore_case else line
-            search_str = search_str.lower() if args.ignore_case else search_str
-            if search_str in search_line:
-                if args.search_mode == 'or':
-                    return search_str if args.partial else line
-                matches[search_str] = line
-
     if args.search_mode == 'and' and len(matches) == len(args.search):
         return line
+
+
+def _sl_substr(
+    line: str, args: argparse.Namespace, matches: dict = {}
+) -> U[str, None]:
+    """Search line using substring."""
+    for search_str in args.search:
+        search_line = line.lower() if args.ignore_case else line
+        search_str = search_str.lower() if args.ignore_case else search_str
+        if search_str in search_line:
+            if args.search_mode == 'or':
+                return search_str if args.partial else line
+            else:
+                matches[search_str] = line
+    if args.search_mode == 'and' and len(matches) == len(args.search):
+        return line
+
+
+def _search_line(line: str, args: argparse.Namespace) -> U[str, None]:
+    """Handles single line in file returning the line if conditions are met."""
+    if args.regex:
+        return _sl_regex(line, args)
+    return _sl_substr(line, args)
 
 
 def find_in_file_segment(
@@ -55,7 +76,7 @@ def find_in_file_segment(
                 break
             sline = _search_line(line, args)
             if sline:
-                print(sline)
+                print(sline.rstrip())
                 _results.append(sline)
     results[filename] = _results
 
@@ -67,22 +88,14 @@ def spawn_threads(
     procs: dict,
     start: int,
     end: int,
+    segsize: int,
 ):
     """Spawn a thread to process a segment of a file."""
-    segsize = end - start
+    _verbose(f'Starting threads for range {start} - {end} in {filename}', args)
 
     tresults = {}
-    segs = [(s, min(s + segsize, end)) for s in range(start, end, segsize)]
-    for seg in segs:
-        t = threading.Thread(
-            target=find_in_file_segment,
-            args=(filename, seg[0], seg[1], args, tresults),
-        )
-        t.start()
-        procs['threads'].append(t)
-        t.join()
-
-    results.append((filename, tresults))
+    find_in_file_segment(filename, start, end, args, tresults)
+    return tresults
 
 
 def spawn_procs(
@@ -104,10 +117,19 @@ def spawn_procs(
         start = i * segment_size
         end = (i + 1) * segment_size
 
+        _verbose(f'Starting process for {filename} segment {i}', args)
         _procs.append(
             pool.apply_async(
                 spawn_threads,
-                args=(filename, args, results, procs, start, end),
+                args=(
+                    filename,
+                    args,
+                    results,
+                    procs,
+                    start,
+                    end,
+                    segment_size,
+                ),
             )
         )
 
@@ -149,17 +171,10 @@ if __name__ == '__main__':
         '-c',
         '--cpu',
         type=int,
-        default=os.cpu_count() // 2,
-        help='Number of CPU cores to use',
+        default=M.cpu_count() // 4 * 3,
+        help='Number of CPU cores to use. Defaults to roughly 3/4 of cores',
     )
-    parser.add_argument(
-        '-t',
-        '--threads',
-        type=int,
-        default=2,
-        help='Number of threads per file, default is 4',
-        dest='num_threads',
-    )
+
     parser.add_argument(
         '-r', '--regex', action='store_true', help='Use regex for searching'
     )
@@ -185,11 +200,15 @@ if __name__ == '__main__':
         help='Ignore case when searching',
     )
     parser.add_argument(
+        '-v', '--verbose', action='store_true', help='Verbose output'
+    )
+    parser.add_argument(
         'search',
         nargs='*',
         type=str,
         help='Search string(s) to find in log files',
     )
+
     import sys
     import shlex
 
