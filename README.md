@@ -10,6 +10,25 @@ The main utility this repo offers is something called "globalshell", which is ju
 
 `globalshell/aliases.sh` As name implies, contains the aliases loaded into the shell.
 
+### List All Globalshell Commands
+
+A list of functions and alises can be determined by running `globalshell` in the terminal.
+
+This should output something like:
+
+```
+[GLOBALSHELL] FUNCTIONS:
+actvenv colortext columnate dirfiles echo_gptfile evar fixperms get_shell_rc_files git_ssh gitacpush gitconf gitdatecommit gitnewbranch globalshell gptfiles history ostype pasterun posix_ranstr publish_to_pypi revert_to_commit safesource screenproc sourceshell substr_in
+
+[GLOBALSHELL] ALIASES:
+gpull gpush initgshell gcpports gcpssh pyenvinit timestamp py3 py shellsh git-ssh dc dcpruneall tstime gtree ls
+
+[GLOBALSHELL] BIN:
+colorprint colorprint-amd64 colorprint-arm multifind pytime
+```
+
+Anything in the `BIN` section should be in the user's path.
+
 ## Aliases
 
 Here's a summary of what each alias in your `aliases.sh` file does, formatted in Markdown:
@@ -176,4 +195,3 @@ There are two versions of colorprint, one in python and one in c++. There are 2 
 
 - Purpose: Sources the identified shell rc file, effectively refreshing the shell's environment and settings. It ensures that any changes to the shell configuration are immediately applied.
 - Usage: `sourceshell`
-
