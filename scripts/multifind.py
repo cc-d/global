@@ -65,7 +65,6 @@ def find_in_file_segment(
 ):
     """Find the search string in a file segment from start to end."""
 
-    _results = []
     with open(filename, 'r') as file:
         file.seek(start)
         if start != 0:
@@ -77,64 +76,42 @@ def find_in_file_segment(
             sline = _search_line(line, args)
             if sline:
                 print(sline.rstrip())
-                _results.append(sline)
-    results[filename] = _results
+                results.append(sline)
 
-
-def spawn_threads(
-    filename: str,
-    args: argparse.Namespace,
-    results: dict,
-    procs: dict,
-    start: int,
-    end: int,
-    segsize: int,
-):
-    """Spawn a thread to process a segment of a file."""
-    _verbose(f'Starting threads for range {start} - {end} in {filename}', args)
-
-    tresults = {}
-    find_in_file_segment(filename, start, end, args, tresults)
-    return tresults
+    return results
 
 
 def spawn_procs(
     filename: str,
     args: argparse.Namespace,
     pool: M.Pool,
-    procs: dict,
     manager: M.Manager,
     results: list,
 ):
     """Process a file using multiple processes."""
 
     # get line count
+    procs, pr = [], []
 
-    segment_size = os.path.getsize(filename) // args.cpu
-    _procs = []
-
+    fsize = os.path.getsize(filename)
+    segment_size = fsize // args.cpu
+    _verbose(f'Filename: {filename}', args)
+    _verbose(f'Segment size: {segment_size}', args)
+    _verbose(f'File size: {fsize}', args)
+    _verbose(f'CPU count: {args.cpu}', args)
     for i in range(0, args.cpu):
         start = i * segment_size
         end = (i + 1) * segment_size
 
         _verbose(f'Starting process for {filename} segment {i}', args)
-        _procs.append(
+        procs.append(
             pool.apply_async(
-                spawn_threads,
-                args=(
-                    filename,
-                    args,
-                    results,
-                    procs,
-                    start,
-                    end,
-                    segment_size,
-                ),
+                find_in_file_segment, (filename, start, end, args, results)
             )
         )
 
-    while not all(p.ready() for p in _procs):
-        sleep(0.1)
+    for p in procs:
+        p.get()
 
     return results
 
@@ -143,9 +120,9 @@ def proc_single_file(fname, args):
     """Process a single file."""
 
     with M.Pool(args.cpu) as pool, M.Manager() as manager:
-        procs = manager.dict({'threads': [], 'procs': []})
+
         results = manager.list()
-        spawn_procs(fname, args, pool, procs, manager, results)
+        spawn_procs(fname, args, pool, manager, results)
 
 
 def main(args):
@@ -171,7 +148,7 @@ if __name__ == '__main__':
         '-c',
         '--cpu',
         type=int,
-        default=M.cpu_count() // 4 * 3,
+        default=M.cpu_count() // 2 if M.cpu_count() >= 4 else M.cpu_count(),
         help='Number of CPU cores to use. Defaults to roughly 3/4 of cores',
     )
 
