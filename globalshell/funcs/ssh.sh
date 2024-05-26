@@ -31,10 +31,10 @@ git_ssh() {
     # Check if environment variable is set and is valid
     if [ -n "$GIT_SSH_DEFAULT_CHOICE" ] && [ "$GIT_SSH_DEFAULT_CHOICE" -ge 1 ] && [ "$GIT_SSH_DEFAULT_CHOICE" -le "$#" ]; then
         choice=$GIT_SSH_DEFAULT_CHOICE
-        echo "$_LGS Using GIT_SSH_DEFAULT_CHOICE: $choice"
+        echo "$_GLOBAL_SHELL_LEFT Using GIT_SSH_DEFAULT_CHOICE: $choice"
     else
         # prompt user on the same line for which file to use with ssh-add
-        echo -n "$_LGS Select which SSH keyfile to use with ssh-add: "
+        echo -n "$_GLOBAL_SHELL_LEFT Select which SSH keyfile to use with ssh-add: "
         read choice
     fi
 
@@ -50,12 +50,12 @@ git_ssh() {
         # clever
         cpath=$(eval "echo \$$(echo $choice)")
         if ! ssh-add $cpath 2>/dev/null; then
-            echo "$_LGS: Failed to add SSH key. Retrying..."
+            echo "$_GLOBAL_SHELL_LEFT: Failed to add SSH key. Retrying..."
             eval "$(ssh-agent -s)"
-            ssh-add $cpath || echo "$_LGSERROR: Failed to add SSH key."
+            ssh-add $cpath || echo "$_GLOBAL_SHELL_LEFTERROR: Failed to add SSH key."
         fi
     else
-        echo "$_LGS: $choice is not a valid choice."
+        echo "$_GLOBAL_SHELL_LEFT: $choice is not a valid choice."
     fi
 }
 
