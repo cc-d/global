@@ -131,8 +131,8 @@ def main(args):
     if len(log_files) == 0:
         print('No files found')
         return
-    elif len(log_files) == 1:
-        proc_single_file(log_files[0], args)
+    for f in log_files:
+        proc_single_file(f, args)
 
 
 if __name__ == '__main__':
