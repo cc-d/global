@@ -17,15 +17,14 @@ def _sysexit(msg: str, code: int = 1):
 
 
 class GPTFile:
-    __S = ['<!-- FILE: %s -->', '%s', '<!-- END: %s -->']
+    __S = ['\n<!-- FILE: %s -->\n', '\n<!-- END: %s -->\n']
 
     def __init__(self, fname: str):
-        print(f"Opening file: {fname}")
+
         with open(fname, 'r') as f:
-            self.lines = f.readlines()
-        print('\n'.join(self.lines))
+            self.__lines = f.read().splitlines()
+
         self.fname = fname
-        print(self.__str__())
 
     def clip(self):
         copyclip(self.__str__())
@@ -33,16 +32,18 @@ class GPTFile:
     def __str__(self):
         ps = (
             '<!-- FILE: %s -->' % self.fname,
-            '%s',
+            # %s'
             '<!-- END: %s -->' % self.fname,
         )
-        ps = [x % self.fname for x in self.__S]
-        s = '\n'.join([ps[0]] + self.lines + [ps[2]])
 
-        return s
+        return ps
 
     def __repr__(self):
         return self.__str__()
+
+    @property
+    def lines(self):
+        return self.__lines
 
 
 def copyclip(text: str):
@@ -62,34 +63,44 @@ def main():
         'files', metavar='files', type=str, nargs='*', help='Files to process.'
     )
     args = parser.parse_args()
-    print("Arguments:", args.files)
 
     files, globs = [], []
 
     argfiles = [x for x in sys.argv[1:] if x not in ['-h', '--help']]
-    print("Argument files:", argfiles)
+
     for f in argfiles:
         if op.isfile(f):
-            print("File found:", f)
+
             files.append(f)
         else:
-            print("Adding glob pattern:", f)
+
             globs.append(f)
 
     for g in globs:
         matched_files = glob(g)
-        print("Matched files:", matched_files)
+
         files += matched_files
 
     if not files:
         _sysexit("No files found.")
 
+    clip = []
     for f in files:
+        print(f)
         if not op.isfile(f):
             continue
-        print("Processing file:", f)
+        print(f)
+
         gpt = GPTFile(f)
-        gpt.clip()
+        for l in gpt.lines:
+
+            clip.append(l)
+
+    if not clip:
+        _sysexit("No files found.")
+
+    print(len(clip), "lines copied to clipboard.")
+    copyclip('\n'.join(clip))
 
 
 if __name__ == '__main__':

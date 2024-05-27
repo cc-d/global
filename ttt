@@ -1,0 +1,54 @@
+<!-- FILE: /Users/mym2/.zshrc -->
+export STORAGE_BUCKET="pict-testing"
+
+
+
+export GIT_SSH_DEFAULT_CHOICE=1
+
+
+
+. /Users/mym2/global/init-globalshell.sh
+
+
+
+export GOOGLE_APPLICATION_CREDENTIALS=~/pict/webapp/webapp-service-account.json
+
+
+
+export LIBSITEIP='168.235.104.146'
+
+export LIBLIFEIP=168.235.104.171
+
+export O2FAIP='168.235.104.190'
+
+
+
+export BNAME=BNAME=SOS-53320-stockwell-slack-item-alerts
+
+
+
+# NVM initialization
+
+export NVM_DIR="$HOME/.nvm"
+
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+export TNAME=SOS-52163
+
+export BNAME=SOS-53320-stockwell-slack-item-alerts
+
+export BN=$BNAME
+
+export TN=SOS-53321
+
+export IEDDITIP=168.235.104.27
+
+export PYPI_TOKEN_FILE=~/.keys/pypitokenall
+
+export IINGEST=SOS-51601
+
+export IS=iingest-staging
+
+<!-- END: /Users/mym2/.zshrc -->
