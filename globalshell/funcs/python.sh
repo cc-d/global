@@ -45,7 +45,7 @@ publish_to_pypi() {
         # Find the most recent build file in the dist directory
         most_recent_build=$(ls -tv dist/* 2>/dev/null | head -n 2 | tr '\n' ' ')
         most_recent_version=$(echo $most_recent_build | grep -oE '[^ ]+\d+\.\d+\.\d+' | head -n 1)
-
+        echo "Most recent build: $most_recent_build"
         if [ -n "$most_recent_build" ]; then
             # Read PyPI token from file
             if ! [ -n "$PYPI_TOKEN_FILE" ]; then
@@ -60,7 +60,7 @@ publish_to_pypi() {
             echo "Using PyPI token from file: $PYPI_TOKEN_FILE"
             echo "Uploading build: $most_recent_build"
             echo "Most recent version: $most_recent_version"
-            TWINE_USERNAME="__token__" TWINE_PASSWORD="$pypi_token" twine upload $most_recent_version*
+            TWINE_USERNAME="__token__" TWINE_PASSWORD="$pypi_token" twine upload --verbose $most_recent_version*
 
         else
             echo "No build files found in 'dist' directory."
