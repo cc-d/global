@@ -8,6 +8,7 @@ from pathlib import Path as P
 import subprocess as sp
 import platform as plat
 from glob import glob
+from unittest.mock import patch
 
 
 def _sysexit(msg: str, code: int = 1):
@@ -49,13 +50,17 @@ class GPTFile:
 def copyclip(text: str):
     """Copy text to clipboard. Supports macOS and Ubuntu."""
     system = plat.system()
+
     if system == 'Darwin':  # macOS
-        sp.run("pbcopy", text=True, input=text)
+        with patch('builtins.print') as p:
+            sp.run("pbcopy", text=True, input=text, shell=True)
+
     elif system == 'Linux':  # Ubuntu
         sp.run("xclip -selection clipboard", text=True, input=text, shell=True)
 
 
 def main():
+
     parser = argparse.ArgumentParser(
         description="Process files and copy contents to clipboard."
     )
@@ -89,7 +94,6 @@ def main():
         print(f)
         if not op.isfile(f):
             continue
-        print(f)
 
         gpt = GPTFile(f)
         for l in gpt.lines:
@@ -100,7 +104,7 @@ def main():
         _sysexit("No files found.")
 
     print(len(clip), "lines copied to clipboard.")
-    copyclip('\n'.join(clip))
+    copyclip('\n'.join([c for c in clip if c.strip()]))
 
 
 if __name__ == '__main__':
