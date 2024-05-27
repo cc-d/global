@@ -1,241 +1,228 @@
-<!-- FILE: init-globalshell.sh -->
-#!/bin/sh
+# Global Repo
 
+This is a repo I have cloned in every environment I work in.
 
+The main utility this repo offers is something called "globalshell", which is just a suite of posix compliant shell functions and aliases that I find helpful to have in every environment I work in. Both macos & recent ubuntu distributions are explicitly supported in most circumstances.
 
-# left text for globalshell messages
+## GLOBALSHELL
 
-export _GLOBAL_SHELL_LEFT='[GLOBALSHELL]'
+`init-globalshell.sh` initalizes globalshell and adds initialization logic to the appropriate shell rc file.
 
+`globalshell/aliases.sh` As name implies, contains the aliases loaded into the shell.
 
+### List All Globalshell Commands
 
-# Assumes repo is cloned to $HOME/global
+A list of functions and alises can be determined by running `globalshell` in the terminal.
 
-export GLOBAL_SHELL_DIR="$HOME/global"
+This should output something like:
 
-INIT_COMMAND=". $GLOBAL_SHELL_DIR/init-globalshell.sh"
+```
+[GLOBALSHELL] FUNCTIONS:
+actvenv colortext columnate dirfiles echo_gptfile evar fixperms get_shell_rc_files git_ssh gitacpush gitconf gitdatecommit gitnewbranch globalshell gptfiles history ostype pasterun posix_ranstr publish_to_pypi revert_to_commit safesource screenproc sourceshell substr_in
 
+[GLOBALSHELL] ALIASES:
+gpull gpush initgshell gcpports gcpssh pyenvinit timestamp py3 py shellsh git-ssh dc dcpruneall tstime gtree ls
 
+[GLOBALSHELL] BIN:
+colorprint colorprint-amd64 colorprint-arm multifind pytime
+```
 
-export GLOBAL_SHELL_GS_DIR="$GLOBAL_SHELL_DIR/globalshell"
+Anything in the `BIN` section should be in the user's path.
 
-export GLOBAL_SHELL_HISTORY=1
+## Aliases
 
+Here's a summary of what each alias in your `aliases.sh` file does, formatted in Markdown:
 
+- `gpull`/`gpush`: Pulls/pushes the branch set as $BNAME to/from the remote repository.
 
-# Path Stuff
+- `initgshell`: Sources the `init-globalshell.sh` script from the `global` directory in the user's home directory.
 
-export GLOBAL_BIN_PATH="$GLOBAL_SHELL_DIR/bin"
+- `pyenvinit`: Initializes `pyenv` on a system with `pyenv` installed. `pyenv` can cause some path weirdness if initialized in the shell rc file.
 
-export PATH="$GLOBAL_BIN_PATH:$PATH"
+- `timestamp`: Prints the current time as a Unix timestamp plus milliseconds. Equivalent to python `time.time()`
 
+- `py3` and `py`: Shortcuts for running Python 3 and the default Python interpreter, respectively.
 
+- `git-ssh`: alias for `git_ssh` function which is covered in the functions section.
 
-# Add globalshell init to zshrc/bashrc depending on system type
+- `dc`: Shortcut for `docker compose`, a tool for defining and running multi-container Docker applications.
 
-if echo "$SHELL" | grep -q 'zsh'; then
+- `dcpruneall`: Removes all unused Docker images, containers, volumes, and networks.
 
-  export GLOBAL_SHELL_RC_FILE="$HOME/.zshrc"
+## Commands
 
-elif echo "$SHELL" | grep -q 'bash'; then
+### cd
 
-  export GLOBAL_SHELL_RC_FILE="$HOME/.bashrc"
+I've overriden the `cd` command with custom functionality which displays a colored and sorted list of file names in whichever dir was the target of `cd`.
 
-else
+Originally I had a sh function that did this, then a python script, then finally I wrote the utility using cpp for optimization reasons. Going from python -> c++ was about a 90% performance improvement.
 
-  echo "No Shell .rc file detected"
+![!cd](img/cd.png)
 
-fi
+### history
 
-# Add globalshell init to zshrc/bashrc depending on system type
+I've overriden the `history` command with custom functionality which works as follows:
 
-# make sure the init command added is in the EXACT same format
+If the `GLOBAL_SHELL_HISTORY` environment variable is set, the `history` command will execute `$HOME/global/cron/ghistory.py` which combines multiple shell history files into a single file, removes any duplicate entries, and displays a list of numbered commands to the user.
 
-# as $INIT_COMMAND to prevent infinite loops
+One can optionally use `crontab cron/crontab` to set up a cron job to run `ghistory.py` at a regular interval. This will ensure that default shell history file behavior is bypassed (mainly the truncation) and every unique command is preserved.
 
-add_init_to_rc_file() {
+The default history file location is `$HOME/.global/shell_history`
 
-  RC_FILE="$1"
+![!history](img/history.png)
 
-  if [ ! -f "$RC_FILE" ]; then
+### Colorprint
 
-    echo "$INIT_COMMAND" > "$RC_FILE"
+This was created to work around issues with in-terminal color lines being broken at incorrect widths. It had to be maximally performant or otherwise it would be annoying to use.
 
-    echo "$_GLOBAL_SHELL_LEFT Created $RC_FILE with init command"
+There are two versions of colorprint, one in python and one in c++. There are 2 compiled binaries of the c++ version, one for ARM64 and one for x86-64. The correct version should be automatically used based on system/os type.
 
-  elif ! cat "$RC_FILE" | grep -q "$INIT_COMMAND"; then
+`colorprint.py` is the python version of colorprint.
 
-    echo "$INIT_COMMAND" >> "$RC_FILE"
+`colorprint-x86` is the x86-64 version of colorprint.
 
-    echo "$_GLOBAL_SHELL_LEFT Added init to $RC_FILE"
+`colorprint-arm` is the ARM64 version of colorprint.
 
-  else
+(see the `cd` img for an example of colorprint in action)
 
-    echo "$_GLOBAL_SHELL_LEFT Init command already in $RC_FILE"
+### revert_to_commit
 
-  fi
+- Purpose: Reverts the current Git branch to a specified commit by creating a new branch and reverting commits up to the target.
 
-}
+- Usage: `revert_to_commit <commit_hash>`
 
+### gitconf
 
+- Purpose: Configures Git username and email globally, locally, or system-wide.
+- Usage: `gitconf <email> [scope]` or `gitconf [scope] <email>`
+- Scope Options: global, local, system.
 
+### gitnewbranch
 
+- Purpose: Creates a new Git branch off a specified base, stashing or resetting local changes as needed.
+- Usage: Interactive prompts guide the process.
 
-add_init_to_rc_file "$GLOBAL_SHELL_RC_FILE"
+### gitacpush
 
+- Purpose: Automatically adds, commits, and pushes changes to the current branch without needing to specify a commit message.
+- Usage: `gitacpush`
 
+### gitdatecommit
 
-# import aliases
+- Purpose: Commits changes with a specific author and committer date.
+- Usage: `gitdatecommit [-m <message>] [-d <date>] [-t <time>]`
 
-. "$GLOBAL_SHELL_GS_DIR/aliases.sh"
+### **_gptfiles_**
 
+- Purpose: Takes a list of files and copies their contents in a token minimized way onto the clipboard for easy pasting into (usually) chatgpt
 
+- Usage: `gptfiles <file1> <file2> ...`
 
-# import our functions, always source utils first
+### git_ssh
 
-. "$GLOBAL_SHELL_GS_DIR/funcs/utils.sh"
+- Purpose: Adds a specified SSH key to the SSH agent to facilitate Git operations over SSH. It allows for easy usage of `ssh-add` and can be configured to automatically add a key on startup if the `GIT_SSH_DEFAULT_CHOICE` environment variable is set.
+- Usage: `git_ssh` (or `git-ssh` if aliased)
 
+### actvenv
 
+- Purpose: Tries to activate the most relevant Python virtual environment to the current working directory, streamlining the process of switching between projects.
+- Usage: `actvenv`
 
-# source all functions in funcs directory
+### fixperms
 
-for f in $(find "$GLOBAL_SHELL_GS_DIR/funcs" -type f -name '*.sh' -not -name 'utils.sh'); do
+- Purpose: Ensures that all files and directories in the current or provided directory are set to the user's user:group with permissions set to 755, standardizing access rights for security and usability.
+- Usage: `fixperms [file/directory]`
 
-    . $f
+### evar
 
-done
+- Purpose: Sets an environment variable in the current session and adds the `export <variable>=<value>` line to the appropriate shell `.rc` file, ensuring the variable's availability in future sessions.
+- Usage: `evar <variable_name> <value>`
 
+### safesource
 
+- Purpose: Provides a safe way of calling `source` or `.` (dot command), handling scenarios where `source` is not installed. It ensures scripts or configuration files are sourced correctly across different shells.
+- Usage: `safesource <file>`
 
-# builtin command overrides/aliases/etc
+### substr_in
 
-# if ls receives any args it behaves as normal
+- Purpose: Checks if a specified substring is present within a string, offering a simple utility for string manipulation or conditional logic.
+- Usage: `substr_in <substring> <string>`
 
+### ostype
 
+- Purpose: Detects the operating system type and architecture. This utility is useful for scripts that need to adapt based on the operating environment.
+- Usage: `ostype`
 
+### posix_ranstr
 
+- Purpose: Generates a random string of a specified length and character set, which can be used for creating unique identifiers or passwords.
+- Usage: `posix_ranstr <length> [<charset>]`
 
-cd () {
+### screenproc
 
-    if which builtin &>/dev/null; then
+- Purpose: Manages screen sessions, providing functionalities to list, kill, and name sessions automatically. It's particularly useful for managing long-running processes in the background.
+- Usage: `screenproc [option]`
 
-        builtin cd $@
+### pasterun
 
-    else
+- Purpose: Executes a command on code pasted directly into the terminal. This function facilitates the quick testing or execution of scripts without the need for creating a temporary file.
+- Usage: `pasterun <command>`
 
-        command cd $@
+### dirfiles
 
-    fi
+- Purpose: Lists files and directories within a specified path, applying filters to exclude certain directories by default. It helps in navigating project structures more efficiently.
+- Usage: `dirfiles <directory>`
 
+### pytime
 
+- Purpose: Measures the execution time of a specified command in convenient human-readable format, providing insights into the performance of scripts or processes. Uses python, hence the name.
 
-    if [ "$(uname -m)" = "x86_64" ]; then
+- Usage: `pytime <command>`
 
-        ls -Aa1Fp --color=always | tr '\n' ' ' | sed -E 's/^.*\.\.[^ ]* //' |  "$GLOBAL_SHELL_GS_DIR/colorprint-amd64"
+### columnate
 
-    elif echo "$(uname -m)" | grep -q 'arm'; then
+- Purpose: Organizes input into avg/median width truncated columns for easy, compact viewing. Automatically detects terminal width and adjusts the number of columns accordingly, as well as properly handling color codes and special characters.
+- Usage: `ls -AaFp --color=always | columnate`
 
-        ls -Aa1Fp --color=always | tr '\n' ' ' | sed -E 's/^.*\.\.[^ ]* //' | "$GLOBAL_SHELL_GS_DIR/colorprint-arm"
+![!columnate](img/columnate.png)
 
-    else
+### get_shell_rc_files
 
-        ls -Aa1Fp --color=always | tr '\n' ' ' | sed -E 's/^.*\.\.[^ ]* //'
+- Purpose: Identifies the shell's rc file, such as `.bashrc`, `.zshrc`, etc. This utility supports customizing and configuring the shell environment by determining the correct file to modify.
+- Usage: `get_shell_rc_files | head -n 1`
 
-    fi
+### sourceshell
 
+- Purpose: Sources the identified shell rc file, effectively refreshing the shell's environment and settings. It ensures that any changes to the shell configuration are immediately applied.
+- Usage: `sourceshell`
+<!-- FILE: /Users/mym2/.zshrc -->
 
+export STORAGE_BUCKET="pict-testing"
 
-    echo ''
+export GIT_SSH_DEFAULT_CHOICE=1
 
-}
+. /Users/mym2/global/init-globalshell.sh
 
+export GOOGLE_APPLICATION_CREDENTIALS=~/pict/webapp/webapp-service-account.json
 
+export LIBSITEIP='168.235.104.146'
+export LIBLIFEIP=168.235.104.171
+export O2FAIP='168.235.104.190'
 
-globalshell () {
+export BNAME=BNAME=SOS-53320-stockwell-slack-item-alerts
 
-  echo "$_GLOBAL_SHELL_LEFT FUNCTIONS:"
+# NVM initialization
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export TNAME=SOS-52163
+export BNAME=SOS-53320-stockwell-slack-item-alerts
+export BN=$BNAME
+export TN=SOS-53321
+export IEDDITIP=168.235.104.27
+export PYPI_TOKEN_FILE=~/.keys/pypitokenall
+export IINGEST=SOS-51601
+export IS=iingest-staging
 
-  _all_gc_funcs="globalshell\n"
+<!-- END: /Users/mym2/.zshrc -->
 
-  _gs_grep_cmd='^[a-zA-Z0-9_-]+[[:space:]]*\(\)[[:space:]]*{$'
-
-  for f in $(find "$GLOBAL_SHELL_GS_DIR/funcs" -type f -name '*.sh'); do
-
-
-
-    _cur_gc_funcs=$(cat $f | grep -E "$_gs_grep_cmd" | sed -E 's/[{}()]//g')
-
-    if [ -n "$_cur_gc_funcs" ]; then
-
-      _all_gc_funcs="$_all_gc_funcs\n$_cur_gc_funcs"
-
-    else
-
-      _all_gc_funcs="$_cur_gc_funcs"
-
-    fi
-
-
-
-  done
-
-  _all_gc_funcs=$(echo "$_all_gc_funcs" | sort | uniq)
-
-  _all_gc_funcs=$(echo "$_all_gc_funcs" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g' | sed -E 's/^ //')
-
-  echo "$_all_gc_funcs"
-
-  echo ""
-
-
-
-
-
-  echo "$_GLOBAL_SHELL_LEFT ALIASES:"
-
-  _all_gc_aliases=$(cat "$GLOBAL_SHELL_GS_DIR/aliases.sh" | grep -oE '^alias [^=]*' | sed -E 's/alias //g' | tr '\n' ' ')
-
-  echo "$_all_gc_aliases"
-
-  echo ""
-
-
-
-  echo "$_GLOBAL_SHELL_LEFT BIN:"
-
-  _all_gc_bins=`command ls $GLOBAL_BIN_PATH/* | sed -E 's/.*\///' | tr '\n' ' '`
-
-
-
-  echo "$_all_gc_bins"
-
-}
-
-
-
-
-
-# Add $path/global/bin to PATH in .rc shell file
-
-
-
-
-
-# automatically run git_ssh if the environment variable is set
-
-if [ -n "$GIT_SSH_DEFAULT_CHOICE" ]; then
-
-  echo "$_GLOBAL_SHELL_LEFT GIT_SSH_DEFAULT_CHOICE is set, running git_ssh"
-
-  git_ssh
-
-fi
-
-
-
-echo "$_GLOBAL_SHELL_LEFT GLOBAL SHELL INITIALIZED" && echo ""
-
-:wq!:
-
-#export HISTFILE="$HOME/.global/shell_history"
-<!-- END: init-globalshell.sh -->
