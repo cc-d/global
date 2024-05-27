@@ -44,7 +44,7 @@ publish_to_pypi() {
     if [ -d "dist" ]; then
         # Find the most recent build file in the dist directory
         most_recent_build=$(ls -tv dist/* 2>/dev/null | head -n 2 | tr '\n' ' ')
-        most_recent_version=$(echo $most_recent_build | grep -oE '[^ ]+\d+\.\d+?\.\d+?' | head -n 1)
+        most_recent_version=$(echo $most_recent_build | grep -oE '[^ ]+\d+\.\d+\.\d+' | head -n 1)
 
         if [ -n "$most_recent_build" ]; then
             # Read PyPI token from file
