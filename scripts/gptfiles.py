@@ -68,16 +68,10 @@ def main():
     argfiles = [x for x in sys.argv[1:] if x not in ['-h', '--help']]
 
     for f in argfiles:
-        if op.isfile(f):
-
-            files.append(f)
-        else:
-
-            globs.append(f)
+        files.append(f) if op.isfile(f) else globs.append(f)
 
     for g in globs:
         matched_files = glob(g)
-
         files += matched_files
 
     if not files:
@@ -91,7 +85,6 @@ def main():
 
         gpt = GPTFile(f)
         for l in gpt.lines:
-
             clip.append(l)
 
     if not clip:

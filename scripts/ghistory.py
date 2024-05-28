@@ -56,6 +56,7 @@ def _interleave(*iterables: Iterable) -> List:
 
 
 def main():
+    print(GHHEADER)
     bhist = read_history_file(HISTORY_FILES[0])
     zhist = read_history_file(HISTORY_FILES[1])
     for f in glob(op.expanduser('~/.zsh_sessions/*.hist*')):
@@ -72,10 +73,12 @@ def main():
         print('writing %s new lines to %s' % (len(new_lines), GHFILE))
         with open(GHFILE, 'a') as f:
             f.write('\n'.join(new_lines) + '\n')
-
-    for i, l in enumerate(ghist + new_lines):
-        print(i, l)
+    else:
+        print('no new lines to write')
 
 
 if __name__ == '__main__':
     main()
+
+
+# The script reads the history files of bash and zsh, and the history files of zsh sessions. It then interleaves the lines from the bash and zsh history files, and compares the interleaved history with the global history file. If there are new lines, it writes them to the global history file. The script is useful for maintaining a global history file that contains all the unique commands from all the history files.
