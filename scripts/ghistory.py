@@ -56,7 +56,6 @@ def _interleave(*iterables: Iterable) -> List:
 
 
 def main():
-    print(GHHEADER)
     bhist = read_history_file(HISTORY_FILES[0])
     zhist = read_history_file(HISTORY_FILES[1])
     for f in glob(op.expanduser('~/.zsh_sessions/*.hist*')):
@@ -70,11 +69,13 @@ def main():
     new_lines = [l for l in non_ghist if l not in ghist]
 
     if new_lines:
-        print('writing %s new lines to %s' % (len(new_lines), GHFILE))
+        print('writing %s new lines to %s...\n' % (len(new_lines), GHFILE))
         with open(GHFILE, 'a') as f:
             f.write('\n'.join(new_lines) + '\n')
-    else:
-        print('no new lines to write')
+
+    with open(GHFILE) as f:
+        for i, l in enumerate(f.read().splitlines()):
+            print(i, l)
 
 
 if __name__ == '__main__':
