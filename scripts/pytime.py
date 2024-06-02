@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from sys import argv
-from subprocess import run
+from subprocess import run, PIPE
 from time import perf_counter
 from decimal import Decimal, getcontext
 from pyshared import ran, D
@@ -16,8 +16,14 @@ def time_cmd(cmd):
     -> Decimal: Time in seconds.
     """
     start = Decimal(perf_counter())
-    system(cmd)
-    return fmt_time(Decimal(perf_counter()) - start)
+    result = run(split(cmd), stdout=PIPE, stderr=PIPE, text=True)
+    end = Decimal(perf_counter())
+    if result.stdout:
+        print(result.stdout, end="")
+    if result.stderr:
+        print(result.stderr, end="")
+
+    return fmt_time(end - start)
 
 
 def fmt_time(e):
