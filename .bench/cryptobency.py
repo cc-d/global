@@ -11,6 +11,7 @@ sizes = [1024, 1024**2, 1024 * 100, 1024**3]  # 1KB, 1MB, 100MB, 1GB
 
 os.environ['LOGF_USE_PRINT'] = 'True'
 os.environ['LOGF_SINGLE_MSG'] = 'True'
+os.environ['LOGF_LOG_RETURN'] = 'False'
 
 import logging
 
@@ -78,9 +79,7 @@ def chacha_decrypt(file_path, key):
         algorithms.ChaCha20(key, nonce), mode=None, backend=default_backend()
     )
     decryptor = cipher.decryptor()
-    data = decryptor.update(ciphertext) + decryptor.finalize()
-    with open(file_path + '.chacha.dec', 'wb') as f:
-        f.write(data)
+    return decryptor.update(ciphertext) + decryptor.finalize()
 
 
 @logf()
@@ -111,9 +110,7 @@ def aes_gcm_decrypt(file_path, key):
         algorithms.AES(key), modes.GCM(iv, tag), backend=default_backend()
     )
     decryptor = cipher.decryptor()
-    data = decryptor.update(ciphertext) + decryptor.finalize()
-    with open(file_path + '.gcm.dec', 'wb') as f:
-        f.write(data)
+    return decryptor.update(ciphertext) + decryptor.finalize()
 
 
 @logf()
@@ -131,9 +128,7 @@ def fernet_decrypt(file_path, key):
     fernet = Fernet(key)
     with open(file_path, 'rb') as f:
         encrypted_data = f.read()
-    decrypted_data = fernet.decrypt(encrypted_data)
-    with open(file_path + '.fernet.dec', 'wb') as f:
-        f.write(decrypted_data)
+    return fernet.decrypt(encrypted_data)
 
 
 # Main benchmark loop
