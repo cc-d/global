@@ -84,8 +84,10 @@ def main():
             continue
 
         gpt = GPTFile(f)
+        clip.append(f'<!-- FILE: {f} -->')
         for l in gpt.lines:
             clip.append(l)
+        clip.append(f'<!-- END: {f} -->')
 
     if not clip:
         _sysexit("No files found.")

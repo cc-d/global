@@ -7,13 +7,23 @@ from cryptography.fernet import Fernet
 from logfunc import logf
 
 # File sizes in bytes
-sizes = [1024, 1024**2, 1024 * 100, 1024**3]  # 1KB, 1MB, 100MB, 1GB
+sizes = [1024, 1024 * 20, 1024**2, (1024**2) * 10, (1024**3) // 2]
 
 os.environ['LOGF_USE_PRINT'] = 'True'
 os.environ['LOGF_SINGLE_MSG'] = 'True'
 os.environ['LOGF_LOG_RETURN'] = 'False'
 
 import logging
+
+results = {
+    size: {
+        'aes': {'encrypt': 0, 'decrypt': 0},
+        'chacha': {'encrypt': 0, 'decrypt': 0},
+        'aes_gcm': {'encrypt': 0, 'decrypt': 0},
+        'fernet': {'encrypt': 0, 'decrypt': 0},
+    }
+    for size in sizes
+}
 
 
 def get_random_bytes(size) -> bytes:
@@ -28,6 +38,7 @@ def create_test_file(file_path, size):
 
 @logf()
 def aes_encrypt(file_path, key, iv):
+    _start = time.time()
     cipher = Cipher(
         algorithms.AES(key), modes.CBC(iv), backend=default_backend()
     )
@@ -39,13 +50,16 @@ def aes_encrypt(file_path, key, iv):
     ciphertext = encryptor.update(padded_data) + encryptor.finalize()
     with open(file_path + '.aes', 'wb') as f:
         f.write(iv + ciphertext)
+    results[len(data)]['aes']['encrypt'] = time.time() - _start
 
 
 @logf()
 def aes_decrypt(file_path, key):
+    _start = time.time()
     with open(file_path, 'rb') as f:
         iv = f.read(16)
         ciphertext = f.read()
+    os.remove(file_path)
     cipher = Cipher(
         algorithms.AES(key), modes.CBC(iv), backend=default_backend()
     )
@@ -53,12 +67,12 @@ def aes_decrypt(file_path, key):
     unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
     padded_data = decryptor.update(ciphertext) + decryptor.finalize()
     data = unpadder.update(padded_data) + unpadder.finalize()
-    with open(file_path + '.aes.dec', 'wb') as f:
-        f.write(data)
+    results[len(data)]['aes']['decrypt'] = time.time() - _start
 
 
 @logf()
 def chacha_encrypt(file_path, key, nonce):
+    _start = time.time()
     cipher = Cipher(
         algorithms.ChaCha20(key, nonce), mode=None, backend=default_backend()
     )
@@ -68,10 +82,12 @@ def chacha_encrypt(file_path, key, nonce):
     ciphertext = encryptor.update(data) + encryptor.finalize()
     with open(file_path + '.chacha', 'wb') as f:
         f.write(nonce + ciphertext)
+    results[len(data)]['chacha']['encrypt'] = time.time() - _start
 
 
 @logf()
 def chacha_decrypt(file_path, key):
+    _start = time.time()
     with open(file_path, 'rb') as f:
         nonce = f.read(16)
         ciphertext = f.read()
@@ -79,12 +95,14 @@ def chacha_decrypt(file_path, key):
         algorithms.ChaCha20(key, nonce), mode=None, backend=default_backend()
     )
     decryptor = cipher.decryptor()
-    return decryptor.update(ciphertext) + decryptor.finalize()
+    data = decryptor.update(ciphertext) + decryptor.finalize()
+    results[len(data)]['chacha']['decrypt'] = time.time() - _start
 
 
 @logf()
 def aes_gcm_encrypt(file_path, key):
-    iv = get_random_bytes(12)  # GCM typically uses a 12-byte IV
+    _start = time.time()
+    iv = os.urandom(12)  # GCM typically uses a 12-byte IV
     cipher = Cipher(
         algorithms.AES(key), modes.GCM(iv), backend=default_backend()
     )
@@ -94,41 +112,46 @@ def aes_gcm_encrypt(file_path, key):
     ciphertext = encryptor.update(data) + encryptor.finalize()
     with open(file_path + '.gcm', 'wb') as f:
         f.write(iv + encryptor.tag + ciphertext)
-    print(
-        f'AES-GCM IV: {iv.hex()} Tag: {encryptor.tag.hex()}'
-    )  # For debugging
+    results[len(data)]['aes_gcm']['encrypt'] = time.time() - _start
 
 
 @logf()
 def aes_gcm_decrypt(file_path, key):
+    _start = time.time()
     with open(file_path, 'rb') as f:
         iv = f.read(12)
         tag = f.read(16)
         ciphertext = f.read()
-    print(f'AES-GCM IV: {iv.hex()} Tag: {tag.hex()}')  # For debugging
+    os.remove(file_path)
     cipher = Cipher(
         algorithms.AES(key), modes.GCM(iv, tag), backend=default_backend()
     )
     decryptor = cipher.decryptor()
-    return decryptor.update(ciphertext) + decryptor.finalize()
+    data = decryptor.update(ciphertext) + decryptor.finalize()
+    results[len(data)]['aes_gcm']['decrypt'] = time.time() - _start
 
 
 @logf()
 def fernet_encrypt(file_path, key):
+    _start = time.time()
     fernet = Fernet(key)
     with open(file_path, 'rb') as f:
         data = f.read()
+    os.remove(file_path)
     encrypted_data = fernet.encrypt(data)
     with open(file_path + '.fernet', 'wb') as f:
         f.write(encrypted_data)
+    results[len(data)]['fernet']['encrypt'] = time.time() - _start
 
 
 @logf()
 def fernet_decrypt(file_path, key):
+    _start = time.time()
     fernet = Fernet(key)
     with open(file_path, 'rb') as f:
         encrypted_data = f.read()
-    return fernet.decrypt(encrypted_data)
+    data = fernet.decrypt(encrypted_data)
+    results[len(data)]['fernet']['decrypt'] = time.time() - _start
 
 
 # Main benchmark loop
@@ -156,4 +179,14 @@ for size in sizes:
     fernet_encrypt(file_path, key_fernet)
     fernet_decrypt(file_path + '.fernet', key_fernet)
 
-    print('-----------------------------------')
+# Print total results at the end
+print('\nTotal Results:')
+for size, algos in results.items():
+    print(f'\nFile size: {size} bytes')
+    for algo, times in algos.items():
+    
+        encrypt_time = times.get('encrypt', 'N/A')
+        decrypt_time = times.get('decrypt', 'N/A')
+        print(
+            f'{algo.upper()} -> Encrypt: {encrypt_time:.4f}s, Decrypt: {decrypt_time:.4f}s'
+        )
