@@ -31,3 +31,8 @@ alias tstime='pytime'
 alias gtree='tree -aCF  --charset ascii --filelimit=200 | sed "s/  / /g;s/--/-/g"'
 
 alias ls='ls -AaFp --color=always'
+
+
+alias mkvenv='python3 -m venv venv'
+
+alias mkactvenv='mkvenv && actvenv'
