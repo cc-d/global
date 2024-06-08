@@ -182,11 +182,11 @@ gitdatecommit() {
     esac
     shift
   done
-  _gd_day=$(echo "$_gd_date_input" | cut -d- -f1)
-  _gd_month=$(echo "$_gd_date_input" | cut -d- -f2)
-  _gd_year=$(echo "$_gd_date_input" | cut -d- -f3)
 
-  _gd_git_date="${_gd_year}-${_gd_month}-${_gd_day}T${_gd_time_input}"
+  echo "Committing with date: $_gd_date_input $_gd_time_input"
+
+  _gd_git_date="$T${_gd_date_input}"
+  _gd_git_date="${_gd_date_input}T${_gd_time_input}"
 
 
   GIT_AUTHOR_DATE="$_gd_git_date" GIT_COMMITTER_DATE="$_gd_git_date" git commit -m "$_gd_commit_message"
