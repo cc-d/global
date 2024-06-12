@@ -1,0 +1,43 @@
+{
+  "folders": [
+    {
+      "name": "cccloud",
+      "path": "../../cccloud"
+    },
+    {
+      "name": "logf",
+      "path": "../../logf"
+    },
+    {
+      "name": "gitpoll",
+      "path": "../../gitpoll"
+    },
+    {
+      "name": "global",
+      "path": ".."
+    },
+    {
+      "name": "liberfysite",
+      "path": "../../liberfysite"
+    },
+    {
+      "name": "PyShared",
+      "path": "../../PyShared"
+    },
+    {
+      "name": "open2fa",
+      "path": "../../open2fa"
+    },
+    {
+      "name": "open2fa-server",
+      "path": "../../open2fa-server"
+    },
+    {
+      "path": "../../flask-simple-captcha"
+    },
+    {
+      "path": "../../liberlife"
+    }
+  ],
+  "settings": {}
+}
