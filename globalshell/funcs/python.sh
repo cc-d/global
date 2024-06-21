@@ -1,29 +1,64 @@
 #!/bin/sh
 
 
-actvenv() {
-  _ACTVENV_COUNT=0
-  _ACTVENV_DIRSCANNED=0
-  if [ -d "venv" ]; then
-    echo "Activating venv in current directory"
-    . venv/bin/activate
-  else
-    for d in $(find . -type d -name "venv" -maxdepth 3); do
-      if [ -f "$d/bin/activate" ]; then
-        _ACTVENV_FILE="$d/bin/activate"
-      else
-        _ACTVENV_COUNT=$(($_ACTVENV_COUNT + 1))
-      fi
-      _ACTVENV_DIRSCANNED=$(($_ACTVENV_DIRSCANNED + 1))
-    done
-    if [ -n "$_ACTVENV_FILE" ]; then
-      echo "Activating virtualenv cmd: . $_ACTVENV_FILE"
-      . "$_ACTVENV_FILE"
-    else
-      echo "No virtualenv found"
+findvenv() {
+
+    _av_venv=`find . -type f -path '*/venv/bin/activate' -maxdepth 5| head -n 1`
+    if [ -n "$_av_venv" ]; then
+        _venv_dir=`find .. -type d -path '*/venv' -maxdepth 1 | head -n 1`
     fi
-  fi
-  echo "[ACTVENV]> Scanned $_ACTVENV_DIRSCANNED | Other Venvs found: $_ACTVENV_COUNT"
+
+    if [ -n "$_av_venv" ]; then
+        echo "$_av_venv"
+        return 0
+    fi
+    return 1
+
+}
+
+actvenv() {
+    _av_venv=`findvenv`
+    if [ -n "$_av_venv" ]; then
+        . $_av_venv
+        return 0
+    fi
+    return 1
+}
+
+
+
+
+recvenv() {
+    deactivate
+    _av_venv=`findvenv`
+    if [ -n "$_av_venv" ]; then
+        echo "Found virtualenv: $_av_venv"
+        _venv_dir=`echo $_av_venv | sed -E 's|[a-zA-Z0-9]+/bin/activate||'`
+        echo "CDing to venv directory... $_venv_dir"
+        cd $_venv_dir
+        echo "Recreating virtualenv..."
+    fi
+    echo "Creating virtualenv..."
+    mkactvenv
+    echo "Installing requirements..."
+    _rv_recfile=`find . -type f -name 'req*.txt' -maxdepth 2 | head -n 1 | sed -E 's/^\.?\/?//'`
+
+    if [ -n "$_rv_recfile" ]; then
+        echo "Found requirements file: $_rv_recfile"
+        if pwd | grep pict; then
+            _cmdflags="--use-deprecated=legacy-resolver"
+        else
+            _cmdflags=""
+        fi
+
+        echo "Running: pip3 install -r $_rv_recfile $_cmdflags"
+        pip3 install -r $_rv_recfile $_cmdflags
+    else
+        echo "No requirements file found."
+    fi
+
+
+    return 1
 }
 
 publish_to_pypi() {

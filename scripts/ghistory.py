@@ -25,21 +25,28 @@ HISTORY_FILES = [
 TS_HIST_RE = re.compile(r'^:\s+\d+:\d+;')
 
 
+def safe_read(filepath: str) -> List[str]:
+    with open(filepath, "rb") as f:
+        raw_data = f.read()
+    return raw_data.decode("utf-8", errors="replace").splitlines()
+
+
 def read_history_file(file: str) -> List[str]:
     if not op.exists(file):
         return []
 
-    with open(file) as f:
-        ulist = list()
-        for line in f.read().splitlines():
-            clean_line = line
-            if TS_HIST_RE.match(clean_line):
-                clean_line = TS_HIST_RE.sub('', clean_line, 1)
+    ulist = []
+    lines = safe_read(file)
 
-            if clean_line.strip() and not clean_line.startswith('#'):
-                if clean_line not in ulist:
-                    ulist.append(clean_line)
-        return ulist
+    for line in lines:
+        clean_line = line
+        if TS_HIST_RE.match(clean_line):
+            clean_line = TS_HIST_RE.sub('', clean_line, 1)
+
+        if clean_line.strip() and not clean_line.startswith('#'):
+            if clean_line not in ulist:
+                ulist.append(clean_line)
+    return ulist
 
 
 def _interleave(*iterables: Iterable) -> List:
