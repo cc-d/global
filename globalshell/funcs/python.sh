@@ -3,9 +3,9 @@
 
 findvenv() {
 
-    _av_venv=`find . -type f -path '*/venv/bin/activate' -maxdepth 5| head -n 1`
+    _av_venv=`find .  -maxdepth 5 -type f -path '*/venv/bin/activate'| head -n 1`
     if [ -n "$_av_venv" ]; then
-        _venv_dir=`find .. -type d -path '*/venv' -maxdepth 1 | head -n 1`
+        _venv_dir=`find ..  -maxdepth 1 -type d -path '*/venv' | head -n 1`
     fi
 
     if [ -n "$_av_venv" ]; then
@@ -41,7 +41,7 @@ recvenv() {
     echo "Creating virtualenv..."
     mkactvenv
     echo "Installing requirements..."
-    _rv_recfile=`find . -type f -name 'req*.txt' -maxdepth 2 | head -n 1 | sed -E 's/^\.?\/?//'`
+    _rv_recfile=`find .  -maxdepth 2 -type f -name 'req*.txt'| head -n 1 | sed -E 's/^\.?\/?//'`
 
     if [ -n "$_rv_recfile" ]; then
         echo "Found requirements file: $_rv_recfile"
