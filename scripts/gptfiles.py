@@ -71,6 +71,11 @@ def main():
     argfiles = [x for x in sys.argv[1:] if x not in ['-h', '--help']]
 
     for f in argfiles:
+        if P(f).parts[-1] == '.gptfiles':
+            with open(f, 'r') as gptf:
+                argfiles += gptf.read().split()
+
+    for f in argfiles:
         files.append(f) if op.isfile(f) else globs.append(f)
 
     for g in globs:
