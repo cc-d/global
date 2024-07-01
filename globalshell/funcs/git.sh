@@ -138,7 +138,7 @@ gitacpush() {
 
   if [ $_GAC_COUNT -gt 1 ]; then
     _GAC_COUNT="`echo $_GAC_COUNT` FILES";
-  elif [ $_GAC_COUNT -eq 1 ]; then
+  elif [ $_GAC_COUNT -eq 1 ] && [ "$(echo $_GAC_FILES | sed 's/ //g')" != "" ]; then
     _GAC_COUNT="`echo $_GAC_COUNT` FILE";
   else
     _GAC_COUNT="NO FILES";
@@ -156,10 +156,8 @@ gitacpush() {
   if echo "$_GAC_SOS_SUBSTR" | grep -q -E '^SOS-'; then
     _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG [$_GAC_SOS_SUBSTR]"
   fi
-  echo "$_GAC_LEFT_TEXT ORIGINAL"
-  echo ""
-  echo $_GAC_COMMIT_MSG
-  echo ""
+
+  echo $_GAC_COMMIT_MSG "\n"
 
   # truncate commit message if it's too long and add ellipsis
   if [ "${#_GAC_COMMIT_MSG}" -gt "$GITAC_MAX_MSG_LEN" ]; then
