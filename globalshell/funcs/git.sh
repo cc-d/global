@@ -122,7 +122,7 @@ gitacpush() {
   _GAC_COUNT=$(echo "$_GAC_FILES" | wc -l | awk '{print $1}')
   _GAC_COM_FILES=""
   for _GAC_FILE in $_GAC_FILES; do
-    if "${#_GAC_FILE}" -gt 15; then
+    if [ "${#_GAC_FILE}" -gt 15 ]; then
       _GAC_COM_FILES="$_GAC_COM_FILES ${_GAC_FILE:0:14}..."
       _GAC_COM_FILES="$_GAC_COM_FILES..."
       _GAC_COM_FILES="$_GAC_COM_FILES`echo $_GAC_FILE | rev | cut -c 1-14`"
