@@ -121,7 +121,12 @@ gitacpush() {
 
   _GAC_COUNT=$(echo "$_GAC_FILES" | wc -l | awk '{print $1}')
   _GAC_FILES=$(echo "$_GAC_FILES" | tr '\n' ' ')
-  _GAC_COUNT="$_GAC_COUNT FILE(s) |"
+  _GAC_COUNT="$_GAC_COUNT FILE";
+  if [ "$_GAC_COUNT" -gt 1 ]; then
+    _GAC_COUNT="\"$_GAC_COUNT\"S"
+  fi
+
+
 
   if [ -z "$GITAC_MAX_MSG_LEN" ]; then
     # -3 for the ellipsis 72 is github's max commit msg display length
