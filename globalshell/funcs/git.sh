@@ -150,14 +150,13 @@ gitacpush() {
     GITAC_MAX_MSG_LEN=69 # nice
   fi
 
-  _GAC_COMMIT_MSG="$_GAC_COUNT"
+  _GAC_COMMIT_MSG="$_GAC_COUNT $_GAC_COM_FILES"
 
   # automatically include jira ticket number in commit message
   _GAC_SOS_SUBSTR="$(git branch --show-current)"
   if echo "$_GAC_SOS_SUBSTR" | grep -q -E '^SOS-'; then
     _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG [$_GAC_SOS_SUBSTR]"
   fi
-  _GAC_COMMIT_MSG="$_GAC_COMMIT_MSG $_GAC_FILES"
   echo "$_GAC_LEFT_TEXT ORIGINAL"
   echo ""
   echo $_GAC_COMMIT_MSG
