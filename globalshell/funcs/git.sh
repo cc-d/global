@@ -125,7 +125,7 @@ gitacpush() {
     if [ "${#_GAC_FILE}" -gt 14 ]; then
     echo "file too long"
       _GAC_TRUNCFILE="${_GAC_FILE:0:14}..."
-      _GAC_TRUNCFILE="$_GAC_TRUNCFILE`echo $_GAC_FILE | rev | cut -c 0-14`"
+      _GAC_TRUNCFILE="$_GAC_TRUNCFILE`echo $_GAC_FILE | rev | cut -c 1-14`"
       echo "truncfile: $_GAC_TRUNCFILE"
       _GAC_COM_FILES="$_GAC_COM_FILES $_GAC_TRUNCFILE"
 
