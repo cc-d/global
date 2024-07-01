@@ -137,9 +137,9 @@ gitacpush() {
   _GAC_FILES=$(echo "$_GAC_FILES" | tr '\n' ' ')
 
   if [ $_GAC_COUNT -gt 1 ]; then
-    _GAC_COUNT="`echo $_GAC_COUNT`FILES";
+    _GAC_COUNT="`echo $_GAC_COUNT` FILES";
   elif [ $_GAC_COUNT -eq 1 ]; then
-    _GAC_COUNT="`echo $_GAC_COUNT`FILE";
+    _GAC_COUNT="`echo $_GAC_COUNT` FILE";
   else
     _GAC_COUNT="NO FILES";
   fi
@@ -165,6 +165,11 @@ gitacpush() {
   if [ "${#_GAC_COMMIT_MSG}" -gt "$GITAC_MAX_MSG_LEN" ]; then
     _GAC_COMMIT_MSG="${_GAC_COMMIT_MSG:0:$GITAC_MAX_MSG_LEN}..."
   fi
+
+  _GAC_COMMIT_MSG=`echo $_GAC_COMMIT_MSG | sed -E 's/ {2,}/ /g'`
+
+
+
 
   git commit -m "$_GAC_COMMIT_MSG"
   git push origin "$(git rev-parse --abbrev-ref HEAD)"
