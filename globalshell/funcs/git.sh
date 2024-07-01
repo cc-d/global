@@ -124,7 +124,7 @@ gitacpush() {
 
   if [ $_GAC_COUNT -gt 1 ]; then
     _GAC_COUNT="`echo $_GAC_COUNT` FILES";
-  else if [ $_GAC_COUNT -eq 1 ]; then
+  elif [ $_GAC_COUNT -eq 1 ]; then
     _GAC_COUNT="`echo $_GAC_COUNT` FILE";
   else
     _GAC_COUNT="NO FILES";
