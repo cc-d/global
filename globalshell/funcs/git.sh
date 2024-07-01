@@ -124,7 +124,7 @@ gitacpush() {
   for _GAC_FILE in $_GAC_FILES; do
     if [ "${#_GAC_FILE}" -gt 20 ]; then
 
-      _GAC_TRUNCFILE="..."
+      _GAC_TRUNCFILE=".."
       _GAC_TRUNCFILE="$_GAC_TRUNCFILE`echo $_GAC_FILE | rev | cut -c 1-10 | rev`"
 
       _GAC_COM_FILES="$_GAC_COM_FILES $_GAC_TRUNCFILE"
