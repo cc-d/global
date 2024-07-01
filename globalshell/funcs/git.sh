@@ -123,7 +123,7 @@ gitacpush() {
   _GAC_FILES=$(echo "$_GAC_FILES" | tr '\n' ' ')
   _GAC_COUNT="$_GAC_COUNT FILE";
   if [ "$_GAC_COUNT" -gt 1 ]; then
-    _GAC_COUNT="\"$_GAC_COUNT\"S"
+    _GAC_COUNT=\""$_GAC_COUNT"S\"
   fi
 
 
