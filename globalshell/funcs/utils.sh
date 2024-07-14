@@ -254,7 +254,8 @@ get_shell_rc_files() {
     *) echo "$HOME/.profile" ;;
   esac
 }
-
+alias shellrcfile='get_shell_rc_files | head -n 1'
+alias getshellrcfiles='get_shell_rc_files | head -n 1'
 
 sourceshell() {
   _SSPADSTR="!!!!!!!!!!!!!"
