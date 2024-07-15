@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 import argparse
 import string
-from pyshared import ranstr, ran, op, os, sys, truncstr
+from pyshared import (
+    ranstr,
+    ran,
+    op,
+    os,
+    sys,
+    truncstr,
+    get_terminal_width,
+    print_columns,
+)
 from pathlib import Path
 
 
@@ -11,50 +20,57 @@ class DEFS:
     path = '/tmp'
     dirchar = 'D'
     filechar = 'F'
+    dlen = 2
+    flen = 4
 
-    def rdir():
-        return (
-            DEFS.dirchar
-            + ranstr(10, chars=string.ascii_lowercase)
-            + DEFS.dirchar
-        )
+    def rdir(pool=[]):
+        def _s():
+            return (
+                DEFS.dirchar
+                + ranstr(DEFS.dlen, chars=string.ascii_lowercase)
+                + DEFS.dirchar
+            )
 
-    def rfile():
-        return (
-            DEFS.filechar
-            + ranstr(10, chars=string.ascii_lowercase)
-            + DEFS.filechar
-        )
+        nd = _s()
+        while nd in pool:
+            nd = _s()
+        return nd
 
+    def rfile(pool=[]):
+        def _s():
+            return (
+                DEFS.filechar
+                + ranstr(DEFS.flen, chars=string.ascii_lowercase)
+                + DEFS.filechar
+            )
 
-_startpath = DEFS.path
+        nf = _s()
+        while nf in pool:
+            nf = _s()
+        return nf
 
 
 def recdirs(cd: Path, rem: int, cdirs: list = [], root=DEFS.path) -> list[str]:
     if rem <= 0:
-        print(
-            'created',
-            len(cdirs),
-            'dirs',
-            min(cdirs, key=lambda x: len(x)),
-            '->',
-            truncstr(max(cdirs, key=lambda x: len(x)), 50, end_chars=50),
-        )
         return cdirs
 
     cd = Path(cd) if isinstance(cd, str) else cd
 
-    if ran.randint(0, 5) == 2 or cd.as_posix() == _startpath:
-        newdir = op.join(cd.as_posix(), DEFS.rdir())
+    if ran.randint(0, 5) == 2 or cd.as_posix() == root:
+        base = cd.as_posix()
     else:
-        newdir = op.join(cd.parent.as_posix(), DEFS.rdir())
+        base = cd.parent.as_posix()
 
-    os.makedirs(op.abspath(newdir))
-    cdirs.append(newdir)
+    newd = op.abspath(op.join(base, DEFS.rdir(pool=cdirs)))
+    while newd in cdirs or op.abspath(newd) in cdirs or op.exists(newd):
+        newd = op.abspath(op.join(base, DEFS.rdir(pool=cdirs)))
+
+    os.makedirs(op.join(base, newd))
+    cdirs.append(newd)
 
     rem -= 1
 
-    return recdirs(newdir, rem, cdirs)
+    return recdirs(newd, rem, cdirs)
 
 
 def newfiles(rdirs: list[str], nfiles: int) -> list[str]:
@@ -63,20 +79,21 @@ def newfiles(rdirs: list[str], nfiles: int) -> list[str]:
 
     while nfiles > 0:
         cd = ran.choice(rdirs)
-        fname = DEFS.rfile()
+        fname = DEFS.rfile(pool=nf)
         fname = op.join(cd, fname)
-        with open(op.join(cd, fname), 'w') as f:
-
+        with open(fname, 'w') as f:
             f.write(ranstr(100))
             nfiles -= 1
             nf.append(fname)
-    print(
-        len(nf),
-        'files created',
-        min(nf, key=lambda x: len(x)),
-        '->',
-        truncstr(max(nf, key=lambda x: len(x)), 50, end_chars=50),
+
+    buf, i = '', 0
+    twidth = get_terminal_width()
+    (
+        print_columns(nf)
+        if max([len(x) for x in nf]) + 1 < twidth
+        else [print(x) for x in nf]
     )
+
     return nf
 
 
