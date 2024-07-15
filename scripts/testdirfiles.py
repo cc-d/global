@@ -16,19 +16,20 @@ from pathlib import Path
 
 class DEFS:
     dirs = 10
-    files = 50
+    files = 20
     path = '/tmp'
-    dirchar = 'D'
-    filechar = 'F'
-    dlen = 2
+    dform = '{dc}{ran}'
+    fform = '{fc}{ran}'
+    dchar = 'D'
+    fc = 'F'
+    dlen = 4
     flen = 4
 
     def rdir(pool=[]):
         def _s():
-            return (
-                DEFS.dirchar
-                + ranstr(DEFS.dlen, chars=string.ascii_lowercase)
-                + DEFS.dirchar
+            return DEFS.dform.format(
+                dc=DEFS.dchar,
+                ran=ranstr(DEFS.dlen, chars=string.ascii_lowercase),
             )
 
         nd = _s()
@@ -38,10 +39,8 @@ class DEFS:
 
     def rfile(pool=[]):
         def _s():
-            return (
-                DEFS.filechar
-                + ranstr(DEFS.flen, chars=string.ascii_lowercase)
-                + DEFS.filechar
+            return DEFS.fform.format(
+                fc=DEFS.fc, ran=ranstr(DEFS.flen, chars=string.ascii_lowercase)
             )
 
         nf = _s()
@@ -81,17 +80,17 @@ def newfiles(rdirs: list[str], nfiles: int) -> list[str]:
         cd = ran.choice(rdirs)
         fname = DEFS.rfile(pool=nf)
         fname = op.join(cd, fname)
-        with open(fname, 'w') as f:
-            f.write(ranstr(100))
-            nfiles -= 1
-            nf.append(fname)
+        open(fname, 'w').close()
+
+        nfiles -= 1
+        nf.append(fname)
 
     buf, i = '', 0
     twidth = get_terminal_width()
     (
         print_columns(nf)
         if max([len(x) for x in nf]) + 1 < twidth
-        else [print(x) for x in nf]
+        else [print(x) for x in sorted(nf, key=lambda x: len(x))]
     )
 
     return nf
