@@ -7,7 +7,7 @@ from time import sleep as s
 def d(n, r=5):
     while True:
         print(f'{n} is bald ' * randint(1, r))
-        s(0.5)
+        s(randint(1, 10) / 10)
 
 
 def main():
