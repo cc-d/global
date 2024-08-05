@@ -1,3 +1,4 @@
+import sys
 import random as r
 from time import sleep as s
 
