@@ -1,10 +1,13 @@
+#!/usr/bin/env python3
 import sys
-import random as r
+from random import randint
 from time import sleep as s
 
 
 def d(n, r=5):
-    print(f'{n} is bald ' * r)
+    while True:
+        print(f'{n} is bald ' * randint(1, r))
+        s(0.5)
 
 
 def main():
