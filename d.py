@@ -3,12 +3,12 @@ import random as r
 from time import sleep as s
 
 
-def d(n):
-    print(f'{n} is bald')
+def d(n, r=5):
+    print(f'{n} is bald ' * r)
 
 
 def main():
-    pass
+    d(sys.argv[1])
 
 
 if __name__ == '__main__':
