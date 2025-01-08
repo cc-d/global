@@ -1,0 +1,132 @@
+{
+  "breadcrumbs.enabled": true,
+  "breadcrumbs.icons": true,
+  "breadcrumbs.filePath": "on",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "diffEditor.renderSideBySide": false,
+  "editor.fontLigatures": true,
+  "editor.fontSize": 12,
+  "editor.folding": false,
+  "editor.glyphMargin": false,
+  "editor.guides.indentation": false,
+  "editor.lineHeight": 14,
+  "editor.lineNumbers": "on",
+  "editor.matchBrackets": "always",
+  "editor.minimap.autohide": true,
+  "editor.minimap.enabled": true,
+  "editor.padding.bottom": 4,
+  "editor.padding.top": 4,
+  "editor.rulers": [80],
+  "editor.autoClosingBrackets": "beforeWhitespace",
+  "editor.autoClosingQuotes": "never",
+  "editor.renderWhitespace": "all",
+  "extensions.ignoreRecommendations": true,
+  "files.trimTrailingWhitespace": true,
+  "git.openRepositoryInParentFolders": "never",
+  "editor.minimap.maxColumn": 100,
+  "editor.minimap.scale": 1,
+  "editor.minimap.showSlider": "mouseover",
+  "editor.minimap.side": "right",
+  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.lineHeight": 1.0,
+
+  "python.analysis.extraPaths": [],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true
+  },
+  "breadcrumbs.symbolSortOrder": "name",
+  "editor.inlineSuggest.enabled": true,
+  "settingsSync.ignoredExtensions": [],
+  "workbench.colorCustomizations": {
+    "sideBarSectionHeader.background": "#111111",
+    "terminal.background": "#000000",
+    "panel.background": "#111111",
+    "editor.background": "#111111",
+    "editorGutter.background": "#191919",
+    "editorLineNumber.activeForeground": "#ffffff",
+    "scrollbarSlider.background": "#727272",
+    "scrollbarSlider.activeBackground": "#b6b6b6a6",
+
+    "editorWarning.foreground": "#ff0000"
+  },
+  "terminal.integrated.minimumContrastRatio": 1,
+  "editor.fontFamily": "jetbrains mono nl",
+  "terminal.integrated.fontFamily": "jetbrains mono nl",
+  "black-formatter.args": [
+    "-l 79",
+    "--skip-string-normalization",
+    "--skip-magic-trailing-comma",
+    "--preview"
+  ],
+  "flake8.severity": {
+    "E": "Information",
+    "F": "Information",
+    "W": "Information"
+  },
+  "github.copilot.advanced": {},
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "settingsSync.ignoredSettings": ["-window.zoomLevel"],
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": "true",
+    "markdown": true,
+    "scminput": "true"
+  },
+  "markdown.preview.typographer": true,
+"editor.accessibilitySupport": "off",
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact, javascriptreact, javascript, typescript, tsx, jsx]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "prettier.arrowParens": "always",
+  "prettier.singleQuote": true,
+  "prettier.proseWrap": "preserve",
+  "explorer.fileNesting.enabled": true,
+  "explorer.openEditors.sortOrder": "alphabetical",
+  "workbench.editor.autoLockGroups": {
+    "terminalEditor": false
+  },
+  "workbench.editor.highlightModifiedTabs": true,
+  "workbench.editor.tabSizingFixedMaxWidth": 100,
+  "workbench.editor.tabSizingFixedMinWidth": 38,
+  "workbench.editor.wrapTabs": true,
+  "terminal.integrated.cursorBlinking": true,
+  "isort.args": [
+    "--profile",
+    "black",
+    "--trailing-comma",
+    "--use-parentheses",
+    "--line-width",
+    "79"
+  ],
+  "explorer.confirmDragAndDrop": false,
+
+  "terminal.integrated.shellIntegration.history": 1000,
+  "explorer.confirmDelete": false,
+  "files.associations": {
+    "*.tsx": "typescriptreact"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.formatOnSave": true,
+  "workbench.startupEditor": "none",
+"javascript.updateImportsOnFileMove.enabled": "always",
+  "github.copilot.editor.enableAutoCompletions": false,
+  "terminal.integrated.enableMultiLinePasteWarning": false,
+  "terminal.integrated.persistentSessionScrollback": 1000,
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true
+  },
+  "github.copilot.editor.enableCodeActions": false,
+  "keyboard.touchbar.enabled": false
+  //"prettier.arrowParens": "avoid"
+}
