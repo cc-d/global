@@ -1,22 +1,24 @@
 #!/usr/bin/env python3
 import sys
 from glob import glob
+from os import mkdir
 import os.path as op
 import sys
 import re
-from typing import (
-    List,
-    Tuple,
-    Optional as Opt,
-    Union as U,
-    Any,
-    Iterable,
-    Callable,
-)
-from itertools import zip_longest
+from typing import List, Optional as Opt, Union as U, Any, Iterable as Iter
 
 GHHEADER = '=' * 10 + ' GLOBAL HISTORY ' + '=' * 10
+
 GHFILE = op.expanduser('~/.global/shell_history')
+GDIR = op.dirname(GHFILE)
+
+if not op.isdir(GDIR):
+    print('.global dir does not exist creating now')
+    mkdir(op.dirname(GHFILE))
+
+if not op.exists(GHFILE):
+    open(GHFILE, 'w').close()
+
 HISTORY_FILES = [
     op.expanduser('~/.bash_history'),
     op.expanduser('~/.zsh_history'),
@@ -49,7 +51,7 @@ def read_history_file(file: str) -> List[str]:
     return ulist
 
 
-def _interleave(*iterables: Iterable) -> List:
+def _interleave(*iterables: Iter) -> List:
     new_list = list()
     new_iters = [list(i) for i in iterables]
     while sum(len(i) for i in new_iters) > 0:
