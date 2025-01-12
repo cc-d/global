@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+"""
+The script reads the history files of bash and zsh, and the history files of
+zsh sessions. It then interleaves the lines from the bash and zsh history files
+and compares the interleaved history with the global history file. If there are
+new lines, it writes them to the global history file.
+The script is useful for maintaining a global history file that contains all
+the unique commands from all the history files.
+"""
 import sys
 from glob import glob
 from os import mkdir
@@ -89,6 +97,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-# The script reads the history files of bash and zsh, and the history files of zsh sessions. It then interleaves the lines from the bash and zsh history files, and compares the interleaved history with the global history file. If there are new lines, it writes them to the global history file. The script is useful for maintaining a global history file that contains all the unique commands from all the history files.
