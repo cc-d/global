@@ -59,17 +59,6 @@ Originally I had a sh function that did this, then a python script, then finally
 
 ![!cd](img/cd.png)
 
-### history
-
-I've overriden the `history` command with custom functionality which works as follows:
-
-If the `GLOBAL_SHELL_HISTORY` environment variable is set, the `history` command will execute `$HOME/global/cron/ghistory.py` which combines multiple shell history files into a single file, removes any duplicate entries, and displays a list of numbered commands to the user.
-
-One can optionally use `crontab cron/crontab` to set up a cron job to run `ghistory.py` at a regular interval. This will ensure that default shell history file behavior is bypassed (mainly the truncation) and every unique command is preserved.
-
-The default history file location is `$HOME/.global/shell_history`
-
-![!history](img/history.png)
 
 ### Colorprint
 
