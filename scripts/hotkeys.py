@@ -6,20 +6,21 @@ from random import choice
 CON = Controller()
 
 
-class Keybind:
-    def __init__(self, out_text: str):
-        self.out_text = out_text
+def keybind(out_text: str) -> Call:
 
-    def type(self):
-        press_keys(self.out_text)
+    return lambda: press_keys(out_text)
 
+
+MOD = '<ctrl>+<alt>+'
 
 KB_PAIRS = {
-    '<ctrl>+<alt>+f': 'Full-Stack Engineer',
-    '<ctrl>+<alt>+3': '365 Retail Markets',
+    'f': 'Full-Stack Engineer',
+    '3': '365 Retail Markets',
+    'c': 'Cary Carter',
+    'g': 'https://github.com/cc-d',
 }
 
-KEYBINDS = {k: Keybind(v).type for k, v in KB_PAIRS.items()}
+KEYBINDS = {MOD + k: keybind(v) for k, v in KB_PAIRS.items()}
 
 
 def press(key: str):
@@ -28,6 +29,7 @@ def press(key: str):
 
 
 def press_keys(keys: Iter):
+    press(keyboard.Key.backspace)
     for k in keys:
         press(k)
 
