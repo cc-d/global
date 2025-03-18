@@ -19,8 +19,6 @@ alias timestamp="python3 -c 'from time import time; print(time() * 1000)'"
 alias py3='python3'
 alias py='python'
 
-alias shellsh='source shell.sh'
-
 alias git-ssh="git_ssh"
 
 # docker
