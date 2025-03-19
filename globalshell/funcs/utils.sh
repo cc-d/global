@@ -125,7 +125,8 @@ screenproc() {
     }
 
     _sp_list_sessions() {
-       screen -list || grep -F -f "$_SCREENPROC_FILE" || echo "No active screenproc sessions.";
+        screen -list || grep -F -f "$_SCREENPROC_FILE" || \
+          echo "No active screenproc sessions.";
     }
 
     _sp_kill_session() {
