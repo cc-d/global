@@ -37,4 +37,3 @@ alias delmkactvenv='deactivate && rm -rf venv && mkactvenv'
 
 alias pytestcov='pytest --cov=. --cov-report=term-missing'
 
-

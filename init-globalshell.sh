@@ -48,7 +48,7 @@ add_init_to_rc_file "$GLOBAL_SHELL_RC_FILE"
 . "$GLOBAL_SHELL_GS_DIR/funcs/utils.sh"
 
 # For shell.sh init
-. "$GLOBAL_SHELL_GS_DIR/funcs/shell.sh"
+. "$GLOBAL_SHELL_GS_DIR/funcs/mac.sh"
 
 # source all functions in funcs directory
 for f in $(find "$GLOBAL_SHELL_GS_DIR/funcs" -type f -name '*.sh' -not -name 'utils.sh' -not -name 'shell.sh'); do

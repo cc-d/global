@@ -106,6 +106,14 @@ gitnewbranch() {
 
 
 gitacpush() {
+
+  git status
+  echo "Continue (y/n)?"
+  read _gac_count
+  if [ `"$_gac_count" | tr '[:upper:]' '[:lower:]'` != 'y' ]; then
+    return
+  fi
+
   git add -A
   _GAC_FILES=$(git status --porcelain | awk '{print $2}')
   _GAC_LEFT_TEXT="[GITACPUSH]>"

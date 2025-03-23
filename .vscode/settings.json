@@ -127,6 +127,7 @@
     "**/.pytest_cache": true
   },
   "github.copilot.editor.enableCodeActions": false,
-  "keyboard.touchbar.enabled": false
+  "keyboard.touchbar.enabled": false,
+  "docwriter.style": "Google"
   //"prettier.arrowParens": "avoid"
 }
