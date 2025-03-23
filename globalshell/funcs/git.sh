@@ -111,7 +111,7 @@ gitacpush() {
   echo "Continue (y/n)?"
   read _gac_count
 
-  if [ "$_gac_count" = "y" || "$_gac_count" != "y"]; then
+  if [ "$_gac_count" != "Y" && "$_gac_count" != "y"]; then
     return
   fi
 
