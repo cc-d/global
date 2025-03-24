@@ -107,7 +107,7 @@ gitnewbranch() {
 
 gitacpush() {
 
-  git status
+  git status -u 
   echo "Continue (y/n)?"
   read _gac_count
 

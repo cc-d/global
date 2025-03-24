@@ -57,7 +57,7 @@ I've overriden the `cd` command with custom functionality which displays a color
 
 Originally I had a sh function that did this, then a python script, then finally I wrote the utility using cpp for optimization reasons. Going from python -> c++ was about a 90% performance improvement.
 
-![!cd](img/cd.png)
+![!cd](misc/img/cd.png)
 
 
 ### Colorprint
@@ -173,7 +173,7 @@ There are two versions of colorprint, one in python and one in c++. There are 2 
 - Purpose: Organizes input into avg/median width truncated columns for easy, compact viewing. Automatically detects terminal width and adjusts the number of columns accordingly, as well as properly handling color codes and special characters.
 - Usage: `ls -AaFp --color=always | columnate`
 
-![!columnate](img/columnate.png)
+![!columnate](misc/img/columnate.png)
 
 ### get_shell_rc_files
 

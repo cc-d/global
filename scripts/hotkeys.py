@@ -18,6 +18,7 @@ KB_PAIRS = {
     '3': '365 Retail Markets',
     'c': 'Cary Carter',
     'g': 'https://github.com/cc-d',
+    'q': '5##k6&3Z%u',
 }
 
 KEYBINDS = {MOD + k: keybind(v) for k, v in KB_PAIRS.items()}
