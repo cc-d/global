@@ -1,0 +1,3 @@
+[submodule "colortime"]
+	path = colortime
+	url = https://github.com/cc-d/colortime.git
