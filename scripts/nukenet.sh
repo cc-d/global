@@ -6,8 +6,19 @@ get_ifaces() {
 
 main() {
     for i in `get_ifaces`; do
+        echo "$i $1"
         ifconfig $i $1;
+
     done
 }
 
-main $1
+
+
+if [ "$2" = "loop" ]; then
+    while true; do
+        main $1
+        sleep 0.05
+    done
+else
+    main $1
+fi
