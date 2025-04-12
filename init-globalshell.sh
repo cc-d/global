@@ -41,6 +41,10 @@ add_init_to_rc_file() {
 
 add_init_to_rc_file "$GLOBAL_SHELL_RC_FILE"
 
+ctime() {
+  echo `$GLOBAL_SHELL_DIR/misc/time/time.arm64`
+}
+
 # import aliases
 . "$GLOBAL_SHELL_GS_DIR/aliases.sh"
 
@@ -128,9 +132,7 @@ echo "$_GLOBAL_SHELL_LEFT GLOBAL SHELL INITIALIZED" && echo ""
 # fi
 
 
-ctime() {
-  "$GLOBAL_SHELL_DIR/misc/time/time.arm64"
-}
+
 
 
 
