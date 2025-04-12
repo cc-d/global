@@ -1,7 +1,10 @@
 #!/bin/sh
 
 
-_NN_OUTFILE=/tmp/nnsh_`ctime`
+GLOBAL_SHELL_DIR=$(dirname $(realpath `dirname $0`))
+
+
+_NN_OUTFILE=/tmp/nnsh_`$GLOBAL_SHELL_DIR/misc/time/time.arm64`
 
 _nn_get_ifaces() {
     echo `ifconfig -a | cut -f 1 -w | grep -vE \'^\$\' | sed -E 's/:$//g'`
@@ -14,9 +17,8 @@ _nn_ifconfig() {
 
     done
 
-    echo `$HOME/global/misc/time/time.arm64`>> $_NN_OUTFILE;
+    echo `$GLOBAL_SHELL_DIR/misc/time/time.arm64` >> $_NN_OUTFILE;
 }
-
 
 
 if [ "$2" = "loop" ]; then

@@ -3,8 +3,8 @@
 # left text for globalshell messages
 export _GLOBAL_SHELL_LEFT='[GLOBALSHELL]'
 
-# Assumes repo is cloned to $HOME/global
-export GLOBAL_SHELL_DIR="$HOME/global"
+export GLOBAL_SHELL_DIR=$(dirname $(realpath $0))
+
 INIT_COMMAND=". $GLOBAL_SHELL_DIR/init-globalshell.sh"
 
 export GLOBAL_SHELL_GS_DIR="$GLOBAL_SHELL_DIR/globalshell"
@@ -40,6 +40,8 @@ add_init_to_rc_file() {
 
 
 add_init_to_rc_file "$GLOBAL_SHELL_RC_FILE"
+
+
 
 ctime() {
   echo `$GLOBAL_SHELL_DIR/misc/time/time.arm64`
