@@ -123,11 +123,14 @@ echo "$_GLOBAL_SHELL_LEFT GLOBAL SHELL INITIALIZED" && echo ""
 #export HISTFILE="$HOME/.global/shell_history"
 
 
+# if [ -f "./shell.sh" ]; then
+#     . ./shell.sh;
+# fi
 
 
-if [ -f "./shell.sh" ]; then
-    . ./shell.sh;
-fi
+ctime() {
+  "$GLOBAL_SHELL_DIR/misc/time/time.arm64"
+}
 
 
 
