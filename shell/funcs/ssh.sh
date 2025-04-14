@@ -6,7 +6,7 @@
 # it is not password protected
 
 git_ssh() {
-    # this appears on the left of all globalshell messages
+    # this appears on the left of all shell messages
 
     # we'll use a multi-line string like a pseudo-array for this
     sshkeys=""

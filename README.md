@@ -2,28 +2,28 @@
 
 This is a repo I have cloned in every environment I work in.
 
-The main utility this repo offers is something called "globalshell", which is just a suite of posix compliant shell functions and aliases that I find helpful to have in every environment I work in. Both macos & recent ubuntu distributions are explicitly supported in most circumstances.
+The main utility this repo offers is something called "shell", which is just a suite of posix compliant shell functions and aliases that I find helpful to have in every environment I work in. Both macos & recent ubuntu distributions are explicitly supported in most circumstances.
 
-## GLOBALSHELL
+## shell
 
-`init-globalshell.sh` initalizes globalshell and adds initialization logic to the appropriate shell rc file.
+`init-globalshell.sh` initalizes shell and adds initialization logic to the appropriate shell rc file.
 
-`globalshell/aliases.sh` As name implies, contains the aliases loaded into the shell.
+`shell/aliases.sh` As name implies, contains the aliases loaded into the shell.
 
-### List All Globalshell Commands
+### List All shell Commands
 
-A list of functions and alises can be determined by running `globalshell` in the terminal.
+A list of functions and alises can be determined by running `shell` in the terminal.
 
 This should output something like:
 
 ```
-[GLOBALSHELL] FUNCTIONS:
-actvenv colortext columnate dirfiles echo_gptfile evar fixperms get_shell_rc_files git_ssh gitacpush gitconf gitdatecommit gitnewbranch globalshell gptfiles history ostype pasterun posix_ranstr publish_to_pypi revert_to_commit safesource screenproc sourceshell substr_in
+[shell] FUNCTIONS:
+actvenv colortext columnate dirfiles echo_gptfile evar fixperms get_shell_rc_files git_ssh gitacpush gitconf gitdatecommit gitnewbranch shell gptfiles history ostype pasterun posix_ranstr publish_to_pypi revert_to_commit safesource screenproc sourceshell substr_in
 
-[GLOBALSHELL] ALIASES:
+[shell] ALIASES:
 gpull gpush initgshell gcpports gcpssh pyenvinit timestamp py3 py shellsh git-ssh dc dcpruneall tstime gtree ls
 
-[GLOBALSHELL] BIN:
+[shell] BIN:
 colorprint colorprint-amd64 colorprint-arm multifind pytime
 ```
 

@@ -234,7 +234,7 @@ columnate() {
     _PYCMD="python"
   fi
 
-  cat - | $_PYCMD $HOME/global/globalshell/columnate.py
+  cat - | $_PYCMD $HOME/global/shell/columnate.py
 
 }
 

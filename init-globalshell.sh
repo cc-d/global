@@ -1,20 +1,20 @@
 #!/bin/sh
 
-# left text for globalshell messages
-export _GLOBAL_SHELL_LEFT='[GLOBALSHELL]'
+# left text for shell messages
+export _GLOBAL_SHELL_LEFT='[shell]'
 
 export GLOBAL_SHELL_DIR=$(dirname $(realpath $0))
 
 INIT_COMMAND=". $GLOBAL_SHELL_DIR/init-globalshell.sh"
 
-export GLOBAL_SHELL_GS_DIR="$GLOBAL_SHELL_DIR/globalshell"
+export GLOBAL_SHELL_GS_DIR="$GLOBAL_SHELL_DIR/shell"
 export GLOBAL_SHELL_HISTORY=1
 
 # Path Stuff
 export GLOBAL_BIN_PATH="$GLOBAL_SHELL_DIR/bin"
 export PATH="$GLOBAL_BIN_PATH:$PATH"
 
-# Add globalshell init to zshrc/bashrc depending on system type
+# Add shell init to zshrc/bashrc depending on system type
 if echo "$SHELL" | grep -q 'zsh'; then
   export GLOBAL_SHELL_RC_FILE="$HOME/.zshrc"
 elif echo "$SHELL" | grep -q 'bash'; then
@@ -22,7 +22,7 @@ elif echo "$SHELL" | grep -q 'bash'; then
 else
   echo "No Shell .rc file detected"
 fi
-# Add globalshell init to zshrc/bashrc depending on system type
+# Add shell init to zshrc/bashrc depending on system type
 # make sure the init command added is in the EXACT same format
 # as $INIT_COMMAND to prevent infinite loops
 add_init_to_rc_file() {
@@ -83,9 +83,9 @@ cd () {
     echo ''
 }
 
-globalshell () {
+shell () {
   echo "$_GLOBAL_SHELL_LEFT FUNCTIONS:"
-  _all_gc_funcs="globalshell\n"
+  _all_gc_funcs="shell\n"
   _gs_grep_cmd='^[a-zA-Z0-9_-]+[[:space:]]*\(\)[[:space:]]*{$'
   for f in $(find "$GLOBAL_SHELL_GS_DIR/funcs" -type f -name '*.sh'); do
 
