@@ -25,9 +25,6 @@ class Poll:
         return f'<Poll RSSI={self.rssi}dBm Noise={self.noise} {self.date}>'
 
 
-polls = []
-
-
 def main():
     polls = []
     while True:
@@ -39,7 +36,15 @@ def main():
                     ).stdout.decode('utf8')
                 )
             )
-            print(polls[-1])
+
+            last10 = polls[-10:]
+            print(last10)
+            print(
+                f'{polls[-1]} | '
+                f'Avg (last 10): {(sum(i.rssi for i in last10) )// len(last10)} | '
+                f'Min:  {min(x.rssi for x in polls if x.rssi != 0)} | '
+                f'Max: {min(x.rssi for x in polls if x.rssi != 0)}'
+            )
         except BaseException as e:
             print(e)
         sleep(0.1)
