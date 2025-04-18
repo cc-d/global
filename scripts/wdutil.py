@@ -13,20 +13,21 @@ class Poll:
 
     def __init__(self, std: str):
 
-        _rssi = re.findall(r'\WRSSI\W+(\-?\d+)', std)
+        _rssi = re.findall(r'\WRSSI\W+(-\d+)', std)
 
         self.rssi = 0 if not _rssi else int(_rssi[0])
 
-        self.noise = re.findall(r'WNoise\W+\-?\d+', std)
+        self.noise = re.findall(r'WNoise\W(-\d+)', std)
         self.noise = 0 if self.noise == [] else self.noise[0]
         self.date = dt.fromtimestamp(time.time())
 
     def __repr__(self) -> str:
-        return f'<Poll RSSI={self.rssi}dBm Noise={self.noise} {self.date}>'
+        return f'{self.date.isoformat().split('.')[0]} RSSI={self.rssi}dBm Noise={self.noise}'
 
 
 def main():
     polls = []
+
     while True:
         try:
             polls.append(
@@ -36,14 +37,21 @@ def main():
                     ).stdout.decode('utf8')
                 )
             )
+            nz_polls = [p for p in polls if p.rssi != 0]
+            nz_last10 = [p for p in nz_polls[:-10] if p.rssi != 0]
 
-            last10 = polls[-10:]
-            print(last10)
+            _len10 = 1 if nz_last10 == [] else len(nz_last10)
+
+            try:
+                last10_avg = round((sum(i.rssi for i in nz_last10)) / _len10)
+            except ZeroDivisionError as e:
+                last10_avg = 0
+
             print(
-                f'{polls[-1]} | '
-                f'Avg (last 10): {(sum(i.rssi for i in last10) )// len(last10)} | '
-                f'Min:  {min(x.rssi for x in polls if x.rssi != 0)} | '
-                f'Max: {min(x.rssi for x in polls if x.rssi != 0)}'
+                f'{(polls[-1])} '
+                f'{last10_avg} '
+                f'({max(x.rssi for x in nz_polls)}/'
+                f'{min(x.rssi for x in nz_polls)})'
             )
         except BaseException as e:
             print(e)
