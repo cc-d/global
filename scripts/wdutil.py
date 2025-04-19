@@ -22,7 +22,7 @@ class Poll:
         self.date = dt.fromtimestamp(time.time())
 
     def __repr__(self) -> str:
-        return f'{self.date.isoformat().split('.')[0]} RSSI={self.rssi}dBm Noise={self.noise}'
+        return f'{self.date.isoformat().split('.')[0]} {self.rssi}dBm {self.noise}'
 
 
 def main():
@@ -33,29 +33,25 @@ def main():
             polls.append(
                 Poll(
                     run(
-                        ('sudo', 'wdutil', 'info'), capture_output=True
+                        ('sudo', 'wdutil', 'info'),
+                        capture_output=True,
+                        check=True,
                     ).stdout.decode('utf8')
                 )
             )
             nz_polls = [p for p in polls if p.rssi != 0]
-            nz_last10 = [p for p in nz_polls[:-10] if p.rssi != 0]
-
-            _len10 = 1 if nz_last10 == [] else len(nz_last10)
-
-            try:
-                last10_avg = round((sum(i.rssi for i in nz_last10)) / _len10)
-            except ZeroDivisionError as e:
-                last10_avg = 0
+            nz_last10 = [p for p in nz_polls[-10:] if p.rssi != 0]
 
             print(
                 f'{(polls[-1])} '
-                f'{last10_avg} '
                 f'({max(x.rssi for x in nz_polls)}/'
-                f'{min(x.rssi for x in nz_polls)})'
+                f'{min(x.rssi for x in nz_polls)}) '
+                f'[{''.join(reversed([str(x.rssi) for x in polls[-11:][:-1]]))}]'
             )
+
         except BaseException as e:
             print(e)
-        sleep(0.1)
+        sleep(1)
 
 
 if __name__ == '__main__':
