@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import re
 from time import sleep
 from subprocess import run
@@ -13,12 +15,12 @@ class Poll:
 
     def __init__(self, std: str):
 
-        _rssi = re.findall(r'\WRSSI\W+(-\d+)', std)
+        _rssi = ''.join(re.findall(r'\WRSSI\W+: (-{0,1}\d+) dBm', std))
 
-        self.rssi = 0 if not _rssi else int(_rssi[0])
+        self.rssi = 0 if not _rssi else int(_rssi)
 
-        self.noise = re.findall(r'WNoise\W(-\d+)', std)
-        self.noise = 0 if self.noise == [] else self.noise[0]
+        self.noise = ''.join(re.findall(r'\WNoise\W+: (-{0,1}\d+) dBm', std))
+        self.noise = 0 if not self.noise else int(self.noise)
         self.date = dt.fromtimestamp(time.time())
 
     def __repr__(self) -> str:
@@ -40,7 +42,6 @@ def main():
                 )
             )
             nz_polls = [p for p in polls if p.rssi != 0]
-            nz_last10 = [p for p in nz_polls[-10:] if p.rssi != 0]
 
             print(
                 f'{(polls[-1])} '
