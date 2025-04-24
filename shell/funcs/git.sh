@@ -107,7 +107,7 @@ gitnewbranch() {
 
 gitacpush() {
 
-  git status -u 
+  git status -u
   echo "Continue (y/n)?"
   read _gac_count
 
@@ -225,3 +225,6 @@ gitdatecommit() {
 }
 
 
+gitdateamend() {
+  GIT_AUTHOR_DATE="$1" GIT_COMMITTER_DATE="$1" GIT_AUTHOR_NAME=`git config user.name` GIT_AUTHOR_EMAIL=`git config user.email` git commit --amend --no-edit --reset-author
+}
