@@ -95,10 +95,12 @@ def main():
             if tdiff != speak_every:
                 warn = 'TIME CHANGED IN INCREMENT > 1 SECOND'
                 speak(warn)
+
                 print(warn)
-        sleep(speak_every)
 
         speak(cur[1], argv[2:])
+        sleep(speak_every)
+
         prevtime = cur[0]
         print(cur[1])
 
