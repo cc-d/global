@@ -64,7 +64,7 @@ def speak(speak: str, is_time: bool = True, *args) -> None:
 
     hour_word = (
         'twelve'
-        if h[0] == '0'
+        if h == '00'
         else ONES[int(h[1])] if h[0] == '0' else two_word(h)
     )
     minute_word = two_word(m)
