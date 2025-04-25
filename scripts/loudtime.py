@@ -92,7 +92,6 @@ def main():
         cur = get_time()
         if prevtime is not None:
             tdiff = int(cur[0]) - int(prevtime)
-            print(tdiff)
             if tdiff != speak_every:
                 warn = 'TIME CHANGED IN INCREMENT > 1 SECOND'
                 speak(warn)
@@ -101,6 +100,7 @@ def main():
 
         speak(cur[1], argv[2:])
         prevtime = cur[0]
+        print(cur[1])
 
 
 if __name__ == '__main__':
