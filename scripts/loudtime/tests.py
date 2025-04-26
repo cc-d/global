@@ -6,6 +6,7 @@ from datetime import datetime
 
 # Import directly from the module
 from .main import two_word, speak, get_time, main, ONES, subprocess, time, argv
+from logfunc import logf
 
 # Test data constants
 SAMPLE_TEXT = "Test speech"
@@ -57,6 +58,7 @@ def test_speak_regular_text(mock_popen):
     ],
 )
 @patch('subprocess.Popen')
+@logf(use_print=True)
 def test_speak_time_formats(mock_popen, time_str, interval, esp_args):
     """Test speaking time with different formats and intervals."""
     speak(time_str, interval)  # Call the 'speak' function
