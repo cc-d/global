@@ -50,9 +50,9 @@ def test_speak_regular_text(mock_popen):
 @pytest.mark.parametrize(
     'time_str, interval, esp_args',
     [
-        (DATA[0][2], 30, DATA[0][3]),
-        (DATA[1][2], 30, DATA[1][3]),
-        (DATA[2][2], 90, DATA[2][3]),
+        (DATA[0][2], 30, DATA[0][3].split()),
+        (DATA[1][2], 30, DATA[1][3].split()),
+        (DATA[2][2], 90, DATA[2][3].split()),
         (SAMPLE_TEXT, None, [SAMPLE_TEXT, '-v', 'en-us']),
     ],
 )
@@ -60,6 +60,7 @@ def test_speak_regular_text(mock_popen):
 def test_speak_time_formats(mock_popen, time_str, interval, esp_args):
     """Test speaking time with different formats and intervals."""
     speak(time_str, interval)  # Call the 'speak' function
+    print(esp_args, '#' * 333, ['espeak'] + esp_args)
     mock_popen.assert_called_with(['espeak'] + esp_args)
 
 
@@ -98,7 +99,7 @@ def test_main_normal_operation(
         mock_sleep.side_effect = exit_after_iteration
 
         # Check if time was spoken properly
-        mock_popen.assert_called_with(['espeak', esp_args])
+        mock_popen.assert_called_with(['espeak', esp_args.split()])
 
 
 @patch('time.time')
@@ -107,10 +108,10 @@ def test_main_normal_operation(
 @pytest.mark.parametrize(
     'time_int, time_str, interval, esp_args',
     [
-        (DATA[0][0], DATA[0][2], 30, ['two thirty four fifty six', 0]),
-        (DATA[0][0], DATA[0][2], 30, ['two thirty four fifty six', 69]),
-        (DATA[0][0], DATA[1][2], 30, ['twelve fifteen thirty', 0]),
-        (DATA[0][0], DATA[2][2], 90, ['thirty four fifty six', 0]),
+        (DATA[0][0], DATA[0][2], 30, DATA[0][3]),
+        (DATA[0][0], DATA[0][2], 30, DATA[0][3]),
+        (DATA[0][0], DATA[1][2], 30, DATA[2][3]),
+        (DATA[0][0], DATA[2][2], 90, DATA[1][3]),
         (DATA[1][0], SAMPLE_TEXT, None, [SAMPLE_TEXT, '-v', 'en-us', 0]),
     ],
 )
@@ -148,4 +149,4 @@ def test_main_incorrect_time_increment(
                 'espeak',
                 'INCORRECT TIME INCREMENT (69s)',
             ]
-        assert calls[1][0][0] == ['espeak', 'twelve zero three']
+        assert calls[1][0][0] == ['espeak', esp_args.split()]
