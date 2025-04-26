@@ -49,7 +49,7 @@ def two_word(num: int) -> str:
 
 
 # Speak time naturally with espeak in non-blocking manner
-def speak(speak: str, is_time: bool = True, *args) -> None:
+def speak(speak: str, speak_every: int, is_time: bool = True, *args) -> None:
     if is_time is False:
         # Run espeak non-blocking
         subprocess.Popen(
@@ -59,18 +59,20 @@ def speak(speak: str, is_time: bool = True, *args) -> None:
         )
         return
 
-    h, m, s = speak.split(':')
-    # Remove leading 0 from hour for natural speech
+    if speak_every < 60:
+        h, m, s = speak.split(':')
+        hour_word = (
+            'twelve'
+            if h == '00'
+            else (ONES[int(h[1])] if h[0] == '0' else two_word(h))
+        )
+    else:
+        h, m, s = ('', *speak.split(':')[:-1])
+        hour_word = ''
 
-    hour_word = (
-        'twelve'
-        if h == '00'
-        else ONES[int(h[1])] if h[0] == '0' else two_word(h)
-    )
     minute_word = two_word(m)
     second_word = two_word(s)
     spoken = ' '.join((hour_word, minute_word, second_word))
-    print(spoken)
     # Run espeak non-blocking
     subprocess.Popen(
         ['espeak', spoken],
@@ -93,16 +95,17 @@ def main():
         if prevtime is not None:
             tdiff = int(cur[0]) - int(prevtime)
             if tdiff != speak_every:
-                warn = 'TIME CHANGED IN INCREMENT > 1 SECOND'
-                speak(warn)
+                warn = 'TIME CHANGED IN INCREMENT > 1 SECOND (%ss)' % tdiff
+
+                speak(warn, speak_every, False)
 
                 print(warn)
 
-        speak(cur[1], argv[2:])
-        sleep(speak_every)
+        speak(cur[1], speak_every, argv[2:])
 
         prevtime = cur[0]
         print(cur[1])
+        sleep(speak_every)
 
 
 if __name__ == '__main__':
