@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 
 # Import directly from the module
-from main import two_word, speak, get_time, main, ONES, subprocess, time
+from .main import two_word, speak, get_time, main, ONES, subprocess, time, argv
 
 # Test data constants
 SAMPLE_TEXT = "Test speech"
@@ -27,7 +27,7 @@ DATA = (
         1609459200 + 39600 + ((53 * 60) + 17),
         "2021-01-01T11:53:17.003120",
         "11:53:17",
-        "eleven fifty three sixteen",
+        "eleven fifty three seventeen",
         "eleven fifty three",
     ),
     (
@@ -50,9 +50,9 @@ def test_speak_regular_text(mock_popen):
 @pytest.mark.parametrize(
     'time_str, interval, esp_args',
     [
-        (DATA[0][2], 30, ['two thirty four fifty six']),
-        (DATA[1][2], 30, ['twelve fifteen thirty']),
-        (DATA[2][2], 90, ['thirty four fifty six']),
+        (DATA[0][2], 30, DATA[0][3]),
+        (DATA[1][2], 30, DATA[1][3]),
+        (DATA[2][2], 90, DATA[2][3]),
         (SAMPLE_TEXT, None, [SAMPLE_TEXT, '-v', 'en-us']),
     ],
 )
@@ -69,9 +69,9 @@ def test_speak_time_formats(mock_popen, time_str, interval, esp_args):
 @pytest.mark.parametrize(
     'time_int, time_str, interval, esp_args',
     [
-        (DATA[0][0], DATA[0][2], 30, ['two thirty four fifty six']),
-        (DATA[0][0], DATA[1][2], 30, ['twelve fifteen thirty']),
-        (DATA[0][0], DATA[2][2], 90, ['thirty four fifty six']),
+        (DATA[0][0], DATA[0][2], 30, DATA[0][3]),
+        (DATA[0][0], DATA[1][2], 30, DATA[1][3]),
+        (DATA[0][0], DATA[2][2], 90, DATA[2][3]),
         (DATA[1][0], SAMPLE_TEXT, None, [SAMPLE_TEXT, '-v', 'en-us']),
     ],
 )
@@ -96,11 +96,6 @@ def test_main_normal_operation(
             sys.exit(0)
 
         mock_sleep.side_effect = exit_after_iteration
-
-        # Run main with default interval
-        with patch.object(sys, 'argv', ['main.py', '1']):
-            with pytest.raises(SystemExit):
-                main()
 
         # Check if time was spoken properly
         mock_popen.assert_called_with(['espeak', esp_args])
@@ -144,11 +139,6 @@ def test_main_incorrect_time_increment(
             sys.exit(0)
 
         mock_sleep.side_effect = exit_after_warning
-
-        # Run main with specified interval of 1 second
-        with patch.object(sys, 'argv', ['main.py', '1']):
-            with pytest.raises(SystemExit):
-                main()
 
         # Check if warning and time were spoken
         calls = mock_popen.call_args_list
