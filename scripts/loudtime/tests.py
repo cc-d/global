@@ -56,3 +56,106 @@ def test_speak_regular_text(mock_popen):
         (SAMPLE_TEXT, None, [SAMPLE_TEXT, '-v', 'en-us']),
     ],
 )
+@patch('subprocess.Popen')
+def test_speak_time_formats(mock_popen, time_str, interval, esp_args):
+    """Test speaking time with different formats and intervals."""
+    speak(time_str, interval)  # Call the 'speak' function
+    mock_popen.assert_called_with(['espeak'] + esp_args)
+
+
+@patch('time.time')
+@patch('subprocess.Popen')
+@patch('time.sleep')
+@pytest.mark.parametrize(
+    'time_int, time_str, interval, esp_args',
+    [
+        (DATA[0][0], DATA[0][2], 30, ['two thirty four fifty six']),
+        (DATA[0][0], DATA[1][2], 30, ['twelve fifteen thirty']),
+        (DATA[0][0], DATA[2][2], 90, ['thirty four fifty six']),
+        (DATA[1][0], SAMPLE_TEXT, None, [SAMPLE_TEXT, '-v', 'en-us']),
+    ],
+)
+def test_main_normal_operation(
+    mock_sleep, mock_popen, mock_time, time_int, time_str, interval, esp_args
+):
+    """Test the main function's normal operation."""
+    # Setup time sequence
+    mock_time.side_effect = [
+        1609459200,  # First call: 2021-01-01 00:00:00
+        1609459201,  # Second call: 2021-01-01 00:00:01 (1s later)
+    ]
+
+    # Mock datetime for consistent time strings
+    with patch('datetime.datetime') as mock_dt:
+        mock_dt.fromtimestamp.side_effect = [
+            type('obj', (object,), {'isoformat': lambda: time_str})
+        ]
+
+        # Setup to exit after one iteration
+        def exit_after_iteration(*args, **kwargs):
+            sys.exit(0)
+
+        mock_sleep.side_effect = exit_after_iteration
+
+        # Run main with default interval
+        with patch.object(sys, 'argv', ['main.py', '1']):
+            with pytest.raises(SystemExit):
+                main()
+
+        # Check if time was spoken properly
+        mock_popen.assert_called_with(['espeak', esp_args])
+
+
+@patch('time.time')
+@patch('subprocess.Popen')
+@patch('time.sleep')
+@pytest.mark.parametrize(
+    'time_int, time_str, interval, esp_args',
+    [
+        (DATA[0][0], DATA[0][2], 30, ['two thirty four fifty six', 0]),
+        (DATA[0][0], DATA[0][2], 30, ['two thirty four fifty six', 69]),
+        (DATA[0][0], DATA[1][2], 30, ['twelve fifteen thirty', 0]),
+        (DATA[0][0], DATA[2][2], 90, ['thirty four fifty six', 0]),
+        (DATA[1][0], SAMPLE_TEXT, None, [SAMPLE_TEXT, '-v', 'en-us', 0]),
+    ],
+)
+def test_main_incorrect_time_increment(
+    mock_sleep,
+    mock_popen,
+    mock_time,
+    time_int,
+    time_str,
+    interval,
+    esp_args,
+    time_inc_diff,
+):
+    """Test the main function's handling of incorrect time increments."""
+    # Setup time sequence with a time jump (3s instead of expected 1s)
+    mock_time.side_effect = time_int
+
+    # Mock datetime for consistent time strings
+    with patch('datetime.datetime') as mock_dt:
+        mock_dt.fromtimestamp.side_effect = [
+            type('obj', (object,), {'isoformat': lambda: time_str})
+        ]
+
+        # Setup to exit after warning is generated
+        def exit_after_warning(*args, **kwargs):
+            sys.exit(0)
+
+        mock_sleep.side_effect = exit_after_warning
+
+        # Run main with specified interval of 1 second
+        with patch.object(sys, 'argv', ['main.py', '1']):
+            with pytest.raises(SystemExit):
+                main()
+
+        # Check if warning and time were spoken
+        calls = mock_popen.call_args_list
+        assert len(calls) >= 2
+        if time_inc_diff:
+            assert calls[0][0][0] == [
+                'espeak',
+                'INCORRECT TIME INCREMENT (69s)',
+            ]
+        assert calls[1][0][0] == ['espeak', 'twelve zero three']
