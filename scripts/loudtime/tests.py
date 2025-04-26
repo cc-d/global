@@ -83,12 +83,8 @@ def test_main_normal_operation(
 ):
     """Test the main function's normal operation."""
     # Setup time sequence
-    mock_time.side_effect = [
-        1609459200,  # First call: 2021-01-01 00:00:00
-        1609459201,  # Second call: 2021-01-01 00:00:01 (1s later)
-    ]
-
     # Mock datetime for consistent time strings
+    mock_time.side_effect = time_int
     with patch('datetime.datetime') as mock_dt:
         mock_dt.fromtimestamp.side_effect = [
             type('obj', (object,), {'isoformat': lambda: time_str})
