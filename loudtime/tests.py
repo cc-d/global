@@ -6,6 +6,7 @@ from datetime import datetime
 
 # Import directly from the module
 from .main import two_word, speak, get_time, main, ONES, subprocess, time, argv
+from dataclasses import dataclass
 from logfunc import logf
 
 # Test data constants
@@ -16,28 +17,35 @@ DEFAULT_INTERVAL = 1
 # Define a dataclass for common datetime constants
 
 
-DATA = (
-    (
-        1609459200,
-        "2021-01-01T00:00:02.008000",
-        "00:00:02",
-        "twelve zero two",
-        "twelve zero",
-    ),
-    (
-        1609459200 + 39600 + ((53 * 60) + 17),
-        "2021-01-01T11:53:17.003120",
-        "11:53:17",
-        "eleven fifty three seventeen",
-        "eleven fifty three",
-    ),
-    (
-        1609470000 + 10800 + ((7 * 60) + 53),
-        "03:07:53",
-        "2021-01-01T03:07:53.000017",
-        "three seven fifty three",
-        "three seven",
-    ),
+@dataclass(init=True)
+class DATA:
+    time_int: int
+    iso_time: str
+    time_str: str
+    time_full: str
+    time_short: str
+
+
+_TWELVE = DATA(
+    1609459200,
+    "2021-01-01T00:00:02.008000",
+    "00:00:02",
+    "twelve zero two",
+    "twelve zero",
+)
+_ELEVEN = DATA(
+    1609459200 + 39600 + ((53 * 60) + 17),
+    "2021-01-01T11:53:17.003120",
+    "11:53:17",
+    "eleven fifty three seventeen",
+    "eleven fifty three",
+)
+_THREE = DATA(
+    1609470000 + 10800 + ((7 * 60) + 53),
+    "2021-01-01T03:07:53.000017",
+    "03:07:53",
+    "three seven fifty three",
+    "three seven",
 )
 
 
@@ -49,37 +57,42 @@ def test_speak_regular_text(mock_popen):
 
 
 @pytest.mark.parametrize(
-    'time_str, interval, esp_args',
+    'time_str, interval, es_str',
     [
-        (DATA[0][2], 30, DATA[0][3].split()),
-        (DATA[1][2], 30, DATA[1][3].split()),
-        (DATA[2][2], 90, DATA[2][3].split()),
+        (_TWELVE.time_str, 30, _TWELVE.time_full),
+        (_ELEVEN.time_str, 30, _ELEVEN.time_full),
+        (_THREE.time_str, 90, _THREE.time_short),
         (SAMPLE_TEXT, None, [SAMPLE_TEXT, '-v', 'en-us']),
     ],
 )
 @patch('subprocess.Popen')
 @logf(use_print=True)
-def test_speak_time_formats(mock_popen, time_str, interval, esp_args):
+def test_speak_time_formats(mock_popen, time_str, interval, es_str):
     """Test speaking time with different formats and intervals."""
     speak(time_str, interval)  # Call the 'speak' function
-    print(esp_args, '#' * 333, ['espeak'] + esp_args)
-    mock_popen.assert_called_with(['espeak'] + esp_args)
+
+    mock_popen.assert_called_with(['espeak', es_str])
 
 
 @patch('time.time')
 @patch('subprocess.Popen')
 @patch('time.sleep')
 @pytest.mark.parametrize(
-    'time_int, time_str, interval, esp_args',
+    'time_int, time_str, interval, es_str',
     [
-        (DATA[0][0], DATA[0][2], 30, DATA[0][3]),
-        (DATA[0][0], DATA[1][2], 30, DATA[1][3]),
-        (DATA[0][0], DATA[2][2], 90, DATA[2][3]),
-        (DATA[1][0], SAMPLE_TEXT, None, [SAMPLE_TEXT, '-v', 'en-us']),
+        (_TWELVE.time_int, _TWELVE.time_int, 30, _TWELVE.time_full),
+        (_ELEVEN.time_int, _ELEVEN.time_int, 30, _ELEVEN.time_full),
+        (_THREE.time_int, _THREE.time_int, 90, _THREE.time_full),
+        (
+            _ELEVEN.time_int,
+            SAMPLE_TEXT,
+            None,
+            ' '.join([SAMPLE_TEXT, '-v', 'en-us']),
+        ),
     ],
 )
 def test_main_normal_operation(
-    mock_sleep, mock_popen, mock_time, time_int, time_str, interval, esp_args
+    mock_sleep, mock_popen, mock_time, time_int, time_str, interval, es_str
 ):
     """Test the main function's normal operation."""
     # Setup time sequence
@@ -97,20 +110,24 @@ def test_main_normal_operation(
         mock_sleep.side_effect = exit_after_iteration
 
         # Check if time was spoken properly
-        mock_popen.assert_called_with(['espeak', esp_args.split()])
+        mock_popen.assert_called_with(['espeak' + es_str])
 
 
 @patch('time.time')
 @patch('subprocess.Popen')
 @patch('time.sleep')
 @pytest.mark.parametrize(
-    'time_int, time_str, interval, esp_args',
+    'time_int, time_str, interval, es_str',
     [
-        (DATA[0][0], DATA[0][2], 30, DATA[0][3]),
-        (DATA[0][0], DATA[0][2], 30, DATA[0][3]),
-        (DATA[0][0], DATA[1][2], 30, DATA[2][3]),
-        (DATA[0][0], DATA[2][2], 90, DATA[1][3]),
-        (DATA[1][0], SAMPLE_TEXT, None, [SAMPLE_TEXT, '-v', 'en-us', 0]),
+        (_TWELVE.time_int, _TWELVE.time_int, 30, _TWELVE.time_full),
+        (_ELEVEN.time_int, _ELEVEN.time_int, 30, _THREE.time_full),
+        (_THREE.time_int, _THREE.time_int, 90, _ELEVEN.time_full),
+        (
+            _ELEVEN.time_int,
+            SAMPLE_TEXT,
+            None,
+            ' '.join([SAMPLE_TEXT, '-v', 'en-us']),
+        ),
     ],
 )
 def test_main_incorrect_time_increment(
@@ -120,7 +137,7 @@ def test_main_incorrect_time_increment(
     time_int,
     time_str,
     interval,
-    esp_args,
+    es_str,
     time_inc_diff,
 ):
     """Test the main function's handling of incorrect time increments."""
@@ -147,4 +164,4 @@ def test_main_incorrect_time_increment(
                 'espeak',
                 'INCORRECT TIME INCREMENT (69s)',
             ]
-        assert calls[1][0][0] == ['espeak', esp_args.split()]
+        assert calls[1][0][0] == 'espeak' + es_str

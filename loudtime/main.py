@@ -69,7 +69,7 @@ def speak(speak: str, speak_every: Opt[int] = None, *args) -> None:
 
     minute_word = two_word(m)
     second_word = two_word(s)
-    spoken = ' '.join((hour_word, minute_word, second_word))
+    spoken = ' '.join((hour_word, minute_word, second_word)).strip()
     # Run espeak non-blocking
     subprocess.Popen(['espeak', spoken, *args])
 
