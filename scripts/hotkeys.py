@@ -20,7 +20,7 @@ KB_PAIRS = {
     'c': 'Cary Carter',
     'g': 'https://github.com/cc-d',
     'a': 'https://liberfy.ai',
-    'l': 'https://linkedin.com',
+    'l': 'https://linkedin.com/cary-carter',
 }
 
 KEYBINDS = {MOD + k: keybind(v) for k, v in KB_PAIRS.items()}
