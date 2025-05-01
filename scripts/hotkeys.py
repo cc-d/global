@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from pynput import keyboard
 from pynput.keyboard import Controller, Listener
 from typing import Iterable as Iter, Callable as Call
@@ -14,11 +15,12 @@ def keybind(out_text: str) -> Call:
 MOD = '<ctrl>+<alt>+'
 
 KB_PAIRS = {
-    'f': 'Full-Stack Engineer',
+    '1': 'Full-Stack Engineer',
     '3': '365 Retail Markets',
     'c': 'Cary Carter',
     'g': 'https://github.com/cc-d',
-    'q': '5##k6&3Z%u',
+    'a': 'https://liberfy.ai',
+    'l': 'https://linkedin.com',
 }
 
 KEYBINDS = {MOD + k: keybind(v) for k, v in KB_PAIRS.items()}
