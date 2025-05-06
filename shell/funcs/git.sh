@@ -111,11 +111,16 @@ gitacpush() {
   echo "Continue (y/n)?"
   read _gac_count
 
+
+
   if [ "$_gac_count" != "Y" ] && [ "$_gac_count" != "y" ]; then
     return
   fi
 
   git add -A
+
+  git diff --color --ws-error-highlight=all --stat -M -B -C
+
   _GAC_FILES=$(git status --porcelain | awk '{print $2}')
   _GAC_LEFT_TEXT="[GITACPUSH]>"
   _GAC_BRANCH=$(git branch --show-current)
