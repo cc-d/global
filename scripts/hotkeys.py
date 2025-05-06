@@ -25,6 +25,8 @@ KB_PAIRS = {
 
 KEYBINDS = {MOD + k: keybind(v) for k, v in KB_PAIRS.items()}
 
+for kb in KEYBINDS:
+    print(kb, KB_PAIRS[kb.replace(MOD, '')])
 
 def press(key: str):
     CON.press(key)
