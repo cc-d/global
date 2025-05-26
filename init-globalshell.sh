@@ -14,6 +14,9 @@ export GLOBAL_SHELL_HISTORY=1
 export GLOBAL_BIN_PATH="$GLOBAL_SHELL_DIR/bin"
 export PATH="$GLOBAL_BIN_PATH:$PATH"
 
+
+export ACLPERMS='read,write,execute,delete,append,read,write,execute,delete,append,readattr,writeattr,readextattr,writeextattr,readsecurity,writesecurity,chown'
+
 # Add shell init to zshrc/bashrc depending on system type
 if echo "$SHELL" | grep -q 'zsh'; then
   export GLOBAL_SHELL_RC_FILE="$HOME/.zshrc"
