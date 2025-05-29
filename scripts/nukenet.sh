@@ -24,7 +24,7 @@ _nn_ifconfig() {
 if [ "$2" = "loop" ]; then
     while true; do
         _nn_ifconfig $1
-        sleep 0.05
+        sleep 0.5
     done
 else
     _nn_ifconfig $1
