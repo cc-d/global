@@ -274,3 +274,31 @@ sourceshell() {
   fi
 
 }
+
+historya() {
+    shell=$(basename "$SHELL")
+    case "$shell" in
+        zsh)
+            hist="$HOME/.zsh_history"
+            sess="$HOME/.zsh_sessions"
+            ;;
+        bash)
+            hist="$HOME/.bash_history"
+            sess="$HOME/.bash_sessions"
+            ;;
+        sh)
+            hist="$HOME/.sh_history"
+            sess="$HOME/.sh_sessions"
+            ;;
+        *)
+            echo "Unknown shell or no history"
+            return 1
+            ;;
+    esac
+
+    [ -f "$hist" ] && cat "$hist"
+    if [ -d "$sess" ]; then
+        find "$sess" -maxdepth 2 -type f -exec cat {} + 2>/dev/null
+    fi | sort -u
+}
+
