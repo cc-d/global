@@ -112,7 +112,7 @@ ostype() {
 
 posix_ranstr() {
     _prs_length=${1:-8}
-    _prs_charset=${2:-'a-zA-Z0-9'}
+    _prs_charset=${2:-'a-zA-Z0-9!@=_-[]{}:;.,?'}
     LC_ALL=C tr -dc "$_prs_charset" < /dev/urandom | head -c "$_prs_length"
     echo
 }
