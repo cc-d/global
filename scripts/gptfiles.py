@@ -1,108 +1,68 @@
 #!/usr/bin/env python3
-import sys
 import argparse
-from typing import List, Tuple, Dict, Optional as Opt
 import os.path as op
-import os
-from pathlib import Path as P
-import subprocess as sp
 import platform as plat
+import subprocess as subproc
+import sys
 from glob import glob
-from unittest.mock import patch
+from pathlib import Path as P
+from typing import Optional as Opt, Union as U
 
-
-def _sysexit(msg: str, code: int = 1):
-    msg = f"{msg}"
-    print(msg)
-    sys.exit(code)
-
-
-class GPTFile:
-    __S = ['\n<!-- FILE: %s -->\n', '\n<!-- END: %s -->\n']
-
-    def __init__(self, fname: str):
-
-        with open(fname, 'r') as f:
-            self.__lines = f.read().splitlines()
-            self.__lines = [l for l in self.__lines if l.strip()]
-            self.__lines = [
-                l for l in self.__lines if not l.strip().startswith('#')
-            ]
-        self.fname = fname
-
-    def clip(self):
-        copyclip(self.__str__())
-
-    def __str__(self):
-        return self.__S
-
-    def __repr__(self):
-        return self.__str__()
-
-    @property
-    def lines(self):
-        return self.__lines
+START = "<!-- FILE: {} -->\n"
+END = "\n<!-- END: {} -->\n"
 
 
 def copyclip(text: str):
-    """Copy text to clipboard. Supports macOS and Ubuntu."""
-    system = plat.system()
+    if plat.system() == "Darwin":
+        subproc.run("pbcopy", text=True, input=text, shell=True)
+    elif plat.system() == "Linux":
+        subproc.run("xclip -selection clipboard", text=True, input=text, shell=True)
 
-    if system == 'Darwin':  # macOS
-        with patch('builtins.print') as p:
-            sp.run("pbcopy", text=True, input=text, shell=True)
 
-    elif system == 'Linux':  # Ubuntu
-        sp.run("xclip -selection clipboard", text=True, input=text, shell=True)
+def read_file(fname):
+    if not subproc.run(
+        ["file", "--mime-type", "-b", fname], capture_output=True, text=True
+    ).stdout.startswith("text/"):
+        return ""
+    with open(fname, "r", encoding="utf-8", errors="ignore") as f:
+        lines = "\n".join(
+            [
+                l
+                for l in f.read().splitlines()
+                if l.strip() and not l.lstrip().startswith("#")
+            ]
+        )
+        return START.format(fname) + lines + END.format(fname)
 
 
 def main():
-
     parser = argparse.ArgumentParser(
-        description="Process files and copy contents to clipboard."
+        description="Wrap files or stdin with markers and copy to clipboard, using glob syntax"
     )
-    parser.add_argument(
-        'files', metavar='files', type=str, nargs='*', help='Files to process.'
-    )
+    parser.add_argument("paths", nargs="*")
     args = parser.parse_args()
 
-    files, globs = [], []
+    if args.paths:
+        paths = args.paths
+    else:
+        if sys.stdin.isatty():
+            print("No input", file=sys.stderr)
+            sys.exit(1)
+        paths = [p for p in sys.stdin]
 
-    argfiles = [x for x in sys.argv[1:] if x not in ['-h', '--help']]
+    files = []
+    for p in paths:
+        if op.isfile(p):
+            files.append(p)
+        else:
+            files.extend(glob(p, recursive=True))
 
-    for f in argfiles:
-        if P(f).parts[-1] == '.gptfiles':
-            with open(f, 'r') as gptf:
-                argfiles += gptf.read().split()
+    clip = "\n".join([read_file(f) for f in files if op.isfile(f)])
 
-    for f in argfiles:
-        files.append(f) if op.isfile(f) else globs.append(f)
+    copyclip(clip)
 
-    for g in globs:
-        matched_files = glob(g)
-        files += matched_files
-
-    if not files:
-        _sysexit("No files found.")
-
-    clip = []
-    for f in files:
-        print(f)
-        if not op.isfile(f):
-            continue
-
-        gpt = GPTFile(f)
-        clip.append(f'<!-- FILE: {f} -->')
-        for l in gpt.lines:
-            clip.append(l)
-        clip.append(f'<!-- END: {f} -->')
-
-    if not clip:
-        _sysexit("No files found.")
-
-    print(len(clip), "lines copied to clipboard.")
-    copyclip('\n'.join([c for c in clip if c.strip()]))
+    print(f"{len(clip)} lines copied")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
