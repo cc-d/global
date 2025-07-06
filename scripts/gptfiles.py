@@ -56,6 +56,7 @@ def main():
             files.append(p)
         else:
             files.extend(glob(p, recursive=True))
+    print(files)
 
     clip = "\n".join([read_file(f) for f in files if op.isfile(f)])
 
