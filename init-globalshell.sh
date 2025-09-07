@@ -3,7 +3,16 @@
 # left text for shell messages
 export _GLOBAL_SHELL_LEFT='[shell]'
 
-export GLOBAL_SHELL_DIR=$(dirname $(realpath $0))
+if [ -n "$BASH_SOURCE" ]; then
+    GLOBAL_SHELL_DIR=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+elif [ -n "$ZSH_VERSION" ]; then
+    GLOBAL_SHELL_DIR=$(dirname "$(realpath "${(%):-%x}")")
+elif [ -n "$KSH_VERSION" ]; then
+    GLOBAL_SHELL_DIR=$(dirname "$(realpath "${.sh.file}")")
+else
+    # fallback: best-effort
+    export GLOBAL_SHELL_DIR=$(dirname $(realpath $0))
+fi
 
 INIT_COMMAND=". $GLOBAL_SHELL_DIR/init-globalshell.sh"
 
@@ -22,9 +31,14 @@ if echo "$SHELL" | grep -q 'zsh'; then
   export GLOBAL_SHELL_RC_FILE="$HOME/.zshrc"
 elif echo "$SHELL" | grep -q 'bash'; then
   export GLOBAL_SHELL_RC_FILE="$HOME/.bashrc"
+elif [ -f "/etc/profile" ]; then
+  echo 'No $HOME/.rc file detected using /etc/profile'
+  export GLOBAL_SHELL_RC_FILE="/etc/profile"
 else
   echo "No Shell .rc file detected"
 fi
+
+
 # Add shell init to zshrc/bashrc depending on system type
 # make sure the init command added is in the EXACT same format
 # as $INIT_COMMAND to prevent infinite loops
