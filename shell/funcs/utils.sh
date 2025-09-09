@@ -302,3 +302,20 @@ historya() {
     fi | sort -u
 }
 
+copyclip() {
+  if [ "$(uname)" = "Darwin" ]; then
+    pbcopy
+  elif [ "$(uname)" = "Linux" ]; then
+    if command -v xclip >/dev/null 2>&1; then
+      xclip -selection clipboard
+    elif command -v xsel >/dev/null 2>&1; then
+      xsel --clipboard --input
+    else
+      echo "No clipboard utility found (xclip or xsel)." >&2
+      return 1
+    fi
+  else
+    echo "Unsupported OS: $(uname)" >&2
+    return 1
+  fi
+}
