@@ -303,12 +303,29 @@ historya() {
 }
 
 copyclip() {
+  tmp=$(mktemp 2>/dev/null)
+
+  if [ -n "$tmp" ]; then
+    # Temp file created, read stdin into it
+    cat > "$tmp"
+    bytes=$(wc -c < "$tmp")
+    bytes="$bytes bytes <file> copied"
+  else
+    # Fallback: read stdin into a variable
+    input=$(cat)
+    # ${#input} not POSIX, so use wc to get byte count
+    bytes=$(printf '%s' "$input" | wc -c)
+    bytes="$bytes bytes <stdin> copied"
+  fi
+
+  printf "$bytes\n"  
+
   if [ "$(uname)" = "Darwin" ]; then
     pbcopy
   elif [ "$(uname)" = "Linux" ]; then
-    if command -v xclip >/dev/null 2>&1; then
-      xclip -selection clipboard
-    elif command -v xsel >/dev/null 2>&1; then
+    if command -v xclip  2>&1; then
+     xclip -selection clipboard
+    elif command -v xsel  2>&1; then
       xsel --clipboard --input
     else
       echo "No clipboard utility found (xclip or xsel)." >&2
