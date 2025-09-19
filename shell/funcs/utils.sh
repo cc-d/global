@@ -302,37 +302,25 @@ historya() {
     fi | sort -u
 }
 
+
 copyclip() {
-  tmp=$(mktemp 2>/dev/null)
+  data=$(cat)
+  bytes=$(printf %s "$data" | wc -c)
+  printf "%s bytes copied\n" "$bytes"
 
-  if [ -n "$tmp" ]; then
-    # Temp file created, read stdin into it
-    cat > "$tmp"
-    bytes=$(wc -c < "$tmp")
-    bytes="$bytes bytes <file> copied"
-  else
-    # Fallback: read stdin into a variable
-    input=$(cat)
-    # ${#input} not POSIX, so use wc to get byte count
-    bytes=$(printf '%s' "$input" | wc -c)
-    bytes="$bytes bytes <stdin> copied"
-  fi
-
-  printf "$bytes\n"  
-
-  if [ "$(uname)" = "Darwin" ]; then
-    pbcopy
-  elif [ "$(uname)" = "Linux" ]; then
-    if command -v xclip  2>&1; then
-     xclip -selection clipboard
-    elif command -v xsel  2>&1; then
-      xsel --clipboard --input
-    else
-      echo "No clipboard utility found (xclip or xsel)." >&2
-      return 1
-    fi
-  else
-    echo "Unsupported OS: $(uname)" >&2
-    return 1
-  fi
+  case "$(uname)" in
+    Darwin) printf %s "$data" | pbcopy ;;
+    Linux)
+      if command -v xclip >/dev/null; then
+        printf %s "$data" | xclip -selection clipboard
+      elif command -v xsel >/dev/null; then
+        printf %s "$data" | xsel --clipboard --input
+      else
+        echo "No clipboard utility found (xclip or xsel)." >&2
+        return 1
+      fi
+      ;;
+    *) echo "Unsupported OS: $(uname)" >&2; return 1 ;;
+  esac
 }
+
