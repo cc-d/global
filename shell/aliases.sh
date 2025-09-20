@@ -32,7 +32,9 @@ alias ls='ls -AaFp --color=always'
 
 
 alias mkvenv='python3 -m venv venv'
+
 alias mkactvenv='mkvenv && actvenv'
+
 alias delmkactvenv='deactivate && rm -rf venv && mkactvenv'
 
 alias pytestcov='pytest --cov=. --cov-report=term-missing'
