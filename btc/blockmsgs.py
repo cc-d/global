@@ -58,12 +58,37 @@ def rpc_call(method, params, retries=3):
 
 
 def decode_coinbase(hexstr):
-    try:
-        raw = bytes.fromhex(hexstr)
-        text = raw.decode('utf-8', errors='replace')
-        return text
-    except Exception:
-        return None
+    raw = bytes.fromhex(hexstr)
+    i = 0
+    pushes = []
+
+    while i < len(raw):
+        op = raw[i]
+        i += 1
+        if 1 <= op <= 75:
+            data = raw[i : i + op]
+            i += op
+            pushes.append(data)
+        elif op == 0x4C:
+            l = raw[i]
+            i += 1
+            data = raw[i : i + l]
+            i += l
+            pushes.append(data)
+        elif op == 0x4D:
+            l = int.from_bytes(raw[i : i + 2], "little")
+            i += 2
+            data = raw[i : i + l]
+            i += l
+            pushes.append(data)
+        else:
+            break
+
+    height = int.from_bytes(pushes[0], "little")
+    extranonce = pushes[1] if len(pushes) > 1 else b""
+    message = [p.decode("utf-8", "replace") for p in pushes[2:]]
+
+    return ''.join(message)
 
 
 def decode_op_return(hexstr):
@@ -93,7 +118,7 @@ def decode_op_return(hexstr):
             payload = raw[offset : offset + length]
         else:
             return None
-        text = payload.decode('utf-8', errors='replace')
+        text = payload.decode('utf-8', errors='ignore')
         return text
 
     except:
