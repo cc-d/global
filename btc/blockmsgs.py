@@ -8,9 +8,6 @@ import random
 from time import sleep
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-
 with open('blockhashes.txt', 'r') as f:
     BLOCK_HASHES = {int(k): v for k, v in (line.strip().split() for line in f)}
 
@@ -40,7 +37,7 @@ def rpc_call(method, params, retries=3):
     for attempt in range(retries):
 
         url = urls[attempt % len(urls)]
-        print(f"Attempt {attempt+1}/{retries} - {url} {payload}")
+        # print(f"Attempt {attempt+1}/{retries} - {url} {payload}")
         try:
             resp = requests.post(url, json=payload, timeout=20)
             resp.raise_for_status()
@@ -49,7 +46,7 @@ def rpc_call(method, params, retries=3):
                 return resp["result"]
             raise ValueError(f'Error in return JSON: {resp["error"]}')
         except Exception as e:
-            print(f"RPC call error at {url}: {e}", file=sys.stderr)
+            # print(f"RPC call error at {url}: {e}", file=sys.stderr)
             errs.add(f'{e}')
         sleep(retries * 0.1)
     raise RpcError(
@@ -135,7 +132,10 @@ def parse_block(blockid, blockhash, sleep_for=0.001):
     except Exception as e:
         with open('errors.log', 'a') as ef:
             ef.write(f"{blockid} {blockhash} {e}\n")
-
+            print(
+                f"Error fetching block {blockid} ({blockhash}): {e}",
+                file=sys.stderr,
+            )
         return []
 
     rows = []
@@ -172,7 +172,6 @@ def main():
     )
     parser.add_argument(
         "block_specifier",
-        nargs="?",
         help="Single block height/hash or range (e.g., 800000-800010).",
     )
     parser.add_argument(
@@ -210,6 +209,7 @@ def main():
 
     try:
         with open(CSV_FILENAME, 'a', newline='', encoding='utf-8') as csvfile:
+            csvfile.reconfigure(write_through=True)
             writer = csv.writer(
                 csvfile, escapechar='\\', quoting=csv.QUOTE_NONE
             )
@@ -230,12 +230,14 @@ def main():
                     for blk in blocks_to_process
                 }
                 for future in as_completed(futures):
+                    csvfile.flush()
                     rows = future.result()
 
                     if rows:
+
                         writer.writerows(rows)
-                        csvfile.flush()
                         total_messages += len(rows)
+
             print(f"Processing complete. Found {total_messages} message(s).")
             print(f"Results saved to {CSV_FILENAME}")
 
@@ -245,4 +247,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
