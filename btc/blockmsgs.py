@@ -8,16 +8,27 @@ import random
 from time import sleep
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+with open('blockhashes.txt', 'r') as f:
+    BLOCK_HASHES = {int(k): v for k, v in (line.strip().split() for line in f)}
+
 RPC_URLS = [
     "https://bitcoin-rpc.publicnode.com/",
     "https://bitcoin-mainnet.public.blastapi.io",
+    "https://bitcoin.therpc.io",
 ]
 
 CSV_FILENAME = "blockchain_messages.csv"
 
 
-def rpc_call(method, params):
-    """Make a resilient JSON-RPC call with node rotation."""
+class RpcError(Exception):
+    pass
+
+
+def rpc_call(method, params, retries=3):
+    """Make a resilient JSON-RPC call with node rotation and retries."""
     urls = random.sample(RPC_URLS, len(RPC_URLS))
     payload = {
         "jsonrpc": "1.0",
@@ -25,33 +36,33 @@ def rpc_call(method, params):
         "method": method,
         "params": params,
     }
-    for url in urls:
+    errs = set()
+    for attempt in range(retries):
+
+        url = urls[attempt % len(urls)]
+        print(f"Attempt {attempt+1}/{retries} - {url} {payload}")
         try:
             resp = requests.post(url, json=payload, timeout=20)
             resp.raise_for_status()
-            return resp.json()["result"]
-        except (
-            requests.exceptions.RequestException,
-            KeyError,
-            ValueError,
-        ) as e:
+            resp = resp.json()
+            if resp.get("error") is None:
+                return resp["result"]
+            raise ValueError(f'Error in return JSON: {resp["error"]}')
+        except Exception as e:
             print(f"RPC call error at {url}: {e}", file=sys.stderr)
-            continue
-
-    print(
-        f"Error: All RPC nodes failed for {method} with params {params}",
-        file=sys.stderr,
+            errs.add(f'{e}')
+        sleep(retries * 0.1)
+    raise RpcError(
+        f'All RPC nodes failed for {method} after {retries} retries {errs}'
     )
-    return None
 
 
 def decode_coinbase(hexstr):
     try:
         raw = bytes.fromhex(hexstr)
-        return ''.join(
-            c for c in raw.decode('latin1') if c in string.printable
-        )
-    except:
+        text = raw.decode('utf-8', errors='replace')
+        return text
+    except Exception:
         return None
 
 
@@ -82,42 +93,34 @@ def decode_op_return(hexstr):
             payload = raw[offset : offset + length]
         else:
             return None
-        return ''.join(
-            c for c in payload.decode('latin1') if c in string.printable
-        )
+        text = payload.decode('utf-8', errors='replace')
+        return text
+
     except:
         return None
 
 
-def parse_block(block_identifier, sleep_for=0.001):
+def parse_block(blockid, blockhash, sleep_for=0.001):
     """Fetch and parse a single block for messages."""
-
-    blockhash = (
-        rpc_call("getblockhash", [block_identifier])
-        if isinstance(block_identifier, int)
-        else block_identifier
-    )
-
-    if not blockhash:
-        return []
-
+    print(blockhash, blockid)
     sleep(sleep_for)
 
-    block = rpc_call("getblock", [blockhash, 2])
-    if not block:
-        return []
+    try:
+        block = rpc_call("getblock", [blockhash, 2])
+    except Exception as e:
+        with open('errors.log', 'a') as ef:
+            ef.write(f"{blockid} {blockhash} {e}\n")
 
-    sleep(sleep_for)
+        return []
 
     rows = []
     # Coinbase
     coinbase_tx = block["tx"][0]
     coinbase_hex = coinbase_tx["vin"][0].get("coinbase", "")
     msg = decode_coinbase(coinbase_hex)
-    if msg:
-        rows.append(
-            [block['height'], blockhash, coinbase_tx['txid'], 'coinbase', msg]
-        )
+    rows.append(
+        [block['height'], blockhash, coinbase_tx['txid'], 'coinbase', msg]
+    )
 
     # OP_RETURN outputs
     for tx in block["tx"]:
@@ -144,13 +147,14 @@ def main():
     )
     parser.add_argument(
         "block_specifier",
+        nargs="?",
         help="Single block height/hash or range (e.g., 800000-800010).",
     )
     parser.add_argument(
         "-t",
         "--threads",
         type=int,
-        default=16,
+        default=4,
         help="Number of concurrent threads.",
     )
     args = parser.parse_args()
@@ -163,13 +167,17 @@ def main():
         else:
             blocks_to_process = list(range(start, end + 1, -1))
     else:
-        blocks_to_process = [
-            (
-                int(args.block_specifier)
-                if args.block_specifier.isdigit()
-                else args.block_specifier
-            )
-        ]
+        args.block_specifier = (
+            int(args.block_specifier)
+            if args.block_specifier.isdigit()
+            else args.block_specifier
+        )
+        blocks_to_process = [args.block_specifier]
+
+    blocks_to_process = [
+        ((b, BLOCK_HASHES[b]) if isinstance(b, int) else (b, None))
+        for b in blocks_to_process
+    ]
 
     file_exists = os.path.isfile(CSV_FILENAME)
     is_empty = os.path.getsize(CSV_FILENAME) == 0 if file_exists else True
@@ -177,7 +185,9 @@ def main():
 
     try:
         with open(CSV_FILENAME, 'a', newline='', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile)
+            writer = csv.writer(
+                csvfile, escapechar='\\', quoting=csv.QUOTE_NONE
+            )
             if not file_exists or is_empty:
                 writer.writerow(
                     [
@@ -191,22 +201,16 @@ def main():
 
             with ThreadPoolExecutor(max_workers=args.threads) as executor:
                 futures = {
-                    executor.submit(parse_block, blk): blk
+                    executor.submit(parse_block, blk[0], blk[1]): blk
                     for blk in blocks_to_process
                 }
                 for future in as_completed(futures):
-                    try:
-                        rows = future.result()
-                        if rows:
-                            writer.writerows(rows)
-                            csvfile.flush()
-                            total_messages += len(rows)
-                    except Exception as e:
-                        print(
-                            f"Block {futures[future]} error: {e}",
-                            file=sys.stderr,
-                        )
+                    rows = future.result()
 
+                    if rows:
+                        writer.writerows(rows)
+                        csvfile.flush()
+                        total_messages += len(rows)
             print(f"Processing complete. Found {total_messages} message(s).")
             print(f"Results saved to {CSV_FILENAME}")
 
